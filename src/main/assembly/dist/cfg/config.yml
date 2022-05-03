@@ -1,3 +1,18 @@
+health:
+  delayedShutdownHandlerEnabled: false
+  initialOverallState: false
+  healthChecks:
+    - name: Dataverse
+      critical: true
+      initialState: false
+      schedule:
+        checkInterval: 60s
+    - name: DansBagValidator
+      critical: true
+      initialState: false
+      schedule:
+        checkInterval: 60s
+
 #
 # Http-interfaces
 #

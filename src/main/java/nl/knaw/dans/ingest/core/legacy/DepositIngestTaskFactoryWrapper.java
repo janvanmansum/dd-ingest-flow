@@ -31,6 +31,8 @@ import nl.knaw.dans.lib.dataverse.DataverseInstanceConfig;
 import scala.Option;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Map;
+import scala.runtime.BoxedUnit;
+import scala.util.Try;
 import scala.xml.Elem;
 
 import java.net.URI;
@@ -42,6 +44,8 @@ import java.util.regex.Pattern;
  */
 public class DepositIngestTaskFactoryWrapper {
     private final DepositIngestTaskFactory factory;
+    private final DataverseInstance dataverseInstance;
+    private final DansBagValidator validator;
 
     public DepositIngestTaskFactoryWrapper(
         boolean isMigration,
@@ -50,7 +54,7 @@ public class DepositIngestTaskFactoryWrapper {
         HttpServiceConfig migrationInfoConfig,
         HttpServiceConfig validationDansBagConfig) {
 
-        final DataverseInstance dataverseInstance = new DataverseInstance(new DataverseInstanceConfig(
+        dataverseInstance = new DataverseInstance(new DataverseInstanceConfig(
             DepositIngestTaskFactory.appendSlash(dataverseConfigScala.getHttp().getBaseUrl()),
             dataverseConfigScala.getApi().getApiKey(),
             Option.apply(dataverseConfigScala.getApi().getUnblockKey()),
@@ -60,7 +64,7 @@ public class DepositIngestTaskFactoryWrapper {
             dataverseConfigScala.getApi().getAwaitUnlockMaxRetries(),
             dataverseConfigScala.getApi().getAwaitUnlockWaitTimeMs()));
 
-        final DansBagValidator validator = new DansBagValidator(
+        validator = new DansBagValidator(
             DepositIngestTaskFactory.appendSlash(validationDansBagConfig.getBaseUrl()),
             validationDansBagConfig.getConnectionTimeoutMs(),
             validationDansBagConfig.getReadTimeoutMs());
@@ -116,5 +120,13 @@ public class DepositIngestTaskFactoryWrapper {
 
     public DepositImportTaskWrapper createIngestTask(Path depositDir, Path outboxDir, EventWriter eventWriter) {
         return new DepositImportTaskWrapper(factory.createDepositIngestTask(new Deposit(File.apply(depositDir)), File.apply(outboxDir)), eventWriter);
+    }
+
+    public DataverseInstance getDataverseInstance() {
+        return dataverseInstance;
+    }
+
+    public DansBagValidator getDansBagValidatorInstance() {
+        return validator;
     }
 }
