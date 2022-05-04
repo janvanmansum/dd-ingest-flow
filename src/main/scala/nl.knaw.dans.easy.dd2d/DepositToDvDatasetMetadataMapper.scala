@@ -77,6 +77,7 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
           addCompoundFieldMultipleValues(citationFields, AUTHOR, node \ "organization", DcxDaiOrganization toAuthorValueObject)
         case node if node.label == "creator" =>
           addCompoundFieldMultipleValues(citationFields, AUTHOR, node, Creator toAuthorValueObject)
+        case _ => // Do nothing
       }
 
       addCompoundFieldMultipleValues(citationFields, DATASET_CONTACT, contactData)
@@ -111,12 +112,14 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
           (node \ "author").filterNot(DcxDaiAuthor isRightsHolder).foreach(author => addCompoundFieldMultipleValues(citationFields, CONTRIBUTOR, author, DcxDaiAuthor toContributorValueObject))
         case node if node.label == "contributorDetails" && (node \ "organization").nonEmpty =>
           (node \ "organization").filterNot(DcxDaiOrganization inAnyOfRoles(List("RightsHolder", "Funder"))).foreach(organization => addCompoundFieldMultipleValues(citationFields, CONTRIBUTOR, organization, DcxDaiOrganization toContributorValueObject))
+        case _ => // Do nothing
       }
 
       // Add contributors with role Funder as Grant Number with only an agency subfield
       contributors.foreach {
         case node if node.label == "contributorDetails" && (node \ "organization").nonEmpty =>
           (node \ "organization").filter(DcxDaiOrganization inAnyOfRoles(List("Funder"))).foreach(organization => addCompoundFieldMultipleValues(citationFields, GRANT_NUMBER, organization, DcxDaiOrganization toGrantNumberValueObject))
+        case _ => // Do nothing
       }
       addCompoundFieldMultipleValues(citationFields, GRANT_NUMBER, (ddm \ "dcmiMetadata" \ "identifier").filter(Identifier isNwoGrantNumber), Identifier toNwoGrantNumberValue)
 
