@@ -157,4 +157,27 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
           ))
     }
   }
+
+  it should "not trip over a contributor with an author element in it (DD-963)" in {
+    val ddm = <ddm:DDM>
+      <ddm:profile>
+          <dc:title>A title</dc:title>
+          <dc:description>Descr 1</dc:description>
+          <dc:description>Descr 2</dc:description>
+          <ddm:audience>D10000</ddm:audience>
+        </ddm:profile>
+        <ddm:dcmiMetadata>
+          <dct:rightsHolder>Mrs Rights</dct:rightsHolder>
+          <dcx-dai:contributorDetails>
+            <dcx-dai:author>
+               <dcx-dai:initials>J</dcx-dai:initials>
+               <dcx-dai:surname>Doe</dcx-dai:surname>
+            </dcx-dai:author>
+          </dcx-dai:contributorDetails>
+        </ddm:dcmiMetadata>
+      </ddm:DDM>
+
+    val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
+    result shouldBe a[Success[_]]
+  }
 }
