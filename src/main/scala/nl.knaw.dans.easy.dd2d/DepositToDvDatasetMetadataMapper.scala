@@ -123,7 +123,7 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
       }
       addCompoundFieldMultipleValues(citationFields, GRANT_NUMBER, (ddm \ "dcmiMetadata" \ "identifier").filter(Identifier isNwoGrantNumber), Identifier toNwoGrantNumberValue)
 
-      addCompoundFieldMultipleValues(citationFields, DISTRIBUTOR, ddm \ "dcmiMetadata" \ "publisher", Publisher toDistributorValueObject)
+      addCompoundFieldMultipleValues(citationFields, DISTRIBUTOR, (ddm \ "dcmiMetadata" \ "publisher").filterNot(Publisher.isDans), Publisher toDistributorValueObject)
       addPrimitiveFieldSingleValue(citationFields, DISTRIBUTION_DATE, ddm \ "profile" \ "available", DateTypeElement toYearMonthDayFormat)
 
       addPrimitiveFieldSingleValue(citationFields, DATE_OF_DEPOSIT, optDateOfDeposit)

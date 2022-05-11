@@ -15,9 +15,10 @@
  */
 package nl.knaw.dans.easy.dd2d.mapping
 
-import scala.xml.{ Elem, Node }
+import scala.xml.Node
 
 object Publisher extends BlockCitation {
+  private val dansNames = List("DANS", "DANS-KNAW", "DANS/KNAW")
 
   def toDistributorValueObject(node: Node): JsonObject = {
     val m = FieldMap()
@@ -27,5 +28,9 @@ object Publisher extends BlockCitation {
     m.addPrimitiveField(DISTRIBUTOR_ABBREVIATION, "")
     m.addPrimitiveField(DISTRIBUTOR_AFFILIATION, "")
     m.toJsonObject
+  }
+
+  def isDans(node: Node): Boolean = {
+    dansNames contains node.text
   }
 }
