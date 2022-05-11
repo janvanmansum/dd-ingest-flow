@@ -180,4 +180,125 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
   }
+
+  it should "not map publisher DANS-KNAW" in {
+    val ddm =
+      <ddm:DDM>
+          <ddm:profile>
+              <dc:title>A title</dc:title>
+              <dcx-dai:creatorDetails>
+                  <dcx-dai:author>
+                      <dcx-dai:titles>Dr</dcx-dai:titles>
+                      <dcx-dai:initials>A</dcx-dai:initials>
+                      <dcx-dai:insertions>van</dcx-dai:insertions>
+                      <dcx-dai:surname>Helsing</dcx-dai:surname>
+                      <dcx-dai:organization>
+                          <dcx-dai:name xml:lang="en">Anti-Vampire League</dcx-dai:name>
+                      </dcx-dai:organization>
+                  </dcx-dai:author>
+              </dcx-dai:creatorDetails>
+            <ddm:audience>D10000</ddm:audience>
+          </ddm:profile>
+          <ddm:dcmiMetadata>
+            <dct:rightsHolder>Mrs Rights</dct:rightsHolder>
+            <dct:publisher>DANS-KNAW</dct:publisher>
+          </ddm:dcmiMetadata>
+      </ddm:DDM>
+
+    val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
+    result shouldBe a[Success[_]]
+    inside(result) {
+      case Success(Dataset(dsv)) =>
+        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
+        valueObjectsOfCompoundFields shouldNot contain(
+          Map(
+            "distributorName" -> PrimitiveSingleValueField("distributorName", "DANS-KNAW"),
+            "distributorAffiliation" -> PrimitiveSingleValueField("distributorAffiliation", ""),
+            "distributorAbbreviation" -> PrimitiveSingleValueField("distributorAbbreviation", ""),
+            "distributorURL" -> PrimitiveSingleValueField("distributorURL", ""),
+            "distributorLogoURL" -> PrimitiveSingleValueField("distributorLogoURL", "")
+          ))
+    }
+  }
+
+  it should "not map publisher DANS/KNAW" in {
+    val ddm =
+      <ddm:DDM>
+          <ddm:profile>
+              <dc:title>A title</dc:title>
+              <dcx-dai:creatorDetails>
+                  <dcx-dai:author>
+                      <dcx-dai:titles>Dr</dcx-dai:titles>
+                      <dcx-dai:initials>A</dcx-dai:initials>
+                      <dcx-dai:insertions>van</dcx-dai:insertions>
+                      <dcx-dai:surname>Helsing</dcx-dai:surname>
+                      <dcx-dai:organization>
+                          <dcx-dai:name xml:lang="en">Anti-Vampire League</dcx-dai:name>
+                      </dcx-dai:organization>
+                  </dcx-dai:author>
+              </dcx-dai:creatorDetails>
+            <ddm:audience>D10000</ddm:audience>
+          </ddm:profile>
+          <ddm:dcmiMetadata>
+            <dct:rightsHolder>Mrs Rights</dct:rightsHolder>
+            <dct:publisher>DANS-KNAW</dct:publisher>
+          </ddm:dcmiMetadata>
+      </ddm:DDM>
+
+    val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
+    result shouldBe a[Success[_]]
+    inside(result) {
+      case Success(Dataset(dsv)) =>
+        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
+        valueObjectsOfCompoundFields shouldNot contain(
+          Map(
+            "distributorName" -> PrimitiveSingleValueField("distributorName", "DANS/KNAW"),
+            "distributorAffiliation" -> PrimitiveSingleValueField("distributorAffiliation", ""),
+            "distributorAbbreviation" -> PrimitiveSingleValueField("distributorAbbreviation", ""),
+            "distributorURL" -> PrimitiveSingleValueField("distributorURL", ""),
+            "distributorLogoURL" -> PrimitiveSingleValueField("distributorLogoURL", "")
+          ))
+    }
+  }
+
+  it should "map publisher (if not DANS) to distributor" in {
+    val ddm =
+      <ddm:DDM>
+          <ddm:profile>
+              <dc:title>A title</dc:title>
+              <dcx-dai:creatorDetails>
+                  <dcx-dai:author>
+                      <dcx-dai:titles>Dr</dcx-dai:titles>
+                      <dcx-dai:initials>A</dcx-dai:initials>
+                      <dcx-dai:insertions>van</dcx-dai:insertions>
+                      <dcx-dai:surname>Helsing</dcx-dai:surname>
+                      <dcx-dai:organization>
+                          <dcx-dai:name xml:lang="en">Anti-Vampire League</dcx-dai:name>
+                      </dcx-dai:organization>
+                  </dcx-dai:author>
+              </dcx-dai:creatorDetails>
+            <ddm:audience>D10000</ddm:audience>
+          </ddm:profile>
+          <ddm:dcmiMetadata>
+            <dct:rightsHolder>Mrs Rights</dct:rightsHolder>
+            <dct:publisher>PUBLISHER01</dct:publisher>
+          </ddm:dcmiMetadata>
+      </ddm:DDM>
+
+    val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
+    result shouldBe a[Success[_]]
+    inside(result) {
+      case Success(Dataset(dsv)) =>
+        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
+        valueObjectsOfCompoundFields should contain(
+          Map(
+            "distributorName" -> PrimitiveSingleValueField("distributorName", "PUBLISHER01"),
+            "distributorAffiliation" -> PrimitiveSingleValueField("distributorAffiliation", ""),
+            "distributorAbbreviation" -> PrimitiveSingleValueField("distributorAbbreviation", ""),
+            "distributorURL" -> PrimitiveSingleValueField("distributorURL", ""),
+            "distributorLogoURL" -> PrimitiveSingleValueField("distributorLogoURL", "")
+          ))
+    }
+  }
+
 }
