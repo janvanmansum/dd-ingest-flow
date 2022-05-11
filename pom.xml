@@ -27,7 +27,7 @@
 
     <groupId>nl.knaw.dans</groupId>
     <artifactId>dd-ingest-flow</artifactId>
-    <version>0.0.14-SNAPSHOT</version>
+    <version>0.0.14</version>
 
     <name>DD Ingest Flow</name>
     <url>https://github.com/DANS-KNAW/dd-ingest-flow</url>
@@ -42,7 +42,7 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/DANS-KNAW/dd-ingest-flow</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.0.14</tag>
     </scm>
 
     <dependencies>
