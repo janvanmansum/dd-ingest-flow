@@ -84,6 +84,7 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
       addCompoundFieldMultipleValues(citationFields, DESCRIPTION, ddm \ "profile" \ "description", Description toDescriptionValueObject)
       addCompoundFieldMultipleValues(citationFields, DESCRIPTION, if (alternativeTitles.isEmpty) NodeSeq.Empty
                                                                   else alternativeTitles.tail, Description toDescriptionValueObject)
+      addCompoundFieldMultipleValues(citationFields, DESCRIPTION, (ddm \ "dcmiMetadata" \ "description").filterNot(Description isTechnicalInfo), Description toDescriptionValueObject)
       val otherDescriptions =
         (ddm \ "dcmiMetadata" \ "date") ++
         (ddm \ "dcmiMetadata" \ "dateAccepted") ++
