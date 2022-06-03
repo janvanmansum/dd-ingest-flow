@@ -17,7 +17,8 @@ package nl.knaw.dans.easy.dd2d
 
 import better.files.File
 import nl.knaw.dans.easy.dd2d.OutboxSubdir.{ FAILED, OutboxSubdir, PROCESSED, REJECTED }
-import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidationResult, DansBagValidator }
+import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageType
+import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidationResult, DansBagValidator, InformationPackageType }
 import nl.knaw.dans.easy.dd2d.mapping.JsonObject
 import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.lib.dataverse.DataverseInstance
@@ -63,6 +64,8 @@ case class DepositIngestTask(deposit: Deposit,
                              repordIdToTerm: Map[String, String],
                              outboxDir: File) extends Task[Deposit] with DebugEnhancedLogging {
   trace(deposit)
+  protected val informationPackageType: InformationPackageType = InformationPackageType.SIP
+  protected val bagProfileVersion: Int = 1
 
   private val datasetMetadataMapper = new DepositToDvDatasetMetadataMapper(deduplicate, activeMetadataBlocks, narcisClassification, iso1ToDataverseLanguage, iso2ToDataverseLanguage, repordIdToTerm)
   private val bagDirPath = File(deposit.bagDir.path)
@@ -122,7 +125,7 @@ case class DepositIngestTask(deposit: Deposit,
     optDansBagValidator.map {
       dansBagValidator =>
         for {
-          validationResult <- dansBagValidator.validateBag(bagDirPath)
+          validationResult <- dansBagValidator.validateBag(bagDirPath, informationPackageType, bagProfileVersion)
           _ <- rejectIfInvalid(validationResult)
         } yield ()
     }.getOrElse({
