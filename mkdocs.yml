@@ -23,6 +23,7 @@ repo_url: https://github.com/DANS-KNAW/dd-ingest-flow
 
 nav:
   - Manual: index.md
+  - Deposit Directory Layout: deposit-directory.md
 
 plugins:
   - markdownextradata
