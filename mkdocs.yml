@@ -16,8 +16,7 @@
 
 site_name: dd-ingest-flow
 theme:
-  name: dans
-  disclaimer: false
+  name: readthedocs
 
 repo_name: DANS-KNAW/dd-ingest-flow
 repo_url: https://github.com/DANS-KNAW/dd-ingest-flow
@@ -31,7 +30,6 @@ plugins:
 
 markdown_extensions:
   - attr_list
-  #- legacy_attr
   - admonition
   - codehilite:
       guess_lang: false
