@@ -54,7 +54,12 @@
         <dependency>
             <groupId>nl.knaw.dans.lib</groupId>
             <artifactId>dans-dataverse-scala-lib_2.12</artifactId>
-            <version>4.5.0</version>
+            <version>5.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.knaw.dans</groupId>
+            <artifactId>dans-dataverse-client-lib</artifactId>
+            <version>0.0.15</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
