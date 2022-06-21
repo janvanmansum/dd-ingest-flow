@@ -16,18 +16,19 @@
 package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.migrationinfo.{ BasicFileMeta, MigrationInfo }
-import nl.knaw.dans.lib.scaladv.model.dataset.MetadataBlocks
-import nl.knaw.dans.lib.scaladv.model.file.FileMeta
-import nl.knaw.dans.lib.scaladv.model.search.DatasetResultItem
-import nl.knaw.dans.lib.scaladv.{ DatasetApi, DataverseInstance, FileApi, Version }
+import nl.knaw.dans.lib.dataverse.DataverseClient
+import nl.knaw.dans.lib.dataverse.model.search
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import nl.knaw.dans.lib.scaladv.model.dataset.MetadataBlocks
+import nl.knaw.dans.lib.scaladv.model.file.FileMeta
+import nl.knaw.dans.lib.scaladv.{ DatasetApi, DataverseInstance, FileApi, Version }
 import org.json4s.native.Serialization
-import org.json4s.{ DefaultFormats, Formats }
 
 import java.net.URI
 import java.nio.file.{ Path, Paths }
 import java.util.regex.Pattern
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.util.control.NonFatal
 import scala.util.{ Failure, Success, Try }
 
@@ -39,42 +40,54 @@ class DatasetUpdater(deposit: Deposit,
                      variantToLicense: Map[String, String],
                      supportedLicenses: List[URI],
                      dataverseInstance: DataverseInstance,
-                     optMigrationInfoService: Option[MigrationInfo]) extends DatasetEditor(dataverseInstance, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {
+                     dataverseClient: DataverseClient,
+                     optMigrationInfoService: Option[MigrationInfo]) extends DatasetEditor(dataverseInstance, dataverseClient, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {
   trace(deposit)
 
   override def performEdit(): Try[PersistentId] = {
     {
       for {
-        doi <- if (isMigration) getDoiByIsVersionOf // using deposit.dataversePid may lead to confusing situations when the DOI is present but erroneously so.
-               else getDoiBySwordToken
+        _ <- Try { Thread.sleep(4000) } // TODO wait for the doi to become available
+        doi <- if (!isMigration) getDoi(s"""dansSwordToken:"${ deposit.vaultMetadata.dataverseSwordToken }"""")
+               else {
+                 // using deposit.dataversePid may lead to confusing situations when the DOI is present but erroneously so.
+                 getDoiByIsVersionOf
+               }
       } yield doi
     } match {
-      case Failure(e) => Failure(FailedDepositException(deposit, "Could not find persistentId of existing dataset", e))
+      case Failure(e) =>
+        logger.error( s"Could not find persistentId of existing dataset ${deposit.bagDir} " + e)
+        Failure(FailedDepositException(deposit, "Could not find persistentId of existing dataset", e))
       case Success(doi) => {
         for {
-          dataset <- Try { dataverseInstance.dataset(doi) }
-          _ <- dataset.awaitUnlock()
+          javaDatasetApi <-  Try(dataverseClient.dataset(doi))
+          _ <-  Try(javaDatasetApi.awaitUnlock())
           /*
            * Temporary fix. If we do not wait a couple of seconds here, the first version never gets properly published, and the second version
            * just overwrites it, becoming V1.
            */
-          - <- Try { Thread.sleep(3000) }
+          _ <- Try { Thread.sleep(6000) }
           // TODO: library should provide function waitForIndexing that uses the @Path("{identifier}/timestamps") endpoint on Datasets
-          _ <- dataset.awaitUnlock()
-          _ <- checkDatasetInPublishedState(dataset)
-          _ <- dataset.updateMetadata(metadataBlocks)
-          _ <- dataset.awaitUnlock()
+          _ <-  Try(javaDatasetApi.awaitUnlock())
+          state <- Try(javaDatasetApi.viewLatestVersion().getData.getLatestVersion.getVersionState)
+          _ = if (state.contains("DRAFT")) throw CannotUpdateDraftDatasetException(deposit)
 
+          jsonBlocks = Serialization.write(metadataBlocks)
+          _ <- Try(javaDatasetApi.updateMetadataFromJsonLd(jsonBlocks, true))
+          _ <- Try(javaDatasetApi.awaitUnlock())
           licenseAsJson <- licenseAsJson(supportedLicenses)(variantToLicense)(deposit)
-          _ <- dataverseInstance.dataset(doi).updateMetadataFromJsonLd(licenseAsJson, replace = true)
-          _ <- dataset.awaitUnlock()
+          _ <- Try(javaDatasetApi.updateMetadataFromJsonLd(licenseAsJson, true))
+          _ <- Try(javaDatasetApi.awaitUnlock())
+
           pathToFileInfo <- getPathToFileInfo(deposit)
           _ = debug(s"pathToFileInfo = $pathToFileInfo")
-          pathToFileMetaInLatestVersion <- getFilesInLatestVersion(dataset)
+          scalaDatasetApi <- Try { dataverseInstance.dataset(doi) }
+          pathToFileMetaInLatestVersion <- getFilesInLatestVersion(scalaDatasetApi)
           _ = debug(s"pathToFileMetaInLatestVersion = $pathToFileMetaInLatestVersion")
           _ <- validateFileMetas(pathToFileMetaInLatestVersion.values.toList)
 
-          numPub <- getNumberOfPublishedVersions(dataset)
+          versions <- Try(javaDatasetApi.getAllVersions.getData)
+          numPub = versions.count(v => "RELEASED" == v.getVersionState)
           _ = debug(s"Number of published versions so far: $numPub")
           prestagedFiles <- optMigrationInfoService.map(_.getPrestagedDataFilesFor(doi, numPub + 1)).getOrElse(Success(Set.empty[BasicFileMeta]))
 
@@ -96,7 +109,7 @@ class DatasetUpdater(deposit: Deposit,
             .filterNot { case (path, _) => oldToNewPathMovedFiles.keySet.contains(path) } // remove old paths of moved files
             .filterNot { case (path, _) => oldToNewPathMovedFiles.values.toSet.contains(path) } // remove new paths of moved files
           filesToReplace <- getFilesToReplace(pathToFileInfo, fileReplacementCandidates)
-          fileReplacements <- replaceFiles(dataset, filesToReplace, prestagedFiles)
+          fileReplacements <- replaceFiles(scalaDatasetApi, filesToReplace, prestagedFiles)
           _ = debug(s"fileReplacements = $fileReplacements")
 
           /*
@@ -115,7 +128,7 @@ class DatasetUpdater(deposit: Deposit,
           _ = debug(s"pathsToDelete = $pathsToDelete")
           fileDeletions <- getFileDeletions(pathsToDelete, pathToFileMetaInLatestVersion)
           _ = debug(s"fileDeletions = $fileDeletions")
-          _ <- deleteFiles(dataset, fileDeletions.toList)
+          _ <- deleteFiles(scalaDatasetApi, fileDeletions.toList)
 
           /*
            * After the movements have been performed, which paths are occupied? We start from the paths of the latest version (pathToFileMetaInLatestVersion.keySet)
@@ -140,7 +153,7 @@ class DatasetUpdater(deposit: Deposit,
 
           // TODO: check that only updating the file metadata works
           _ <- updateFileMetadata(fileReplacements ++ fileMovements ++ fileAdditions)
-          _ <- dataset.awaitUnlock()
+          _ <- Try(javaDatasetApi.awaitUnlock())
 
           dateAvailable <- deposit.getDateAvailable
           _ <- if (isEmbargo(dateAvailable)) {
@@ -158,51 +171,29 @@ class DatasetUpdater(deposit: Deposit,
           _ <- configureEnableAccessRequests(deposit, doi, canEnable = false)
         } yield doi
       }.doIfFailure {
-        case e: CannotUpdateDraftDatasetException => // Don't delete the draft that caused the failure
+        case _: CannotUpdateDraftDatasetException => // Don't delete the draft that caused the failure
         case NonFatal(e) =>
-          logger.error("Dataset update failed, deleting draft", e)
+          logger.error(s"Dataset update failed, deleting draft", e)
           deleteDraftIfExists(doi)
       }
     }
   }
 
-  private def checkDatasetInPublishedState(datasetApi: DatasetApi): Try[Unit] = {
-    implicit val jsonFormats: Formats = DefaultFormats
+  private def getDoi(q: String) = {
+    logger.debug(q)
     for {
-      r <- datasetApi.viewLatestVersion()
-      v <- r.data
-      _ <- if (v.latestVersion.versionState.contains("DRAFT")) {
-        logger.error(s"v = ${ Serialization.writePretty(v) }")
-        Failure(CannotUpdateDraftDatasetException(deposit))
-      }
-           else Success(())
-    } yield ()
-  }
-
-  private def getDoiBySwordToken: Try[String] = {
-    trace(())
-    debug(s"dansSwordToken = ${ deposit.vaultMetadata.dataverseSwordToken }")
-    for {
-      r <- dataverseInstance.search().find(s"""dansSwordToken:"${ deposit.vaultMetadata.dataverseSwordToken }"""")
-      searchResult <- r.data
-      items = searchResult.items
+      searchResult <- Try(dataverseClient.search().find(q).getData)
+      items = searchResult.getItems
       _ = if (items.size != 1) throw FailedDepositException(deposit, s"Deposit is update of ${ items.size } datasets; should always be 1!")
-      doi = items.head.asInstanceOf[DatasetResultItem].globalId
+      doi = items.head.asInstanceOf[search.DatasetResultItem].getGlobalId
       _ = debug(s"Deposit is update of dataset $doi")
     } yield doi
   }
 
   private def getDoiByIsVersionOf: Try[String] = {
-    trace(())
     for {
       isVersionOf <- deposit.getIsVersionOf
-      _ = debug(s"Is-Version-Of = $isVersionOf")
-      r <- dataverseInstance.search().find(s"""dansBagId:"$isVersionOf"""")
-      searchResult <- r.data
-      items = searchResult.items
-      _ = if (items.size != 1) throw FailedDepositException(deposit, s"Deposit is update of ${ items.size } datasets; should always be 1!")
-      doi = items.head.asInstanceOf[DatasetResultItem].globalId
-      _ = debug(s"Deposit is update of dataset $doi")
+      doi <- getDoi(s"""dansBagId:"$isVersionOf"""")
     } yield doi
   }
 
@@ -222,13 +213,6 @@ class DatasetUpdater(deposit: Deposit,
     if (files.map(_.dataFile).exists(_.isEmpty)) Failure(new IllegalArgumentException("Found file metadata without dataFile element"))
     else if (files.map(_.dataFile.get).exists(_.checksum.`type` != "SHA-1")) Failure(new IllegalArgumentException("Not all file checksums are of type SHA-1"))
          else Success(())
-  }
-
-  private def getNumberOfPublishedVersions(datasetApi: DatasetApi): Try[Int] = {
-    for {
-      r <- datasetApi.viewAllVersions()
-      vs <- r.data
-    } yield vs.count(v => v.versionState.isDefined && v.versionState.get == "RELEASED")
   }
 
   private def getFilesToReplace(pathToFileInfo: Map[Path, FileInfo], pathToFileMetaInLatestVersion: Map[Path, FileMeta]): Try[Map[Int, FileInfo]] = Try {
@@ -279,11 +263,11 @@ class DatasetUpdater(deposit: Deposit,
   }
 
   private def deleteFiles(dataset: DatasetApi, databaseIds: List[DatabaseId]): Try[Unit] = {
-    databaseIds.map(id => {
+    databaseIds.map { id =>
       debug(s"Deleting file, databaseId = $id")
-      dataverseInstance.sword().deleteFile(id)
+      dataverseClient.sword().deleteFile(id)
       dataset.awaitUnlock()
-    }).collectResults.map(_ => ())
+    }.collectResults.map(_ => ())
   }
 
   private def replaceFiles(dataset: DatasetApi, databaseIdToNewFile: Map[Int, FileInfo], prestagedFiles: Set[BasicFileMeta] = Set.empty): Try[Map[Int, FileMeta]] = {
