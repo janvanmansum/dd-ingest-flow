@@ -174,9 +174,8 @@ case class DepositIngestTask(deposit: Deposit,
 
   private def getDatasetContacts: Try[List[JsonObject]] = {
     for {
-      response <- dataverseInstance.admin().getSingleUser(deposit.depositorUserId)
-      user <- response.data
-      datasetContacts <- createDatasetContacts(user.displayName, user.email, user.affiliation)
+      user <- Try(dataverseClient.admin().listSingleUser(deposit.depositorUserId).getData)
+      datasetContacts <- createDatasetContacts(user.getDisplayName, user.getEmail, Option(user.getAffiliation))
     } yield datasetContacts
   }
 
@@ -189,7 +188,7 @@ case class DepositIngestTask(deposit: Deposit,
   }
 
   protected def newDatasetUpdater(dataverseDataset: Dataset): DatasetUpdater = {
-    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseInstance, Option.empty)
+    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseInstance, dataverseClient, Option.empty)
   }
 
   protected def newDatasetCreator(dataverseDataset: Dataset, depositorRole: String): DatasetCreator = {
