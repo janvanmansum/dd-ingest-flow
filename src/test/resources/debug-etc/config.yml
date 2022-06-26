@@ -86,7 +86,7 @@ managePrestaging:
 # See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
 #
 logging:
-  level: WARN
+  level: INFO
   loggers:
     "nl.knaw.dans.ingest":
       level: TRACE

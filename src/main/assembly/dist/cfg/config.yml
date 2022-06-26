@@ -104,4 +104,5 @@ logging:
   appenders:
     - type: file
       archive: false
+      timeZone: system
       currentLogFilename: /var/opt/dans.knaw.nl/log/dd-ingest-flow/dd-ingest-flow.log

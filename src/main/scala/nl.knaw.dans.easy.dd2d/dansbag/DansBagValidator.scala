@@ -25,7 +25,7 @@ import scala.util.Try
 
 class DansBagValidator(serviceUri: URI, connTimeoutMs: Int, readTimeoutMs: Int) extends DebugEnhancedLogging {
   def checkConnection(): Try[Unit] = {
-    logger.info("Checking if validator service can be reached")
+    logger.debug("Checking if validator service can be reached")
     Try {
       Http(s"$serviceUri")
         .timeout(connTimeoutMs, readTimeoutMs)
@@ -34,7 +34,7 @@ class DansBagValidator(serviceUri: URI, connTimeoutMs: Int, readTimeoutMs: Int) 
         .asString
     } map {
       case r if r.code == 200 =>
-        logger.info("OK: validator service is reachable.")
+        logger.debug("OK: validator service is reachable.")
         ()
       case _ => throw new RuntimeException("Connection to Validate DANS Bag Service could not be established")
     }
