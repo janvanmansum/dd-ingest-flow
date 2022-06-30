@@ -16,13 +16,12 @@
 package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.migrationinfo.{ BasicFileMeta, MigrationInfo }
-import nl.knaw.dans.ingest.core.legacy.MapperForScala
+import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse._
 import nl.knaw.dans.lib.dataverse.model.file.{ FileMeta => JavaFileMeta }
 import nl.knaw.dans.lib.dataverse.model.search
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.Version
 import nl.knaw.dans.lib.scaladv.model.dataset.MetadataBlocks
 import nl.knaw.dans.lib.scaladv.model.file.{ FileMeta => ScalaFileMeta }
 import org.json4s.native.Serialization
@@ -68,7 +67,7 @@ class DatasetUpdater(deposit: Deposit,
            * Temporary fix. If we do not wait a couple of seconds here, the first version never gets properly published, and the second version
            * just overwrites it, becoming V1.
            */
-          _ <- Try { Thread.sleep(6000) }
+          _ <- Try { Thread.sleep(8000) }
           // TODO: library should provide function waitForIndexing that uses the @Path("{identifier}/timestamps") endpoint on Datasets
           _ <-  Try(javaDatasetApi.awaitUnlock())
           state <- Try(javaDatasetApi.viewLatestVersion().getData.getLatestVersion.getVersionState)
@@ -203,7 +202,7 @@ class DatasetUpdater(deposit: Deposit,
       response <- Try(dataset.getFiles(Version.LATEST_PUBLISHED.toString())) // N.B. If LATEST_PUBLISHED is not specified, it almost works, but the directoryLabel is not picked up somehow.
       files <- Try(response.getData)
       pathToFileMeta = files.map { javaFileMeta =>
-        val str = MapperForScala.get().writeValueAsString(javaFileMeta)
+        val str = MapperForJava.get().writeValueAsString(javaFileMeta)
         val scalaFileMeta: ScalaFileMeta = Serialization.read[ScalaFileMeta](str)
         (getPathFromFileMeta(javaFileMeta), scalaFileMeta)
       }.toMap

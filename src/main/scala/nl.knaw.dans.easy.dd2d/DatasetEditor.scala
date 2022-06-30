@@ -17,10 +17,11 @@ package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.mapping.{ AccessRights, License }
 import nl.knaw.dans.easy.dd2d.migrationinfo.BasicFileMeta
+import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.DataverseClient
+import nl.knaw.dans.lib.dataverse.model.dataset.Embargo
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.model.dataset.Embargo
 import nl.knaw.dans.lib.scaladv.model.file.FileMeta
 import nl.knaw.dans.lib.scaladv.model.file.prestaged.PrestagedFile
 import org.json4s.native.Serialization
@@ -155,8 +156,8 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
 
   protected def embargoFiles(persistendId: PersistentId, dateAvailable: Date, fileIds: List[Int]): Try[Unit] = {
     trace(persistendId, fileIds)
-    val embargo = Embargo(dateAvailableFormat.format(dateAvailable), "", fileIds)
-    val json = Serialization.write(embargo)
+    val embargo = new Embargo(dateAvailableFormat.format(dateAvailable), "", fileIds.toArray)
+    val json = MapperForJava.get().writeValueAsString(embargo)
     Try(dataverseClient.dataset(persistendId).setEmbargo(json))
   }
 
