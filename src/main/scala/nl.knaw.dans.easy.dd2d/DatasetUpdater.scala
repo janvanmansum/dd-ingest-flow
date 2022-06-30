@@ -89,7 +89,6 @@ class DatasetUpdater(deposit: Deposit,
           versions <- Try(javaDatasetApi.getAllVersions.getData)
           numPub = versions.count(v => "RELEASED" == v.getVersionState)
           _ = debug(s"Number of published versions so far: $numPub")
-          prestagedFiles <- optMigrationInfoService.map(_.getPrestagedDataFilesFor(doi, numPub + 1)).getOrElse(Success(Set.empty[BasicFileMeta]))
 
           oldToNewPathMovedFiles <- getOldToNewPathOfFilesToMove(pathToFileMetaInLatestVersion, pathToFileInfo)
           fileMovements = oldToNewPathMovedFiles.map { case (old, newPath) => (pathToFileMetaInLatestVersion(old).dataFile.get.id, pathToFileInfo(newPath).metadata) }
@@ -109,7 +108,7 @@ class DatasetUpdater(deposit: Deposit,
             .filterNot { case (path, _) => oldToNewPathMovedFiles.keySet.contains(path) } // remove old paths of moved files
             .filterNot { case (path, _) => oldToNewPathMovedFiles.values.toSet.contains(path) } // remove new paths of moved files
           filesToReplace <- getFilesToReplace(pathToFileInfo, fileReplacementCandidates)
-          fileReplacements <- replaceFiles(javaDatasetApi, filesToReplace, prestagedFiles)
+          fileReplacements <- replaceFiles(javaDatasetApi, filesToReplace)
           _ = debug(s"fileReplacements = $fileReplacements")
 
           /*
@@ -149,7 +148,7 @@ class DatasetUpdater(deposit: Deposit,
           pathsToAdd = pathToFileInfo.keySet diff occupiedPaths
           filesToAdd = pathsToAdd.map(pathToFileInfo).toList
           _ = debug(s"filesToAdd = $filesToAdd")
-          fileAdditions <- addFiles(doi, filesToAdd, prestagedFiles).map(_.mapValues(_.metadata))
+          fileAdditions <- addFiles(doi, filesToAdd).map(_.mapValues(_.metadata))
 
           // TODO: check that only updating the file metadata works
           _ <- updateFileMetadata(fileReplacements ++ fileMovements ++ fileAdditions)
@@ -274,13 +273,13 @@ class DatasetUpdater(deposit: Deposit,
     }.collectResults.map(_ => ())
   }
 
-  private def replaceFiles(dataset: DatasetApi, databaseIdToNewFile: Map[Int, FileInfo], prestagedFiles: Set[BasicFileMeta] = Set.empty): Try[Map[Int, ScalaFileMeta]] = {
-    trace(databaseIdToNewFile, prestagedFiles)
+  private def replaceFiles(dataset: DatasetApi, databaseIdToNewFile: Map[Int, FileInfo]): Try[Map[Int, ScalaFileMeta]] = {
+    trace(databaseIdToNewFile)
     databaseIdToNewFile.map {
       case (id, fileInfo) =>
         val fileApi = dataverseClient.file(id)
 
-        def replaceFile(prestagedFiles: Set[BasicFileMeta]): Try[(Int, ScalaFileMeta)] = {
+        def replaceFile(): Try[(Int, ScalaFileMeta)] = {
           /*
            * Note, forceReplace = true is used, so that the action does not fail if the replacement has a different MIME-type than
            * the replaced file. The only way to pass forceReplace is through the FileMeta. This means we are deleting any existing
@@ -288,11 +287,7 @@ class DatasetUpdater(deposit: Deposit,
            * update process.
            */
           for {
-            r <- getPrestagedFileFor(fileInfo, prestagedFiles).map { prestagedFile =>
-              debug(s"Replacing with prestaged file: $fileInfo")
-              Failure(new NotImplementedError("fileApi.replaceWithPrestagedFile"))
-              //fileApi.replaceWithPrestagedFile(prestagedFile.copy(forceReplace = true))
-            }.getOrElse {
+            r <- {
               val meta = ScalaFileMeta(forceReplace = true)
               val json = Serialization.writePretty(meta)
               debug(s"Uploading replacement file: $fileInfo $json")
@@ -304,7 +299,7 @@ class DatasetUpdater(deposit: Deposit,
           } yield (id, fileInfo.metadata)
         }
         for {
-          (replacementId, replacementMeta) <- replaceFile(prestagedFiles)
+          (replacementId, replacementMeta) <- replaceFile()
           _ <- Try(dataset.awaitUnlock())
         } yield (replacementId, replacementMeta)
     }.toList.collectResults.map(_.toMap)

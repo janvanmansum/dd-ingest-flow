@@ -16,14 +16,12 @@
 package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.mapping.{ AccessRights, License }
-import nl.knaw.dans.easy.dd2d.migrationinfo.BasicFileMeta
 import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.dataverse.model.dataset.Embargo
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import nl.knaw.dans.lib.scaladv.model.file.FileMeta
-import nl.knaw.dans.lib.scaladv.model.file.prestaged.PrestagedFile
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
 
@@ -48,11 +46,11 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
    */
   def performEdit(): Try[PersistentId]
 
-  protected def addFiles(persistentId: String, files: List[FileInfo], prestagedFiles: Set[BasicFileMeta] = Set.empty): Try[Map[Int, FileInfo]] = Try {
+  protected def addFiles(persistentId: String, files: List[FileInfo]): Try[Map[Int, FileInfo]] = Try {
     trace(persistentId, files)
     files.map { f =>
       debug(s"Adding file, directoryLabel = ${ f.metadata.directoryLabel }, label = ${ f.metadata.label }")
-      val id = addFile(persistentId, f, prestagedFiles).unsafeGetOrThrow
+      val id = addFile(persistentId, f).unsafeGetOrThrow
       dataverseClient.dataset(persistentId).awaitUnlock()
       id -> f
     }.toMap
@@ -60,15 +58,9 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
 
   private val noFile: java.io.File = null
 
-  private def addFile(doi: String, fileInfo: FileInfo, prestagedFiles: Set[BasicFileMeta]): Try[Int] = {
+  private def addFile(doi: String, fileInfo: FileInfo): Try[Int] = {
     val result = for {
-      r <- getPrestagedFileFor(fileInfo, prestagedFiles).map { prestagedFile =>
-        logger.info(s"Adding prestaged file (scala -> java change not tested): $fileInfo") // TODO
-        Try(dataverseClient.dataset(doi).addFileItem(
-          Optional.of(noFile),
-          Optional.of(Serialization.write(prestagedFile))
-        ))
-      }.getOrElse {
+      r <- {
         debug(s"Uploading file: $fileInfo")
         val optWrappedZip = zipFileHandler.wrapIfZipFile(fileInfo.file)
         val r = Try(dataverseClient.dataset(doi).addFileItem(
@@ -102,18 +94,6 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
         if (foundMatch) logger.info(s"Excluding file: ${ p.toString }")
         !foundMatch
     }.toMap
-  }
-
-  protected def getPrestagedFileFor(fileInfo: FileInfo, basicFileMetas: Set[BasicFileMeta]): Option[PrestagedFile] = {
-    val matchingChecksums = basicFileMetas.filter(_.prestagedFile.checksum.`@value` == fileInfo.checksum)
-    if (matchingChecksums.size == 1) Option(matchingChecksums.head.prestagedFile)
-    else if (matchingChecksums.isEmpty) Option.empty // no matches
-         else { // multiple matches
-           val matchingPaths = basicFileMetas.filter(bfm => bfm.label == fileInfo.metadata.label.get && bfm.directoryLabel == fileInfo.metadata.directoryLabel)
-           if (matchingPaths.size == 1) Option(matchingPaths.head.prestagedFile)
-           else if (matchingPaths.isEmpty) Option.empty
-                else throw new IllegalArgumentException("Found multiple basic file metas with the same path in a single dataset version")
-         }
   }
 
   protected def updateFileMetadata(databaseIdToFileInfo: Map[Int, FileMeta]): Try[Unit] = {

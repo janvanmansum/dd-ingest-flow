@@ -75,8 +75,7 @@ public class DepositIngestTaskFactoryWrapper {
             new MigrationInfoConfig(
                 DepositIngestTaskFactory.appendSlash(migrationInfoConfig.getBaseUrl()),
                 migrationInfoConfig.getConnectionTimeoutMs(),
-                migrationInfoConfig.getReadTimeoutMs()),
-            false // TODO: make configurable
+                migrationInfoConfig.getReadTimeoutMs())
         );
 
         final Elem narcisClassification = DepositIngestTaskFactory.readXml(ingestFlowConfig.getMappingDefsDir().resolve("narcis_classification.xml").toFile());
