@@ -19,9 +19,9 @@ import nl.knaw.dans.easy.dd2d.mapping.{ AccessRights, License }
 import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.dataverse.model.dataset.Embargo
+import nl.knaw.dans.lib.dataverse.model.file.FileMeta
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.model.file.FileMeta
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
 
@@ -55,8 +55,6 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
       id -> f
     }.toMap
   }
-
-  private val noFile: java.io.File = null
 
   private def addFile(doi: String, fileInfo: FileInfo): Try[Int] = {
     val result = for {

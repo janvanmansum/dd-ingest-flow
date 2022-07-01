@@ -35,7 +35,6 @@ public class MapperForJava {
     public static ObjectMapper init () {
         mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
-        // jsonSerializer.readValue(s,  classManifest[T].erasure).asInstanceOf[T]
         module.addDeserializer(MetadataField.class, new MetadataFieldDeserializer());
         module.addDeserializer(DataverseItem.class, new DataverseItemDeserializer());
         module.addDeserializer(ResultItem.class, new ResultItemDeserializer(mapper));

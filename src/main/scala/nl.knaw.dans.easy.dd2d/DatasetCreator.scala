@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.easy.dd2d.migrationinfo.{ BasicFileMeta, MigrationInfo }
+import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.model.RoleAssignment
 import nl.knaw.dans.lib.dataverse.{ DataverseClient, Version }
@@ -65,7 +65,7 @@ class DatasetCreator(deposit: Deposit,
           _ <- Try(javaDatasetApi.awaitUnlock())
           pathToFileInfo <- getPathToFileInfo(deposit)
           databaseIdsToFileInfo <- addFiles(persistentId, pathToFileInfo.values.toList)
-          _ <- updateFileMetadata(databaseIdsToFileInfo.mapValues(_.metadata))
+          _ <- updateFileMetadata(databaseIdsToFileInfo.mapValues(_.javaFileMeta))
           _ <- Try(javaDatasetApi.awaitUnlock())
           _ <- configureEnableAccessRequests(deposit, persistentId, canEnable = true)
           _ <- Try(javaDatasetApi.awaitUnlock())
@@ -99,7 +99,7 @@ class DatasetCreator(deposit: Deposit,
     else {
       logger.info(s"Putting embargo on files until: $dateAvailable")
       for {
-        response <- Try(dataverseClient.dataset(persistentId).getFiles(Version.LATEST.toString()).getData)
+        response <- Try(dataverseClient.dataset(persistentId).getFiles(Version.LATEST.toString).getData)
         ids = response.filter(f => "easy-migration" != f.getDirectoryLabel)
           .map(f => f.getDataFile.getId).toList
         _ <- embargoFiles(persistentId, dateAvailable, ids)
