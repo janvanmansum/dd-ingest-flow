@@ -174,8 +174,9 @@ case class DepositIngestTask(deposit: Deposit,
 
   private def getDatasetContacts: Try[List[JsonObject]] = {
     for {
-      user <- Try(dataverseClient.admin().listSingleUser(deposit.depositorUserId).getData)
-      datasetContacts <- createDatasetContacts(user.getDisplayName, user.getEmail, Option(user.getAffiliation))
+      response <- dataverseInstance.admin().getSingleUser(deposit.depositorUserId)
+      user <- response.data
+      datasetContacts <- createDatasetContacts(user.displayName, user.email, user.affiliation)
     } yield datasetContacts
   }
 
@@ -188,11 +189,11 @@ case class DepositIngestTask(deposit: Deposit,
   }
 
   protected def newDatasetUpdater(dataverseDataset: Dataset): DatasetUpdater = {
-    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseInstance, dataverseClient, Option.empty)
+    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseClient, Option.empty)
   }
 
   protected def newDatasetCreator(dataverseDataset: Dataset, depositorRole: String): DatasetCreator = {
-    new DatasetCreator(deposit, optFileExclusionPattern, zipFileHandler, depositorRole, isMigration = false, dataverseDataset, variantToLicense, supportedLicenses, dataverseInstance, dataverseClient, Option.empty)
+    new DatasetCreator(deposit, optFileExclusionPattern, zipFileHandler, depositorRole, isMigration = false, dataverseDataset, variantToLicense, supportedLicenses, dataverseClient, Option.empty)
   }
 
   protected def publishDataset(persistentId: String): Try[Unit] = {

@@ -20,7 +20,6 @@ import nl.knaw.dans.easy.dd2d.migrationinfo.BasicFileMeta
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.DataverseInstance
 import nl.knaw.dans.lib.scaladv.model.dataset.Embargo
 import nl.knaw.dans.lib.scaladv.model.file.FileMeta
 import nl.knaw.dans.lib.scaladv.model.file.prestaged.PrestagedFile
@@ -29,14 +28,14 @@ import org.json4s.{ DefaultFormats, Formats }
 
 import java.net.URI
 import java.nio.file.{ Path, Paths }
-import java.util.Date
 import java.util.regex.Pattern
+import java.util.{ Date, Optional }
 import scala.util.{ Failure, Success, Try }
 
 /**
  * Object that edits a dataset, a new draft.
  */
-abstract class DatasetEditor(dataverseInstance: DataverseInstance, dataverseClient: DataverseClient, optFileExclusionPattern: Option[Pattern], zipFileHandler: ZipFileHandler) extends DebugEnhancedLogging {
+abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionPattern: Option[Pattern], zipFileHandler: ZipFileHandler) extends DebugEnhancedLogging {
   type PersistentId = String
   type DatasetId = Int
   implicit val jsonFormats: Formats = DefaultFormats
@@ -58,25 +57,30 @@ abstract class DatasetEditor(dataverseInstance: DataverseInstance, dataverseClie
     }.toMap
   }
 
+  private val noFile: java.io.File = null
+
   private def addFile(doi: String, fileInfo: FileInfo, prestagedFiles: Set[BasicFileMeta]): Try[Int] = {
     val result = for {
       r <- getPrestagedFileFor(fileInfo, prestagedFiles).map { prestagedFile =>
-        debug(s"Adding prestaged file: $fileInfo")
-        dataverseInstance.dataset(doi).addPrestagedFile(prestagedFile)
+        logger.info(s"Adding prestaged file (scala -> java change not tested): $fileInfo") // TODO
+        Try(dataverseClient.dataset(doi).addFileItem(
+          Optional.of(noFile),
+          Optional.of(Serialization.write(prestagedFile))
+        ))
       }.getOrElse {
         debug(s"Uploading file: $fileInfo")
-        val optWrappedZip = zipFileHandler
-          .wrapIfZipFile(fileInfo.file)
-        val r = dataverseInstance.dataset(doi).addFile(Option(
-          optWrappedZip
-            .getOrElse(fileInfo.file)), Option(fileInfo.metadata))
+        val optWrappedZip = zipFileHandler.wrapIfZipFile(fileInfo.file)
+        val r = Try(dataverseClient.dataset(doi).addFileItem(
+          Optional.of(optWrappedZip.getOrElse(fileInfo.file).toJava), // TODO what about closing files?
+          Optional.of(Serialization.write(fileInfo.metadata))
+        ))
         optWrappedZip.foreach(_.delete(swallowIOExceptions = true))
         r
       }
-      files <- r.data
-      id = files.files.headOption.flatMap(_.dataFile.map(_.id))
+      files <- Try(r.getData)
+      triedId = Try(files.getFiles.get(0).getDataFile.getId)
       _ <- Try(dataverseClient.dataset(doi).awaitUnlock())
-    } yield id
+    } yield triedId
     debug(s"Result = $result")
     result.map(_.getOrElse(throw new IllegalStateException("Could not get DataFile ID from response")))
   }
@@ -114,7 +118,9 @@ abstract class DatasetEditor(dataverseInstance: DataverseInstance, dataverseClie
   protected def updateFileMetadata(databaseIdToFileInfo: Map[Int, FileMeta]): Try[Unit] = {
     trace(databaseIdToFileInfo)
     databaseIdToFileInfo.map { case (id, fileMeta) =>
-      val r = dataverseInstance.file(id).updateMetadata(fileMeta)
+      val json = Serialization.write(fileMeta)
+      debug(s"id = $id, json = $json")
+      val r = Try(dataverseClient.file(id).updateMetadata(json))
       debug(s"id = $id, result = $r")
       r
     }.collectResults.map(_ => ())
@@ -157,6 +163,7 @@ abstract class DatasetEditor(dataverseInstance: DataverseInstance, dataverseClie
   protected def deleteDraftIfExists(persistentId: String): Unit = {
     val result = for {
       v <- Try(dataverseClient.dataset(persistentId).viewLatestVersion().getData)
+      _ = logger.trace("deleting draft")
       _ <- if (v.getLatestVersion.getVersionState.contains("DRAFT"))
              deleteDraft(persistentId)
            else Success(())
@@ -168,7 +175,7 @@ abstract class DatasetEditor(dataverseInstance: DataverseInstance, dataverseClie
 
   private def deleteDraft(persistentId: PersistentId): Try[Unit] = {
     for {
-      _ <- dataverseInstance.dataset(persistentId).deleteDraft()
+      _ <- Try(dataverseClient.dataset(persistentId).deleteDraft())
       _ = logger.info(s"DRAFT deleted")
     } yield ()
   }
