@@ -173,10 +173,11 @@ case class DepositIngestTask(deposit: Deposit,
   }
 
   private def getDatasetContacts: Try[List[JsonObject]] = {
+    logger.trace("DespositIngestTask.getDatasetContacts")
     for {
-      response <- dataverseInstance.admin().getSingleUser(deposit.depositorUserId)
-      user <- response.data
-      datasetContacts <- createDatasetContacts(user.displayName, user.email, user.affiliation)
+      response <- Try(dataverseClient.admin().listSingleUser(deposit.depositorUserId))
+      user <- Try(response.getData)
+      datasetContacts <- createDatasetContacts(user.getDisplayName, user.getEmail, Option(user.getAffiliation))
     } yield datasetContacts
   }
 
@@ -244,6 +245,7 @@ case class DepositIngestTask(deposit: Deposit,
   }
 
   private def savePersistentIdentifiersInDepositProperties(persistentId: String): Try[Unit] = {
+    logger.trace("ENTER")
     implicit val jsonFormats: Formats = DefaultFormats
     for {
       _ <- dataverseInstance.dataset(persistentId).awaitUnlock()

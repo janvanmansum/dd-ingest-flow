@@ -105,7 +105,7 @@ class DepositMigrationTask(deposit: Deposit,
       amd = optAmd.getOrElse(throw new Exception(s"no AMD found for $persistentId"))
       optPublicationDate <- getJsonLdPublicationdate(amd)
       publicationDate = optPublicationDate.getOrElse(throw new IllegalArgumentException(s"no publication date found in AMD for $persistentId"))
-      _ <- dataverseInstance.dataset(persistentId).releaseMigrated(publicationDate)
+      _ <- Try(dataverseClient.dataset(persistentId).releaseMigrated(publicationDate, true))
       _ <- dataverseInstance.dataset(persistentId).awaitUnlock(
         maxNumberOfRetries = publishAwaitUnlockMaxNumberOfRetries,
         waitTimeInMilliseconds = publishAwaitUnlockMillisecondsBetweenRetries)
