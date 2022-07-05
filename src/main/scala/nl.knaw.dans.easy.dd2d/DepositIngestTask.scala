@@ -20,7 +20,6 @@ import nl.knaw.dans.easy.dd2d.OutboxSubdir.{ FAILED, OutboxSubdir, PROCESSED, RE
 import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageType
 import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidationResult, DansBagValidator, InformationPackageType }
 import nl.knaw.dans.easy.dd2d.mapping.JsonObject
-import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
@@ -55,7 +54,6 @@ case class DepositIngestTask(deposit: Deposit,
                              optDansBagValidator: Option[DansBagValidator],
                              dataverseInstance: DataverseInstance,
                              dataverseClient: DataverseClient,
-                             migrationInfo: Option[MigrationInfo],
                              publishAwaitUnlockMaxNumberOfRetries: Int,
                              publishAwaitUnlockMillisecondsBetweenRetries: Int,
                              narcisClassification: Elem,
@@ -190,11 +188,11 @@ case class DepositIngestTask(deposit: Deposit,
   }
 
   protected def newDatasetUpdater(dataverseDataset: Dataset): DatasetUpdater = {
-    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseClient, Option.empty)
+    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseClient)
   }
 
   protected def newDatasetCreator(dataverseDataset: Dataset, depositorRole: String): DatasetCreator = {
-    new DatasetCreator(deposit, optFileExclusionPattern, zipFileHandler, depositorRole, isMigration = false, dataverseDataset, variantToLicense, supportedLicenses, dataverseClient, Option.empty)
+    new DatasetCreator(deposit, optFileExclusionPattern, zipFileHandler, depositorRole, isMigration = false, dataverseDataset, variantToLicense, supportedLicenses, dataverseClient)
   }
 
   protected def publishDataset(persistentId: String): Try[Unit] = {

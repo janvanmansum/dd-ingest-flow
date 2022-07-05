@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.lib.dataverse._
 import nl.knaw.dans.lib.dataverse.model.dataset.FileList
 import nl.knaw.dans.lib.dataverse.model.file.{ FileMeta => JavaFileMeta }
@@ -40,8 +39,7 @@ class DatasetUpdater(deposit: Deposit,
                      metadataBlocks: MetadataBlocks,
                      variantToLicense: Map[String, String],
                      supportedLicenses: List[URI],
-                     dataverseClient: DataverseClient,
-                     optMigrationInfoService: Option[MigrationInfo]) extends DatasetEditor(dataverseClient, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {
+                     dataverseClient: DataverseClient) extends DatasetEditor(dataverseClient, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {
   trace(deposit)
 
   override def performEdit(): Try[PersistentId] = {

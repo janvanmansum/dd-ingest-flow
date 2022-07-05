@@ -16,10 +16,9 @@
 package nl.knaw.dans.easy.dd2d
 
 import better.files.File
-import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidator, InformationPackageType }
 import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageType
+import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidator, InformationPackageType }
 import nl.knaw.dans.easy.dd2d.mapping.Amd
-import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.scaladv.DataverseInstance
 import nl.knaw.dans.lib.scaladv.model.dataset.Dataset
@@ -39,7 +38,6 @@ class DepositMigrationTask(deposit: Deposit,
                            optDansBagValidator: Option[DansBagValidator],
                            dataverseInstance: DataverseInstance,
                            dataverseClient: DataverseClient,
-                           migrationInfo: Option[MigrationInfo],
                            publishAwaitUnlockMaxNumberOfRetries: Int,
                            publishAwaitUnlockMillisecondsBetweenRetries: Int,
                            narcisClassification: Elem,
@@ -58,7 +56,6 @@ class DepositMigrationTask(deposit: Deposit,
     optDansBagValidator,
     dataverseInstance,
     dataverseClient,
-    migrationInfo: Option[MigrationInfo],
     publishAwaitUnlockMaxNumberOfRetries,
     publishAwaitUnlockMillisecondsBetweenRetries,
     narcisClassification,
@@ -79,11 +76,11 @@ class DepositMigrationTask(deposit: Deposit,
   }
 
   override def newDatasetUpdater(dataverseDataset: Dataset): DatasetUpdater = {
-    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = true, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseClient, migrationInfo)
+    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = true, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseClient)
   }
 
   override def newDatasetCreator(dataverseDataset: Dataset, depositorRole: String): DatasetCreator = {
-    new DatasetCreator(deposit, optFileExclusionPattern, zipFileHandler, depositorRole, isMigration = true, dataverseDataset, variantToLicense, supportedLicenses, dataverseClient, migrationInfo)
+    new DatasetCreator(deposit, optFileExclusionPattern, zipFileHandler, depositorRole, isMigration = true, dataverseDataset, variantToLicense, supportedLicenses, dataverseClient)
   }
 
   override protected def checkPersonalDataPresent(optAgreements: Option[Node]): Try[Unit] = {

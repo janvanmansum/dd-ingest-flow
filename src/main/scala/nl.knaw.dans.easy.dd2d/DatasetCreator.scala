@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.model.RoleAssignment
 import nl.knaw.dans.lib.dataverse.{ DataverseClient, Version }
@@ -39,8 +38,7 @@ class DatasetCreator(deposit: Deposit,
                      dataverseDataset: Dataset,
                      variantToLicense: Map[String, String],
                      supportedLicenses: List[URI],
-                     dataverseClient: DataverseClient,
-                     optMigrationInfoService: Option[MigrationInfo]) extends DatasetEditor(dataverseClient, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {
+                     dataverseClient: DataverseClient) extends DatasetEditor(dataverseClient, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {
   trace(deposit)
 
   override def performEdit(): Try[PersistentId] = {
