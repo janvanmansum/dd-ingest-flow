@@ -20,7 +20,6 @@ import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageT
 import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidator, InformationPackageType }
 import nl.knaw.dans.easy.dd2d.mapping.Amd
 import nl.knaw.dans.lib.dataverse.DataverseClient
-import nl.knaw.dans.lib.scaladv.DataverseInstance
 import nl.knaw.dans.lib.scaladv.model.dataset.Dataset
 
 import java.net.URI
@@ -36,7 +35,6 @@ class DepositMigrationTask(deposit: Deposit,
                            deduplicate: Boolean,
                            activeMetadataBlocks: List[String],
                            optDansBagValidator: Option[DansBagValidator],
-                           dataverseInstance: DataverseInstance,
                            dataverseClient: DataverseClient,
                            publishAwaitUnlockMaxNumberOfRetries: Int,
                            publishAwaitUnlockMillisecondsBetweenRetries: Int,
@@ -45,7 +43,7 @@ class DepositMigrationTask(deposit: Deposit,
                            iso2ToDataverseLanguage: Map[String, String],
                            variantToLicense: Map[String, String],
                            supportedLicenses: List[URI],
-                           repordIdToTerm: Map[String, String],
+                           reportIdToTerm: Map[String, String],
                            outboxDir: File)
   extends DepositIngestTask(deposit,
     optFileExclusionPattern,
@@ -54,7 +52,6 @@ class DepositMigrationTask(deposit: Deposit,
     deduplicate,
     activeMetadataBlocks,
     optDansBagValidator,
-    dataverseInstance,
     dataverseClient,
     publishAwaitUnlockMaxNumberOfRetries,
     publishAwaitUnlockMillisecondsBetweenRetries,
@@ -63,7 +60,7 @@ class DepositMigrationTask(deposit: Deposit,
     iso2ToDataverseLanguage,
     variantToLicense,
     supportedLicenses,
-    repordIdToTerm,
+    reportIdToTerm,
     outboxDir) {
   override protected val informationPackageType: InformationPackageType = InformationPackageType.AIP
 

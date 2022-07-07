@@ -22,10 +22,9 @@ import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidationResult, DansBagValidato
 import nl.knaw.dans.easy.dd2d.mapping.JsonObject
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.dataverse.model.dataset
+import nl.knaw.dans.lib.dataverse.model.dataset.UpdateType.major
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.DataverseInstance
-import nl.knaw.dans.lib.scaladv.model.dataset.UpdateType.major
 import nl.knaw.dans.lib.scaladv.model.dataset.{ Dataset, PrimitiveSingleValueField, toFieldMap }
 import nl.knaw.dans.lib.taskqueue.Task
 import org.json4s.native.Serialization
@@ -45,7 +44,6 @@ import scala.xml.{ Elem, Node }
  * Checks one deposit and then ingests it into Dataverse.
  *
  * @param deposit  the deposit to ingest
- * @param dataverseInstance the Dataverse instance to ingest in
  */
 case class DepositIngestTask(deposit: Deposit,
                              optFileExclusionPattern: Option[Pattern],
@@ -54,7 +52,6 @@ case class DepositIngestTask(deposit: Deposit,
                              deduplicate: Boolean,
                              activeMetadataBlocks: List[String],
                              optDansBagValidator: Option[DansBagValidator],
-                             dataverseInstance: DataverseInstance,
                              dataverseClient: DataverseClient,
                              publishAwaitUnlockMaxNumberOfRetries: Int,
                              publishAwaitUnlockMillisecondsBetweenRetries: Int,
@@ -200,7 +197,7 @@ case class DepositIngestTask(deposit: Deposit,
   protected def publishDataset(persistentId: String): Try[Unit] = {
     trace(persistentId)
     for {
-      _ <- Try(dataverseClient.dataset(persistentId).publish(major.toString, true))
+      _ <- Try(dataverseClient.dataset(persistentId).publish(major, true))
       _ <- Try(dataverseClient.dataset(persistentId).awaitUnlock(
         publishAwaitUnlockMaxNumberOfRetries,
         publishAwaitUnlockMillisecondsBetweenRetries))

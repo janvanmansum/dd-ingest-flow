@@ -94,7 +94,6 @@ public class DepositIngestTaskFactoryWrapper {
             ingestFlowConfig.isDeduplicate(),
             DepositIngestTaskFactory.getActiveMetadataBlocks(dataverseInstance).get(),
             Option.apply(validator),
-            dataverseInstance,
             dataverseClient,
             Option.apply(migrationInfo),
             dataverseConfigScala.getApi().getPublishAwaitUnlockMaxRetries(),
