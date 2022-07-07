@@ -200,7 +200,7 @@ case class DepositIngestTask(deposit: Deposit,
   protected def publishDataset(persistentId: String): Try[Unit] = {
     trace(persistentId)
     for {
-      _ <- dataverseInstance.dataset(persistentId).publish(major, assureIsIndexed = true)
+      _ <- Try(dataverseClient.dataset(persistentId).publish(major.toString, true))
       _ <- Try(dataverseClient.dataset(persistentId).awaitUnlock(
         publishAwaitUnlockMaxNumberOfRetries,
         publishAwaitUnlockMillisecondsBetweenRetries))
