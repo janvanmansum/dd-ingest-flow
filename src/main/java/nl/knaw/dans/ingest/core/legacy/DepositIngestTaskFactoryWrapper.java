@@ -92,7 +92,7 @@ public class DepositIngestTaskFactoryWrapper {
             ingestFlowConfig.getDepositorRole(),
             false,
             ingestFlowConfig.isDeduplicate(),
-            DepositIngestTaskFactory.getActiveMetadataBlocks(dataverseInstance).get(),
+            DepositIngestTaskFactory.getActiveMetadataBlocks(dataverseClient).get(),
             Option.apply(validator),
             dataverseClient,
             Option.apply(migrationInfo),

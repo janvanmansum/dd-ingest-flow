@@ -19,14 +19,17 @@ import better.files.File
 import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator
 import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.lib.dataverse.DataverseClient
+import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import nl.knaw.dans.lib.scaladv.DataverseInstance
 import org.apache.commons.csv.{ CSVFormat, CSVParser }
 import org.apache.commons.io.FileUtils
+import org.apache.commons.lang3.ClassUtils.getName
 
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.regex.Pattern
 import scala.collection.JavaConverters.{ asScalaBufferConverter, asScalaIteratorConverter }
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.util.Try
 import scala.xml.{ Elem, XML }
 
@@ -104,12 +107,13 @@ class DepositIngestTaskFactory(isMigrated: Boolean = false,
   }
 }
 
-object DepositIngestTaskFactory {
-  def getActiveMetadataBlocks(dataverse: DataverseInstance): Try[List[String]] = {
+object DepositIngestTaskFactory extends DebugEnhancedLogging {
+  def getActiveMetadataBlocks(dataverseClient: DataverseClient): Try[List[String]] = {
     for {
-      result <- dataverse.dataverse("root").listMetadataBocks()
-      blocks <- result.data
-    } yield blocks.map(_.name)
+      result <- Try(dataverseClient.dataverse("root").listMetadataBlocks())
+      _ = logger.trace(result.getEnvelopeAsString)
+      blocks <- Try(result.getData)
+    } yield blocks.map(_.getName).toList
   }
 
   def readXml(file: java.io.File): Elem = {
