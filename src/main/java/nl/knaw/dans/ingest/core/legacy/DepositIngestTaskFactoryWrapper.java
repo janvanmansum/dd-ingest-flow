@@ -137,7 +137,7 @@ public class DepositIngestTaskFactoryWrapper {
         return dataverseInstance;
     }
 
-    public DataverseClient buildDataverseClient() {
+    public DataverseClient getDataverseClient() {
         return dataverseClient;
     }
 
