@@ -25,8 +25,8 @@ public class DataverseHealthCheck extends HealthCheck {
 
     private final DataverseClient dataverseClient;
 
-    public DataverseHealthCheck(DataverseClient dataverseInstance) {
-        this.dataverseClient = dataverseInstance;
+    public DataverseHealthCheck(DataverseClient dataverseClient) {
+        this.dataverseClient = dataverseClient;
     }
 
     @Override
