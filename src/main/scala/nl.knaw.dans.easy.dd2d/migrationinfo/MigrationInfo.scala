@@ -16,12 +16,10 @@
 package nl.knaw.dans.easy.dd2d.migrationinfo
 
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import org.json4s.native.JsonMethods
 import org.json4s.{ DefaultFormats, Formats }
 import scalaj.http.Http
 
-import java.net.URI
-import scala.util.{ Success, Try }
+import scala.util.Try
 
 class MigrationInfo(config: MigrationInfoConfig) extends DebugEnhancedLogging {
   private implicit val jsonFormats: Formats = DefaultFormats
