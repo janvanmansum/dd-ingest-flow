@@ -13,16 +13,16 @@ server:
 
 ingestFlow:
   import:
-    inbox: data/import/deposits
-    outbox: data/import/out
+    inbox: data/import/inbox
+    outbox: data/import/outbox
 
   migration:
     inbox: data/migration/deposits
     outbox: data/migration/out
 
   autoIngest:
-    inbox: data/autoingest/in
-    outbox: data/autoingest/out
+    inbox: data/auto-ingest/inbox
+    outbox: data/auto-ingest/outbox
 
   #
   # Filtering. Files with a path matching the pattern will not be added to the dataset. Renaming/moving files is not affected.
@@ -55,7 +55,7 @@ dataverse:
     readTimeoutMs: 30000
   api:
     apiVersion: 1
-    apiKey: '93969514-87af-4b75-9817-a4b60c3a79bf'
+    apiKey: changeme
     unblockKey: 's3kretKey'
     publishAwaitUnlockMaxRetries: 900
     publishAwaitUnlockWaitTimeMs: 3000
