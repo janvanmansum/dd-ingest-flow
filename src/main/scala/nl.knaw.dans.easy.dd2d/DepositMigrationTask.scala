@@ -62,7 +62,7 @@ class DepositMigrationTask(deposit: Deposit,
     supportedLicenses,
     reportIdToTerm,
     outboxDir) {
-  override protected val informationPackageType: InformationPackageType = InformationPackageType.AIP
+//  override protected val informationPackageType: InformationPackageType = InformationPackageType.AIP
 
   override protected def checkDepositType(): Try[Unit] = {
     for {
