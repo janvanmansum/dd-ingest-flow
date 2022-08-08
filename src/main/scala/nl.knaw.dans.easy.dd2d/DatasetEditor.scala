@@ -141,7 +141,7 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
 
   protected def deleteDraftIfExists(persistentId: String): Unit = {
     val result = for {
-      v <- Try(dataverseClient.dataset(persistentId).viewLatestVersion().getData)
+      v <- Try(dataverseClient.dataset(persistentId).getLatestVersion.getData)
       _ = logger.trace("deleting draft")
       _ <- if (v.getLatestVersion.getVersionState.contains("DRAFT"))
              deleteDraft(persistentId)

@@ -67,7 +67,7 @@ class DatasetUpdater(deposit: Deposit,
           _ <- Try { Thread.sleep(8000) }
           // TODO: library should provide function waitForIndexing that uses the @Path("{identifier}/timestamps") endpoint on Datasets
           _ <-  Try(javaDatasetApi.awaitUnlock())
-          state <- Try(javaDatasetApi.viewLatestVersion().getData.getLatestVersion.getVersionState)
+          state <- Try(javaDatasetApi.getLatestVersion.getData.getLatestVersion.getVersionState)
           _ = if (state.contains("DRAFT")) throw CannotUpdateDraftDatasetException(deposit)
 
           jsonBlocks = Serialization.write(metadataBlocks)

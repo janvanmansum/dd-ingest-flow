@@ -218,7 +218,7 @@ case class DepositIngestTask(deposit: Deposit,
 
     def getDatasetState: Try[String] = {
       for {
-        response <- Try(dataverseClient.dataset(persistentId).viewLatestVersion())
+        response <- Try(dataverseClient.dataset(persistentId).getLatestVersion)
         ds <- Try(response.getData)
         state = ds.getLatestVersion.getVersionState
       } yield state
@@ -248,7 +248,7 @@ case class DepositIngestTask(deposit: Deposit,
       _ <- Try(dataverseClient.dataset(persistentId).awaitUnlock())
       _ = debug(s"Dataset $persistentId is not locked")
       _ <- deposit.setDoi(persistentId)
-      r <- Try(dataverseClient.dataset(persistentId).view())
+      r <- Try(dataverseClient.dataset(persistentId).getVersion)
       _ = if (logger.underlying.isDebugEnabled) debug(Serialization.writePretty(r.getEnvelopeAsJson))
       d <- Try(r.getData)
       v = d.getMetadataBlocks.get("dansDataVaultMetadata")
