@@ -27,8 +27,6 @@ import nl.knaw.dans.ingest.core.config.HttpServiceConfig;
 import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
 import nl.knaw.dans.ingest.core.service.EventWriter;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
-import nl.knaw.dans.lib.scaladv.DataverseInstance;
-import nl.knaw.dans.lib.scaladv.DataverseInstanceConfig;
 import nl.knaw.dans.lib.util.DataverseClientFactory;
 import scala.Option;
 import scala.collection.immutable.List;
@@ -44,7 +42,6 @@ import java.util.regex.Pattern;
  */
 public class DepositIngestTaskFactoryWrapper {
     private final DepositIngestTaskFactory factory;
-    private final DataverseInstance dataverseInstance;
     private final DataverseClient dataverseClient;
     private final DansBagValidator validator;
 
@@ -56,15 +53,6 @@ public class DepositIngestTaskFactoryWrapper {
         HttpServiceConfig validationDansBagConfig) {
 
         dataverseClient = buildDataverseClient(dataverseConfigScala);
-        dataverseInstance = new DataverseInstance(new DataverseInstanceConfig(
-            DepositIngestTaskFactory.appendSlash(dataverseConfigScala.getHttp().getBaseUrl()),
-            dataverseConfigScala.getApi().getApiKey(),
-            Option.apply(dataverseConfigScala.getApi().getUnblockKey()),
-            dataverseConfigScala.getHttp().getConnectionTimeoutMs(),
-            dataverseConfigScala.getHttp().getReadTimeoutMs(),
-            Integer.toString(dataverseConfigScala.getApi().getApiVersion()),
-            dataverseConfigScala.getApi().getAwaitUnlockMaxRetries(),
-            dataverseConfigScala.getApi().getAwaitUnlockWaitTimeMs()));
 
         validator = new DansBagValidator(
             DepositIngestTaskFactory.appendSlash(validationDansBagConfig.getBaseUrl()),
@@ -131,10 +119,6 @@ public class DepositIngestTaskFactoryWrapper {
 
     public DepositImportTaskWrapper createIngestTask(Path depositDir, Path outboxDir, EventWriter eventWriter) {
         return new DepositImportTaskWrapper(factory.createDepositIngestTask(new Deposit(File.apply(depositDir)), File.apply(outboxDir)), eventWriter);
-    }
-
-    public DataverseInstance getDataverseInstance() {
-        return dataverseInstance;
     }
 
     public DataverseClient getDataverseClient() {
