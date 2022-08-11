@@ -25,7 +25,8 @@ import nl.knaw.dans.lib.dataverse.model.dataset
 import nl.knaw.dans.lib.dataverse.model.dataset.UpdateType.major
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.model.dataset.{ Dataset, PrimitiveSingleValueField, toFieldMap }
+import nl.knaw.dans.lib.dataverse.model.dataset.Dataset
+import nl.knaw.dans.lib.scaladv.model.dataset.{ PrimitiveSingleValueField, toFieldMap }
 import nl.knaw.dans.lib.taskqueue.Task
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
@@ -187,7 +188,7 @@ case class DepositIngestTask(deposit: Deposit,
   }
 
   protected def newDatasetUpdater(dataverseDataset: Dataset): DatasetUpdater = {
-    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseClient)
+    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = false, dataverseDataset.getDatasetVersion.getMetadataBlocks, variantToLicense, supportedLicenses, dataverseClient)
   }
 
   protected def newDatasetCreator(dataverseDataset: Dataset, depositorRole: String): DatasetCreator = {

@@ -18,7 +18,7 @@ package nl.knaw.dans.easy.dd2d
 import nl.knaw.dans.lib.dataverse._
 import nl.knaw.dans.lib.dataverse.model.dataset.FileList
 import nl.knaw.dans.lib.dataverse.model.file.{ FileMeta => JavaFileMeta }
-import nl.knaw.dans.lib.dataverse.model.search
+import nl.knaw.dans.lib.dataverse.model.{ dataset, search }
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import nl.knaw.dans.lib.scaladv.model.dataset.MetadataBlocks
@@ -26,6 +26,7 @@ import org.json4s.native.Serialization
 
 import java.net.URI
 import java.nio.file.{ Path, Paths }
+import java.util
 import java.util.Optional
 import java.util.regex.Pattern
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
@@ -36,7 +37,7 @@ class DatasetUpdater(deposit: Deposit,
                      optFileExclusionPattern: Option[Pattern],
                      zipFileHandler: ZipFileHandler,
                      isMigration: Boolean = false,
-                     metadataBlocks: MetadataBlocks,
+                     metadataBlocks: util.Map[String, dataset.MetadataBlock],
                      variantToLicense: Map[String, String],
                      supportedLicenses: List[URI],
                      dataverseClient: DataverseClient) extends DatasetEditor(dataverseClient, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {

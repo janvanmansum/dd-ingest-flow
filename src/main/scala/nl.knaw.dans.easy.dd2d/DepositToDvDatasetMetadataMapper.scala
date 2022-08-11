@@ -17,9 +17,11 @@ package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.fieldbuilders.{ AbstractFieldBuilder, CompoundFieldBuilder, CvFieldBuilder, PrimitiveFieldBuilder }
 import nl.knaw.dans.easy.dd2d.mapping._
-import nl.knaw.dans.lib.scaladv.model.dataset.{ Dataset, DatasetVersion, MetadataBlock }
+import nl.knaw.dans.lib.dataverse.model.dataset
+import nl.knaw.dans.lib.dataverse.model.dataset.{ Dataset, MetadataField }
 import org.apache.commons.lang.StringUtils
 
+import java.util
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
@@ -193,15 +195,30 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
   }
 
   private def assembleDataverseDataset(): Dataset = {
-    val versionMap = mutable.Map[String, MetadataBlock]()
-    addMetadataBlock(versionMap, "citation", "Citation Metadata", citationFields)
-    addMetadataBlock(versionMap, "dansRights", "Rights Metadata", rightsFields)
-    addMetadataBlock(versionMap, "dansRelationMetadata", "Relation Metadata", relationFields)
-    addMetadataBlock(versionMap, "dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologySpecificFields)
-    addMetadataBlock(versionMap, "dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields)
-    addMetadataBlock(versionMap, "dansDataVaultMetadata", "Data Vault Metadata", dataVaultFields)
-    val datasetVersion = DatasetVersion(metadataBlocks = versionMap.toMap)
-    Dataset(datasetVersion)
+
+    val blocks = new util.HashMap[String, dataset.MetadataBlock]()
+    def addMetadataBlock(blockId: String, blockDisplayName: String, fields: mutable.HashMap[String, AbstractFieldBuilder]): Unit = {
+      if (fields.nonEmpty) { // TODO shouldn't this test go (also?) after the filter?
+        val list = fields.values.map(_.build(depublicate = deduplicate)).filter(_.isDefined).map(_.get).toList
+        val javaFields = new util.ArrayList[MetadataField](list.size)
+        val block = new dataset.MetadataBlock
+        block.setDisplayName(blockDisplayName)
+        block.setFields(javaFields)
+        blocks.put(blockId, block)
+      }
+    }
+    addMetadataBlock("citation", "Citation Metadata", citationFields)
+    addMetadataBlock("dansRights", "Rights Metadata", rightsFields)
+    addMetadataBlock("dansRelationMetadata", "Relation Metadata", relationFields)
+    addMetadataBlock("dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologySpecificFields)
+    addMetadataBlock("dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields)
+    addMetadataBlock("dansDataVaultMetadata", "Data Vault Metadata", dataVaultFields)
+    //val datasetVersion = DatasetVersion(metadataBlocks = versionMap.toMap)
+    val datasetVersion = new dataset.DatasetVersion()
+    datasetVersion.setMetadataBlocks(blocks)
+    val ds = new Dataset()
+    ds.setDatasetVersion(datasetVersion)
+    ds
   }
 
   private def addPrimitiveFieldSingleValue(metadataBlockFields: mutable.HashMap[String, AbstractFieldBuilder], name: String, sourceNodes: NodeSeq, nodeTransformer: Node => Option[String] = AnyElement toText): Unit = {
@@ -274,12 +291,6 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
     fields.getOrElseUpdate(name, new CompoundFieldBuilder(name)) match {
       case cfb: CompoundFieldBuilder => valueObjects.foreach(cfb.addValue)
       case _ => throw new IllegalArgumentException("Trying to add non-compound value(s) to compound field")
-    }
-  }
-
-  private def addMetadataBlock(versionMap: mutable.Map[String, MetadataBlock], blockId: String, blockDisplayName: String, fields: mutable.HashMap[String, AbstractFieldBuilder]): Unit = {
-    if (fields.nonEmpty) {
-      versionMap.put(blockId, MetadataBlock(blockDisplayName, fields.values.map(_.build(depublicate = deduplicate)).filter(_.isDefined).map(_.get).toList))
     }
   }
 }
