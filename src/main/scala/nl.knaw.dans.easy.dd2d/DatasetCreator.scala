@@ -63,7 +63,7 @@ class DatasetCreator(deposit: Deposit,
           _ <- Try(javaDatasetApi.awaitUnlock())
           pathToFileInfo <- getPathToFileInfo(deposit)
           databaseIdsToFileInfo <- addFiles(persistentId, pathToFileInfo.values.toList)
-          _ <- updateFileMetadata(databaseIdsToFileInfo.mapValues(_.javaFileMeta))
+          _ <- updateFileMetadata(databaseIdsToFileInfo.mapValues(_.metadata))
           _ <- Try(javaDatasetApi.awaitUnlock())
           _ <- configureEnableAccessRequests(deposit, persistentId, canEnable = true)
           _ <- Try(javaDatasetApi.awaitUnlock())

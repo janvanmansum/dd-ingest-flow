@@ -49,7 +49,7 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
   protected def addFiles(persistentId: String, files: List[FileInfo]): Try[Map[Int, FileInfo]] = Try {
     trace(persistentId, files)
     files.map { f =>
-      debug(s"Adding file, directoryLabel = ${ f.metadata.directoryLabel }, label = ${ f.metadata.label }")
+      debug(s"Adding file, directoryLabel = ${ f.metadata.getDirectoryLabel }, label = ${ f.metadata.getLabel }")
       val id = addFile(persistentId, f).unsafeGetOrThrow
       dataverseClient.dataset(persistentId).awaitUnlock()
       id -> f

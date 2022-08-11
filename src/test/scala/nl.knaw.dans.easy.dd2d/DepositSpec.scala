@@ -15,8 +15,6 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.lib.scaladv.model.file.FileMeta
-
 import java.nio.file.Paths
 
 class DepositSpec extends TestSupportFixture {
@@ -27,17 +25,17 @@ class DepositSpec extends TestSupportFixture {
 
   it should "fail if it is not a directory but a file" in {
     val file = testDirNonValid / "no-dir.txt"
-    the[InvalidDepositException] thrownBy Deposit(file) should have message (s"Not a deposit: $file is not a directory")
+    the[InvalidDepositException] thrownBy Deposit(file) should have message s"Not a deposit: $file is not a directory"
   }
 
   it should "fail if it has no sub-directoires" in {
     val file = testDirNonValid / "no-subdir"
-    the[InvalidDepositException] thrownBy Deposit(file) should have message (s"Not a deposit: $file has more or fewer than one subdirectory")
+    the[InvalidDepositException] thrownBy Deposit(file) should have message s"Not a deposit: $file has more or fewer than one subdirectory"
   }
 
   it should "fail if it has no deposit.properties" in {
     val file = testDirNonValid / "no-deposit-properties"
-    the[InvalidDepositException] thrownBy Deposit(file) should have message (s"Not a deposit: $file does not contain a deposit.properties file")
+    the[InvalidDepositException] thrownBy Deposit(file) should have message s"Not a deposit: $file does not contain a deposit.properties file"
   }
 
   it should "return the DOI value in deposit.properties" in {
@@ -51,15 +49,11 @@ class DepositSpec extends TestSupportFixture {
   "getPathToFileInfo" should "correctly map local path to FileInfo object" in {
     val pathToFileInfo = Deposit(testDirValid / "valid-easy-submitted").getPathToFileInfo.get
 
-    pathToFileInfo(Paths.get("data/README.md")) shouldBe FileInfo(
-      file = testDirValid / "valid-easy-submitted" / "example-bag-medium" / "data" / "README.md",
-      "f50380cd3a4ae5b8ea3d524a4b1e8582eca50893",
-      metadata = FileMeta(
-        label = Option("README.md"),
-        directoryLabel = None,
-        restrict = Option(true)
-      )
-    )
+    val fileInfo = pathToFileInfo(Paths.get("data/README.md"))
+    fileInfo.file shouldBe testDirValid / "valid-easy-submitted" / "example-bag-medium" / "data" / "README.md"
+    fileInfo.metadata.getLabel shouldBe "README.md"
+    fileInfo.metadata.getDirectoryLabel shouldBe null
+    fileInfo.metadata.getRestricted shouldBe true
   }
 
   "getOptOtherDoiId" should "be other doi if identifier.doi different from dataversePid" in {
