@@ -17,8 +17,11 @@ package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.fieldbuilders.{ AbstractFieldBuilder, CompoundFieldBuilder, CvFieldBuilder, PrimitiveFieldBuilder }
 import nl.knaw.dans.easy.dd2d.mapping._
+import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.model.dataset
 import nl.knaw.dans.lib.dataverse.model.dataset.{ Dataset, MetadataField }
+import nl.knaw.dans.lib.error.TryExtensions
+import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.apache.commons.lang.StringUtils
 
 import java.util
@@ -42,7 +45,9 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
                                        narcisClassification: Elem,
                                        iso1ToDataverseLanguage: Map[String, String],
                                        iso2ToDataverseLanguage: Map[String, String],
-                                       reportIdToTerm: Map[String, String]) extends BlockCitation // TODO: not necessary anymore?
+                                       reportIdToTerm: Map[String, String],  // TODO: not necessary anymore?
+                                      ) extends BlockCitation with DebugEnhancedLogging
+
   with BlockArchaeologySpecific
   with BlockTemporalAndSpatial
   with BlockRights
@@ -197,10 +202,18 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
   private def assembleDataverseDataset(): Dataset = {
 
     val blocks = new util.HashMap[String, dataset.MetadataBlock]()
+
     def addMetadataBlock(blockId: String, blockDisplayName: String, fields: mutable.HashMap[String, AbstractFieldBuilder]): Unit = {
-      if (fields.nonEmpty) { // TODO shouldn't this test go (also?) after the filter?
-        val list = fields.values.map(_.build(depublicate = deduplicate)).filter(_.isDefined).map(_.get).toList
-        val javaFields = new util.ArrayList[MetadataField](list.size)
+      if (fields.nonEmpty) {
+        val javaFields = new util.ArrayList[MetadataField]()
+        fields.values
+          .map(_.build(depublicate = deduplicate))
+          .filter(_.isDefined)
+          .foreach { maybeField =>
+          val jsonString = nl.knaw.dans.lib.scaladv.serializeAsJson(maybeField.get, logger.underlying.isDebugEnabled).unsafeGetOrThrow
+          val f = MapperForJava.get().readValue(jsonString, classOf[MetadataField])
+          javaFields.add(f)
+        }
         val block = new dataset.MetadataBlock
         block.setDisplayName(blockDisplayName)
         block.setFields(javaFields)
@@ -213,7 +226,6 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
     addMetadataBlock("dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologySpecificFields)
     addMetadataBlock("dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields)
     addMetadataBlock("dansDataVaultMetadata", "Data Vault Metadata", dataVaultFields)
-    //val datasetVersion = DatasetVersion(metadataBlocks = versionMap.toMap)
     val datasetVersion = new dataset.DatasetVersion()
     datasetVersion.setMetadataBlocks(blocks)
     val ds = new Dataset()

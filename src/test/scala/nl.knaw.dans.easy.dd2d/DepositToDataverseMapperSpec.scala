@@ -15,9 +15,10 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.lib.scaladv.model.dataset.{ CompoundField, Dataset, PrimitiveSingleValueField, toFieldMap }
+import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField
 import org.json4s.DefaultFormats
 
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.util.Success
 
 class DepositToDataverseMapperSpec extends TestSupportFixture {
@@ -26,9 +27,9 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
   private val mapper = new DepositToDvDatasetMetadataMapper(deduplicate = false, List("citation", "dansDataVaultMetadata"), null, null, null, null)
   private val vaultMetadata = Deposit(testDirValid / "valid-easy-submitted").vaultMetadata
   private val optAgreements = Deposit(testDirValid / "valid-easy-submitted").tryOptAgreementsXml.get
-  private val contactData = List(toFieldMap(
-    PrimitiveSingleValueField("datasetContactName", "Contact Name"),
-    PrimitiveSingleValueField("datasetContactEmail", "contact@example.org")
+  private val contactData = List(nl.knaw.dans.lib.scaladv.model.dataset.toFieldMap(
+    nl.knaw.dans.lib.scaladv.model.dataset.PrimitiveSingleValueField("datasetContactName", "Contact Name"),
+    nl.knaw.dans.lib.scaladv.model.dataset.PrimitiveSingleValueField("datasetContactEmail", "contact@example.org")
   ))
 
   "toDataverseDataset" should "map profile/title to citation/title" in {
@@ -45,11 +46,11 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-    // TODO fix the other tests likewise
-    val block = result.get.getDatasetVersion.getMetadataBlocks.get("citation")
-    block.getDisplayName shouldBe "title"
-    block.getFields.get(0).getTypeName shouldBe "title"
-    block.getFields.get(0).getTypeName shouldBe "A title"
+    result.get.getDatasetVersion.getMetadataBlocks
+      .get("citation").getFields
+      .find(_.getTypeName == "title").get
+      .asInstanceOf[PrimitiveSingleValueField]
+      .getValue shouldBe "A title"
   }
 
   it should "map profile/descriptions to citation/descriptions" in {
