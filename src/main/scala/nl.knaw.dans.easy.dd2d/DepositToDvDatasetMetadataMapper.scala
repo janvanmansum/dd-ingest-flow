@@ -17,10 +17,8 @@ package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.fieldbuilders.{ AbstractFieldBuilder, CompoundFieldBuilder, CvFieldBuilder, PrimitiveFieldBuilder }
 import nl.knaw.dans.easy.dd2d.mapping._
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.model.dataset
 import nl.knaw.dans.lib.dataverse.model.dataset.{ Dataset, MetadataField }
-import nl.knaw.dans.lib.error.TryExtensions
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.apache.commons.lang.StringUtils
 
@@ -209,11 +207,7 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
         fields.values
           .map(_.build(depublicate = deduplicate))
           .filter(_.isDefined)
-          .foreach { maybeField =>
-          val jsonString = nl.knaw.dans.lib.scaladv.serializeAsJson(maybeField.get, logger.underlying.isDebugEnabled).unsafeGetOrThrow
-          val f = MapperForJava.get().readValue(jsonString, classOf[MetadataField])
-          javaFields.add(f)
-        }
+          .foreach { maybeField => javaFields.add(maybeField.get) }
         val block = new dataset.MetadataBlock
         block.setDisplayName(blockDisplayName)
         block.setFields(javaFields)

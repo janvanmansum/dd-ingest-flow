@@ -16,23 +16,37 @@
 package nl.knaw.dans.easy.dd2d.fieldbuilders
 
 import nl.knaw.dans.easy.dd2d.mapping.JsonObject
-import nl.knaw.dans.lib.scaladv.model.dataset.{ CompoundField, MetadataField }
+import nl.knaw.dans.ingest.core.legacy.MapperForJava
+import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, MetadataField, PrimitiveSingleValueField, SingleValueField }
+import nl.knaw.dans.lib.error.TryExtensions
+import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import nl.knaw.dans.lib.scaladv.serializeAsJson
 
+import scala.collection.JavaConverters.{ mapAsJavaMapConverter, seqAsJavaListConverter }
 import scala.collection.mutable
 
-class CompoundFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder {
-  private val values = new mutable.ListBuffer[JsonObject]
+class CompoundFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder with DebugEnhancedLogging{
+  private val values = new mutable.ListBuffer[Map[String, SingleValueField]]
 
   def addValue(v: JsonObject): Unit = {
     if (!multipleValues && values.nonEmpty) throw new IllegalArgumentException("Trying to add a second value to a single value field")
-    values.append(v)
+    v.foreach { v =>
+      val jsonString = serializeAsJson(v._2, logger.underlying.isDebugEnabled).unsafeGetOrThrow
+      val valueField = MapperForJava.get().readValue(jsonString, classOf[PrimitiveSingleValueField])
+      values.append(Map(v._1 -> valueField))
+    }
   }
 
   override def build(deduplicate: Boolean = false): Option[MetadataField] = {
-    if (values.nonEmpty) Option(
-      if (multipleValues) CompoundField(name, if (deduplicate) values.toList.distinct
-                                              else values.toList)
-      else CompoundField(name, values.head))
+    if (values.nonEmpty) Option {
+      val stringToFields = if (deduplicate) values.toList.distinct
+                           else values.toList
+      new CompoundField(
+        name,
+        multipleValues,
+        stringToFields.map(_.asJava).asJava
+      )
+    }
     else Option.empty
   }
 }
