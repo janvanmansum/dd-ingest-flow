@@ -16,6 +16,7 @@
 package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField
 import org.json4s.DefaultFormats
 
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
@@ -69,15 +70,12 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-//    inside(result) {
-//      case Success(Dataset(dsv)) =>
-//        dsv.metadataBlocks("citation").fields should contain(
-//          CompoundField("dsDescription",
-//            List(
-//              Map("dsDescriptionValue" -> PrimitiveSingleValueField("dsDescriptionValue", "<p>Descr 1</p>")),
-//              Map("dsDescriptionValue" -> PrimitiveSingleValueField("dsDescriptionValue", "<p>Descr 2</p>"))
-//            )))
-//    }
+    result.get.getDatasetVersion.getMetadataBlocks
+      .get("citation").getFields
+      .find(_.getTypeName == "dsDescription").get
+      .asInstanceOf[CompoundField]
+      .getValue.flatMap(_.values().map(_.asInstanceOf[PrimitiveSingleValueField].getValue))
+      .toList shouldBe List("<p>Descr 1</p>", "<p>Descr 2</p>")
   }
 
   it should "map profile/creatorDetails to citation/author" in {
