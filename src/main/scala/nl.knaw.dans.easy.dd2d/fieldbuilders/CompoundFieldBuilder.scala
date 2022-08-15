@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.dd2d.fieldbuilders
 
-import nl.knaw.dans.easy.dd2d.mapping.JsonObject
+import nl.knaw.dans.easy.dd2d.mapping.FieldMap
 import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, PrimitiveSingleValueField, SingleValueField }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
@@ -27,7 +27,7 @@ import scala.collection.mutable
 class CompoundFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder with DebugEnhancedLogging{
   private val values = new mutable.ListBuffer[Map[String, SingleValueField]]
 
-  def addValue(v: JsonObject): Unit = {
+  def addValue(v: FieldMap): Unit = {
     if (!multipleValues && values.nonEmpty) throw new IllegalArgumentException("Trying to add a second value to a single value field")
     values.append(v.mapValues{v => // TODO poor error handling but only required until scala lib is fully eliminated
       val json = serializeAsJson(v).get

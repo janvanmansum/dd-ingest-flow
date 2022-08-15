@@ -29,17 +29,17 @@ object Description extends BlockCitation {
     "coverage" -> "Coverage"
   )
 
-  def toDescriptionValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toDescriptionValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(DESCRIPTION_VALUE, newlineToHtml(node.text))
-    m.toJsonObject
+    m.build
   }
 
-  def toPrefixedDescription(node: Node): JsonObject = {
+  def toPrefixedDescription(node: Node): FieldMap = {
     val prefix = labelToPrefix.getOrElse(node.label, node.label)
-    val m = FieldMap()
+    val m = FieldMapBuilder()
     m.addPrimitiveField(DESCRIPTION_VALUE, s"$prefix: ${ node.text }")
-    m.toJsonObject
+    m.build
   }
 
   def newlineToHtml(description: String): String = {

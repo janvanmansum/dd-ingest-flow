@@ -22,11 +22,11 @@ import scala.xml.Node
 object DatesOfCollection extends BlockCitation with DebugEnhancedLogging {
   private val rangePattern = """^(.*)/(.*)$""".r(DATE_OF_COLLECTION_START, DATE_OF_COLLECTION_END)
 
-  def toDateOfCollectionValue(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toDateOfCollectionValue(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     val matchIterator = rangePattern.findAllIn(node.text.trim)
     m.addPrimitiveField(DATE_OF_COLLECTION_START, matchIterator.group(DATE_OF_COLLECTION_START))
     m.addPrimitiveField(DATE_OF_COLLECTION_END, matchIterator.group(DATE_OF_COLLECTION_END))
-    m.toJsonObject
+    m.build
   }
 }

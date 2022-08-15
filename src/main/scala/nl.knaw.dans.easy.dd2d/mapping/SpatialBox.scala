@@ -25,17 +25,17 @@ object SpatialBox extends Spatial with BlockTemporalAndSpatial {
    * @param boundedBy the boundedBy element
    * @return the spatial box value object
    */
-  def toEasyTsmSpatialBoxValueObject(boundedBy: Node): JsonObject = {
+  def toEasyTsmSpatialBoxValueObject(boundedBy: Node): FieldMap = {
     val isRD = (boundedBy \ "Envelope").headOption.map(isRd).get // TODO: improve error handling
     val lowerCorner = (boundedBy \ "Envelope" \ "lowerCorner").headOption.map(getPoint(isRD)).get // TODO: improve error handling
     val upperCorner = (boundedBy \ "Envelope" \ "upperCorner").headOption.map(getPoint(isRD)).get // TODO: improve error handling
-    val m = FieldMap()
+    val m = FieldMapBuilder()
     m.addCvField(SPATIAL_BOX_SCHEME, if (isRD) RD_SCHEME
                                      else LONLAT_SCHEME)
     m.addPrimitiveField(SPATIAL_BOX_NORTH, upperCorner.y)
     m.addPrimitiveField(SPATIAL_BOX_EAST, upperCorner.x)
     m.addPrimitiveField(SPATIAL_BOX_SOUTH, lowerCorner.y)
     m.addPrimitiveField(SPATIAL_BOX_WEST, lowerCorner.x)
-    m.toJsonObject
+    m.build
   }
 }

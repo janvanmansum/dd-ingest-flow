@@ -43,8 +43,8 @@ object DcxDaiAuthor extends Contributor with BlockCitation {
     role = (authorElement \ "role").map(_.text).headOption,
     organization = (authorElement \ "organization" \ "name").map(_.text).headOption)
 
-  def toAuthorValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toAuthorValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     val author = parseAuthor(node)
     val name = formatName(author)
 
@@ -65,11 +65,11 @@ object DcxDaiAuthor extends Contributor with BlockCitation {
     if (author.organization.isDefined) {
       m.addPrimitiveField(AUTHOR_AFFILIATION, author.organization.get)
     }
-    m.toJsonObject
+    m.build
   }
 
-  def toContributorValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toContributorValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     val author = parseAuthor(node)
     val name = formatName(author)
     if (StringUtils.isNotBlank(name)) {
@@ -82,7 +82,7 @@ object DcxDaiAuthor extends Contributor with BlockCitation {
     if (author.role.isDefined) {
       m.addCvField(CONTRIBUTOR_TYPE, author.role.map(contributoreRoleToContributorType.getOrElse(_, "Other")).getOrElse("Other"))
     }
-    m.toJsonObject
+    m.build
   }
 
   def toRightsHolder(node: Node): Option[String] = {
@@ -114,7 +114,7 @@ object DcxDaiAuthor extends Contributor with BlockCitation {
         .mkString(" ").trim().replaceAll("\\s+", " ")
   }
 
-  private def addIdentifier(m: FieldMap, scheme: String, value: String): Unit = {
+  private def addIdentifier(m: FieldMapBuilder, scheme: String, value: String): Unit = {
     if (StringUtils.isNotBlank(value)) {
       m.addCvField(AUTHOR_IDENTIFIER_SCHEME, scheme)
       m.addPrimitiveField(AUTHOR_IDENTIFIER, value)

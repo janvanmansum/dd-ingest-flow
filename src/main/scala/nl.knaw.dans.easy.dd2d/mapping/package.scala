@@ -26,7 +26,7 @@ package object mapping extends DebugEnhancedLogging {
   val XML_NAMESPACE_URI = "http://www.w3.org/XML/1998/namespace"
   val DCTERMS_NAMESPACE_URI = "http://purl.org/dc/terms/"
 
-  type JsonObject = Map[String, MetadataField]
+  type FieldMap = Map[String, MetadataField]
 
 
   /**
@@ -52,7 +52,7 @@ package object mapping extends DebugEnhancedLogging {
     node.attribute(namespace, name).isDefined
   }
 
-  case class FieldMap() {
+  case class FieldMapBuilder() {
     private val fields = mutable.Map[String, MetadataField]()
 
     def addPrimitiveField(name: String, value: String): Unit = {
@@ -67,7 +67,7 @@ package object mapping extends DebugEnhancedLogging {
       fields.put(name, CompoundField(name, value))
     }
 
-    def toJsonObject: JsonObject = fields.toMap
+    def build: FieldMap = fields.toMap
   }
 
   implicit class OptionExtensions[T](val t: Option[T]) extends AnyVal {

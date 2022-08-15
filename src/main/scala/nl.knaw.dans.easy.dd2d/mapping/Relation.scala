@@ -34,12 +34,12 @@ object Relation extends BlockRelation {
     "isRequiredBy" -> "is required by",
     "isVersionOf" -> "is version of")
 
-  def toRelationValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toRelationValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addCvField(RELATION_TYPE, labelToType.getOrElse(node.label, "relation"))
     m.addPrimitiveField(RELATION_URI, node.attribute("href").map(_.text).getOrElse(""))
     m.addPrimitiveField(RELATION_TEXT, node.text)
-    m.toJsonObject
+    m.build
   }
 
   def isRelation(node: Node): Boolean = {

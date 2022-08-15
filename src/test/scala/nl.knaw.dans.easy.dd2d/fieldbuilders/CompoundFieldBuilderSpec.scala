@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.dd2d.fieldbuilders
 
 import nl.knaw.dans.easy.dd2d.JsonPathSupportFixture
-import nl.knaw.dans.easy.dd2d.mapping.FieldMap
+import nl.knaw.dans.easy.dd2d.mapping.FieldMapBuilder
 import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.json4s.{ DefaultFormats, Formats }
@@ -32,9 +32,9 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
 
   it should "return a complex field with one value if one value is provided" in {
     val c = new CompoundFieldBuilder("test")
-    val value = FieldMap()
+    val value = FieldMapBuilder()
     value.addPrimitiveField("subfield", "subfield value")
-    c.addValue(value.toJsonObject)
+    c.addValue(value.build)
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get
@@ -51,9 +51,9 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
 
   it should "return a single-value field if so specified" in {
     val c = new CompoundFieldBuilder("test", multipleValues = false)
-    val value = FieldMap()
+    val value = FieldMapBuilder()
     value.addPrimitiveField("subfield", "subfield value")
-    c.addValue(value.toJsonObject)
+    c.addValue(value.build)
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get
@@ -64,24 +64,24 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
 
   it should "throw an exception when a second value is added to a single value list" in {
     val c = new CompoundFieldBuilder("test", multipleValues = false)
-    val value1 = FieldMap()
+    val value1 = FieldMapBuilder()
     value1.addPrimitiveField("subfield", "value 1 ")
-    val value2 = FieldMap()
+    val value2 = FieldMapBuilder()
     value2.addPrimitiveField("subfield", "value 2")
-    c.addValue(value1.toJsonObject)
+    c.addValue(value1.build)
     an[IllegalArgumentException] should be thrownBy {
-      c.addValue(value2.toJsonObject)
+      c.addValue(value2.build)
     }
   }
 
   it should "output two fields if two were added" in {
     val c = new CompoundFieldBuilder("test", multipleValues = true)
-    val value1 = FieldMap()
+    val value1 = FieldMapBuilder()
     value1.addPrimitiveField("subfield", "value 1")
-    val value2 = FieldMap()
+    val value2 = FieldMapBuilder()
     value2.addPrimitiveField("subfield", "value 2")
-    c.addValue(value1.toJsonObject)
-    c.addValue(value2.toJsonObject)
+    c.addValue(value1.build)
+    c.addValue(value2.build)
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get
@@ -104,14 +104,14 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
 
   it should "contain values of more than one subfield" in {
     val c = new CompoundFieldBuilder("test", multipleValues = true)
-    val value1 = FieldMap()
+    val value1 = FieldMapBuilder()
     value1.addPrimitiveField("subfieldA", "value 1 A")
     value1.addPrimitiveField("subfieldB", "value 1 B")
-    val value2 = FieldMap()
+    val value2 = FieldMapBuilder()
     value2.addPrimitiveField("subfieldA", "value 2 A")
     value2.addPrimitiveField("subfieldB", "value 2 B")
-    c.addValue(value1.toJsonObject)
-    c.addValue(value2.toJsonObject)
+    c.addValue(value1.build)
+    c.addValue(value2.build)
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get

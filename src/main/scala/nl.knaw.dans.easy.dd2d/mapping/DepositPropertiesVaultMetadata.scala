@@ -18,17 +18,17 @@ package nl.knaw.dans.easy.dd2d.mapping
 import org.apache.commons.lang.StringUtils
 
 object DepositPropertiesVaultMetadata extends BlockCitation {
-  def toOtherIdValue(dansVaultMetadataOtherId: String): Option[JsonObject] = {
+  def toOtherIdValue(dansVaultMetadataOtherId: String): Option[FieldMap] = {
     if (StringUtils.isBlank(dansVaultMetadataOtherId)) Option.empty
     else {
-      val m = FieldMap()
+      val m = FieldMapBuilder()
       val trimmedOtherId = dansVaultMetadataOtherId.trim
       if (trimmedOtherId.exists(_.isWhitespace)) throw new IllegalArgumentException("Identifier must not contain whitespace")
       val parts = trimmedOtherId.split(":")
       if (parts.size != 2) throw new IllegalArgumentException("Other ID value has invalid format. It should be '<prefix>:<suffix>'")
       m.addPrimitiveField(OTHER_ID_AGENCY, parts(0))
       m.addPrimitiveField(OTHER_ID_VALUE, parts(1))
-      Option(m.toJsonObject)
+      Option(m.build)
     }
   }
 }

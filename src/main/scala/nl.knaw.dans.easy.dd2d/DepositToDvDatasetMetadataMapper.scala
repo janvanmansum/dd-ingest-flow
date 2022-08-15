@@ -58,7 +58,7 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
   lazy val temporalSpatialFields = new mutable.HashMap[String, AbstractFieldBuilder]()
   lazy val dataVaultFields = new mutable.HashMap[String, AbstractFieldBuilder]()
 
-  def toDataverseDataset(ddm: Node, optOtherDoiId: Option[String], optAgreements: Option[Node], optDateOfDeposit: Option[String], contactData: List[JsonObject], vaultMetadata: VaultMetadata): Try[Dataset] = Try {
+  def toDataverseDataset(ddm: Node, optOtherDoiId: Option[String], optAgreements: Option[Node], optDateOfDeposit: Option[String], contactData: List[FieldMap], vaultMetadata: VaultMetadata): Try[Dataset] = Try {
     // Please, keep ordered by order in Dataverse UI as much as possible!
 
     if (activeMetadataBlocks.contains("citation")) {
@@ -92,12 +92,12 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
       addCompoundFieldMultipleValues(citationFields, DESCRIPTION, (ddm \ "dcmiMetadata" \ "description").filterNot(Description isTechnicalInfo), Description toDescriptionValueObject)
       val otherDescriptions =
         (ddm \ "dcmiMetadata" \ "date") ++
-        (ddm \ "dcmiMetadata" \ "dateAccepted") ++
-        (ddm \ "dcmiMetadata" \ "dateCopyrighted ") ++
-        (ddm \ "dcmiMetadata" \ "modified") ++
-        (ddm \ "dcmiMetadata" \ "issued") ++
-        (ddm \ "dcmiMetadata" \ "valid") ++
-        (ddm \ "dcmiMetadata" \ "coverage")
+          (ddm \ "dcmiMetadata" \ "dateAccepted") ++
+          (ddm \ "dcmiMetadata" \ "dateCopyrighted ") ++
+          (ddm \ "dcmiMetadata" \ "modified") ++
+          (ddm \ "dcmiMetadata" \ "issued") ++
+          (ddm \ "dcmiMetadata" \ "valid") ++
+          (ddm \ "dcmiMetadata" \ "coverage")
       addCompoundFieldMultipleValues(citationFields, DESCRIPTION, otherDescriptions, Description toPrefixedDescription)
       addCompoundFieldMultipleValues(citationFields, DESCRIPTION, (ddm \ "dcmiMetadata" \ "description").filter(Description isTechnicalInfo), Description toDescriptionValueObject)
 
@@ -284,8 +284,8 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
     }
   }
 
-  private def addCompoundFieldMultipleValues(fields: mutable.HashMap[String, AbstractFieldBuilder], name: String, sourceNodes: NodeSeq, nodeTransformer: Node => JsonObject): Unit = {
-    val valueObjects = new ListBuffer[JsonObject]()
+  private def addCompoundFieldMultipleValues(fields: mutable.HashMap[String, AbstractFieldBuilder], name: String, sourceNodes: NodeSeq, nodeTransformer: Node => FieldMap): Unit = {
+    val valueObjects = new ListBuffer[FieldMap]()
     sourceNodes.foreach(e => valueObjects += nodeTransformer(e))
     fields.getOrElseUpdate(name, new CompoundFieldBuilder(name)) match {
       case cfb: CompoundFieldBuilder => valueObjects.foreach(cfb.addValue)
@@ -293,7 +293,7 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
     }
   }
 
-  private def addCompoundFieldMultipleValues(fields: mutable.HashMap[String, AbstractFieldBuilder], name: String, valueObjects: List[JsonObject]): Unit = {
+  private def addCompoundFieldMultipleValues(fields: mutable.HashMap[String, AbstractFieldBuilder], name: String, valueObjects: List[FieldMap]): Unit = {
     fields.getOrElseUpdate(name, new CompoundFieldBuilder(name)) match {
       case cfb: CompoundFieldBuilder => valueObjects.foreach(cfb.addValue)
       case _ => throw new IllegalArgumentException("Trying to add non-compound value(s) to compound field")

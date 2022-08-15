@@ -29,8 +29,8 @@ object Identifier extends BlockCitation with BlockArchaeologySpecific {
     hasXsiType(node, "EASY2") || !attributeExists(node, XML_SCHEMA_INSTANCE_URI, "type")
   }
 
-  def toOtherIdValue(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toOtherIdValue(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     if (hasXsiType(node, "EASY2")) {
       m.addPrimitiveField(OTHER_ID_AGENCY, "DANS-KNAW")
       m.addPrimitiveField(OTHER_ID_VALUE, node.text)
@@ -39,20 +39,20 @@ object Identifier extends BlockCitation with BlockArchaeologySpecific {
       m.addPrimitiveField(OTHER_ID_AGENCY, "")
       m.addPrimitiveField(OTHER_ID_VALUE, node.text)
     }
-    m.toJsonObject
+    m.build
   }
 
   def isRelatedPublication(node: Node): Boolean = {
     hasXsiType(node, "ISBN") || hasXsiType(node, "ISSN")
   }
 
-  def toRelatedPublicationValue(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toRelatedPublicationValue(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(PUBLICATION_CITATION, "")
     m.addPrimitiveField(PUBLICATION_ID_NUMBER, node.text)
     m.addCvField(PUBLICATION_ID_TYPE, getIdType(node))
     m.addPrimitiveField(PUBLICATION_URL, "")
-    m.toJsonObject
+    m.build
   }
 
   private def getIdType(node: Node): String = {
@@ -63,11 +63,11 @@ object Identifier extends BlockCitation with BlockArchaeologySpecific {
     hasXsiType(node, "NWO-PROJECTNR")
   }
 
-  def toNwoGrantNumberValue(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toNwoGrantNumberValue(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(GRANT_NUMBER_AGENCY, "NWO")
     m.addPrimitiveField(GRANT_NUMBER_VALUE, node.text)
-    m.toJsonObject
+    m.build
   }
 
   def isArchisZaakId(node: Node): Boolean = {
@@ -86,8 +86,8 @@ object Identifier extends BlockCitation with BlockArchaeologySpecific {
       hasXsiType(node, "ARCHIS-WAARNEMING")
   }
 
-  def toArchisNumberValue(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toArchisNumberValue(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     val optArchisNumberType = node.attribute(XML_SCHEMA_INSTANCE_URI, "type").map(_.text)
     val optArchisNumberId = node.text
 
@@ -97,6 +97,6 @@ object Identifier extends BlockCitation with BlockArchaeologySpecific {
 
     m.addCvField(ARCHIS_NUMBER_TYPE, archisNumberTypeToCvItem(archisNumberType.substring(archisNumberType.indexOf(":") + 1)))
     m.addPrimitiveField(ARCHIS_NUMBER_ID, optArchisNumberId)
-    m.toJsonObject
+    m.build
   }
 }

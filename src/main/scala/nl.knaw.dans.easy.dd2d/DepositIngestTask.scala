@@ -19,7 +19,7 @@ import better.files.File
 import nl.knaw.dans.easy.dd2d.OutboxSubdir.{ FAILED, OutboxSubdir, PROCESSED, REJECTED }
 import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageType
 import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidationResult, DansBagValidator, InformationPackageType }
-import nl.knaw.dans.easy.dd2d.mapping.JsonObject
+import nl.knaw.dans.easy.dd2d.mapping.FieldMap
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.dataverse.model.dataset
 import nl.knaw.dans.lib.dataverse.model.dataset.UpdateType.major
@@ -170,7 +170,7 @@ case class DepositIngestTask(deposit: Deposit,
     Option.empty
   }
 
-  private def getDatasetContacts: Try[List[JsonObject]] = {
+  private def getDatasetContacts: Try[List[FieldMap]] = {
     logger.trace("DepositIngestTask.getDatasetContacts")
     for {
       response <- Try(dataverseClient.admin().listSingleUser(deposit.depositorUserId))
@@ -179,7 +179,7 @@ case class DepositIngestTask(deposit: Deposit,
     } yield datasetContacts
   }
 
-  private def createDatasetContacts(name: String, email: String, optAffiliation: Option[String] = None): Try[List[JsonObject]] = Try {
+  private def createDatasetContacts(name: String, email: String, optAffiliation: Option[String] = None): Try[List[FieldMap]] = Try {
     val subfields = ListBuffer[PrimitiveSingleValueField]()
     subfields.append(PrimitiveSingleValueField("datasetContactName", name))
     subfields.append(PrimitiveSingleValueField("datasetContactEmail", email))
