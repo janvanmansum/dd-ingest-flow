@@ -17,8 +17,7 @@ package nl.knaw.dans.easy.dd2d.fieldbuilders
 
 import nl.knaw.dans.easy.dd2d.mapping.JsonObject
 import nl.knaw.dans.ingest.core.legacy.MapperForJava
-import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, MetadataField, PrimitiveSingleValueField, SingleValueField }
-import nl.knaw.dans.lib.error.TryExtensions
+import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, PrimitiveSingleValueField, SingleValueField }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import nl.knaw.dans.lib.scaladv.serializeAsJson
 
@@ -30,14 +29,13 @@ class CompoundFieldBuilder(name: String, multipleValues: Boolean = true) extends
 
   def addValue(v: JsonObject): Unit = {
     if (!multipleValues && values.nonEmpty) throw new IllegalArgumentException("Trying to add a second value to a single value field")
-    v.foreach { v =>
-      val jsonString = serializeAsJson(v._2, logger.underlying.isDebugEnabled).unsafeGetOrThrow
-      val valueField = MapperForJava.get().readValue(jsonString, classOf[PrimitiveSingleValueField])
-      values.append(Map(v._1 -> valueField))
-    }
+    values.append(v.mapValues{v => // TODO poor error handling but only required until scala lib is fully eliminated
+      val json = serializeAsJson(v).get
+      MapperForJava.get.readValue(json, classOf[PrimitiveSingleValueField])
+    })
   }
 
-  override def build(deduplicate: Boolean = false): Option[MetadataField] = {
+  override def build(deduplicate: Boolean = false): Option[CompoundField] = {
     if (values.nonEmpty) Option {
       val stringToFields = if (deduplicate) values.toList.distinct
                            else values.toList
