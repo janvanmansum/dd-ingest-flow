@@ -34,19 +34,18 @@ class DataverseInstanceHealthCheck {
     void checkDataverseAvailable() throws IOException, DataverseException {
         DepositIngestTaskFactoryWrapper depositIngestTaskFactoryWrapper = Mockito.mock(DepositIngestTaskFactoryWrapper.class);
         DataverseClient dataverseInstance = Mockito.mock(DataverseClient.class, RETURNS_DEEP_STUBS);
-        dataverseInstance.checkConnection();
         Mockito.when(depositIngestTaskFactoryWrapper.getDataverseClient()).thenReturn(dataverseInstance);
         Result result = new DataverseHealthCheck(depositIngestTaskFactoryWrapper.getDataverseClient()).check();
-        // TODO assertTrue(result.isHealthy());
+        assertTrue(result.isHealthy());
     }
 
     @Test
     void checkDataverseNotAvailable() throws IOException, DataverseException {
         DepositIngestTaskFactoryWrapper depositIngestTaskFactoryWrapper = Mockito.mock(DepositIngestTaskFactoryWrapper.class);
         DataverseClient dataverseInstance = Mockito.mock(DataverseClient.class, RETURNS_DEEP_STUBS);
-        dataverseInstance.checkConnection();
+        Mockito.doThrow(IOException.class).when(dataverseInstance).checkConnection();
         Mockito.when(depositIngestTaskFactoryWrapper.getDataverseClient()).thenReturn(dataverseInstance);
         Result result = new DataverseHealthCheck(depositIngestTaskFactoryWrapper.getDataverseClient()).check();
-        // TODO assertFalse(result.isHealthy());
+        assertFalse(result.isHealthy());
     }
 }
