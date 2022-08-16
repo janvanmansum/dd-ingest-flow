@@ -24,7 +24,7 @@ import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 
-public class MapperForJava {
+public class MetadataObjectMapper {
 
     public static ObjectMapper get() {
         return mapper;

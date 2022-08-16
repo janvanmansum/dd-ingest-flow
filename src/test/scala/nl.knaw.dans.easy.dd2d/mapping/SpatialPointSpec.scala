@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.dd2d.mapping
 
 import nl.knaw.dans.easy.dd2d.TestSupportFixture
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
 
@@ -30,7 +30,7 @@ class SpatialPointSpec extends TestSupportFixture with BlockTemporalAndSpatial w
       <spatial>
         <Point>52.08113 4.34510</Point>
       </spatial>
-    val result = MapperForJava.get().writeValueAsString(SpatialPoint.toEasyTsmSpatialPointValueObject(spatialPoint))
+    val result = MetadataObjectMapper.get().writeValueAsString(SpatialPoint.toEasyTsmSpatialPointValueObject(spatialPoint))
     findString(result, s"$SPATIAL_POINT_SCHEME.value") shouldBe LONLAT_SCHEME
     findString(result, s"$SPATIAL_POINT_X.value") shouldBe "4.34510"
     findString(result, s"$SPATIAL_POINT_Y.value") shouldBe "52.08113"
@@ -41,7 +41,7 @@ class SpatialPointSpec extends TestSupportFixture with BlockTemporalAndSpatial w
       <spatial srsName={RD_SRS_NAME}>
         <Point>469470 209942</Point>
       </spatial>
-    val result = MapperForJava.get().writeValueAsString(SpatialPoint.toEasyTsmSpatialPointValueObject(spatialPoint))
+    val result = MetadataObjectMapper.get().writeValueAsString(SpatialPoint.toEasyTsmSpatialPointValueObject(spatialPoint))
     findString(result, s"$SPATIAL_POINT_SCHEME.value") shouldBe RD_SCHEME
     findString(result, s"$SPATIAL_POINT_X.value") shouldBe "469470"
     findString(result, s"$SPATIAL_POINT_Y.value") shouldBe "209942"

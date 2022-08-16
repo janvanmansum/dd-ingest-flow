@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import nl.knaw.dans.lib.dataverse.model.RoleAssignment
 import nl.knaw.dans.lib.dataverse.{ DataverseClient, Version }
 import nl.knaw.dans.lib.error._
@@ -44,7 +44,7 @@ class DatasetCreator(deposit: Deposit,
     {
       val javaDataverseApi = dataverseClient.dataverse("root")
       for {
-        jsonString <- Try(MapperForJava.get().writeValueAsString(dataverseDataset))
+        jsonString <- Try(MetadataObjectMapper.get().writeValueAsString(dataverseDataset))
         // autoPublish is false, because it seems there is a bug with it in Dataverse (most of the time?)
         response <- Try(if (isMigration)
                           javaDataverseApi.importDataset(jsonString, Optional.of(s"doi:${ deposit.doi }"), false)
@@ -83,7 +83,7 @@ class DatasetCreator(deposit: Deposit,
     val ra = new RoleAssignment
     ra.setAssignee(s"@${ deposit.depositorUserId }")
     ra.setRole(depositorRole)
-    val str = MapperForJava.get().writeValueAsString(ra)
+    val str = MetadataObjectMapper.get().writeValueAsString(ra)
     debug(s"Assigning role $depositorRole to ${ deposit.depositorUserId }: $str ")
     str
   }

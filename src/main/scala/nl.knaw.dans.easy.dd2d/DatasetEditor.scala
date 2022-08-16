@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.easy.dd2d.mapping.{ AccessRights, License }
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.dataverse.model.dataset.Embargo
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta
@@ -135,7 +135,7 @@ abstract class DatasetEditor(dataverseClient: DataverseClient, optFileExclusionP
   protected def embargoFiles(persistendId: PersistentId, dateAvailable: Date, fileIds: List[Int]): Try[Unit] = {
     trace(persistendId, fileIds)
     val embargo = new Embargo(dateAvailableFormat.format(dateAvailable), "", fileIds.toArray)
-    val json = MapperForJava.get().writeValueAsString(embargo)
+    val json = MetadataObjectMapper.get().writeValueAsString(embargo)
     Try(dataverseClient.dataset(persistendId).setEmbargo(json))
   }
 

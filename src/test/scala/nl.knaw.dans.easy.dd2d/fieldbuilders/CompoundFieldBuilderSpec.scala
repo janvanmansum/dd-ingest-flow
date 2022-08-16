@@ -17,7 +17,7 @@ package nl.knaw.dans.easy.dd2d.fieldbuilders
 
 import nl.knaw.dans.easy.dd2d.JsonPathSupportFixture
 import nl.knaw.dans.easy.dd2d.mapping.FieldMapBuilder
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.json4s.{ DefaultFormats, Formats }
 import org.scalatest.flatspec.AnyFlatSpec
@@ -38,7 +38,7 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get
-    val json = MapperForJava.get().writeValueAsString(field)
+    val json = MetadataObjectMapper.get().writeValueAsString(field)
     debug(json)
     getPathAsString(json, "$.typeClass") shouldBe "compound"
     getPathAsString(json, "$.typeName") shouldBe "test"
@@ -57,7 +57,7 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get
-    val json = MapperForJava.get().writeValueAsString(field)
+    val json = MetadataObjectMapper.get().writeValueAsString(field)
     debug(json)
     getPathAsBoolean(json, "$.multiple") shouldBe false
   }
@@ -85,7 +85,7 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get
-    val json = MapperForJava.get().writeValueAsString(field)
+    val json = MetadataObjectMapper.get().writeValueAsString(field)
     debug(json)
 
     getPathAsString(json, "$.typeClass") shouldBe "compound"
@@ -115,7 +115,7 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
     val optField = c.build()
     optField.isDefined shouldBe true
     val field = optField.get
-    val json = MapperForJava.get().writeValueAsString(field)
+    val json = MetadataObjectMapper.get().writeValueAsString(field)
     debug(json)
 
     getPathAsString(json, "$.typeClass") shouldBe "compound"

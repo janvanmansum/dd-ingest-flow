@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.dd2d.mapping
 
 import nl.knaw.dans.easy.dd2d.TestSupportFixture
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
 
@@ -26,7 +26,7 @@ class DepositPropertiesVaultMetadataSpec extends TestSupportFixture with BlockCi
   "toOtherIdValue" should "create OtherId Json object for other ID if specified in correct format" in {
     val maybeMap = DepositPropertiesVaultMetadata.toOtherIdValue("PAN:123")
     maybeMap shouldBe defined
-    val result = MapperForJava.get().writeValueAsString(maybeMap.get)
+    val result = MetadataObjectMapper.get().writeValueAsString(maybeMap.get)
     getPathAsString(result, "$.otherIdAgency.value") shouldBe "PAN"
     getPathAsString(result, "$.otherIdValue.value") shouldBe "123"
   }
