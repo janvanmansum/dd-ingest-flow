@@ -16,6 +16,8 @@
 package nl.knaw.dans.easy
 
 import better.files.File
+import nl.knaw.dans.easy.dd2d.mapping.FieldMap
+import nl.knaw.dans.lib.dataverse.model.dataset.{ MetadataField, PrimitiveSingleValueField }
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta
 import org.apache.commons.csv.{ CSVFormat, CSVParser }
 import org.apache.commons.io.FileUtils
@@ -23,7 +25,7 @@ import org.apache.commons.lang.StringUtils
 
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
-import scala.collection.JavaConverters.{ asScalaBufferConverter, asScalaIteratorConverter }
+import scala.collection.JavaConverters.{ asScalaBufferConverter, asScalaIteratorConverter, mapAsJavaMapConverter }
 import scala.collection.mutable
 import scala.language.postfixOps
 import scala.util.{ Failure, Success, Try }
@@ -68,6 +70,10 @@ package object dd2d {
     val PROCESSED = Value("processed")
     val REJECTED = Value("rejected")
     val FAILED = Value("failed")
+  }
+
+  def toFieldMap(subFields: MetadataField*): FieldMap = {
+    subFields.map(f => (f.getTypeName, f)).toMap.asJava
   }
 
   def loadCsvToMap(csvFile: File, keyColumn: String, valueColumn: String): Try[Map[String, String]] = {

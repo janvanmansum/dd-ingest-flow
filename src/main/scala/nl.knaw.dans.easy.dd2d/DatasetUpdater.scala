@@ -21,7 +21,6 @@ import nl.knaw.dans.lib.dataverse.model.file.{ FileMeta => JavaFileMeta }
 import nl.knaw.dans.lib.dataverse.model.{ dataset, search }
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.model.dataset.MetadataBlocks
 import org.json4s.native.Serialization
 
 import java.net.URI

@@ -15,8 +15,7 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.lib.dataverse.model.dataset.{ Dataset, CompoundField, MetadataField, PrimitiveSingleValueField }
-import nl.knaw.dans.lib.scaladv.model.{ dataset => scalaDataset }
+import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, Dataset, MetadataField, PrimitiveSingleValueField }
 import org.json4s.DefaultFormats
 
 import java.util
@@ -29,9 +28,9 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
   private val mapper = new DepositToDvDatasetMetadataMapper(deduplicate = false, List("citation", "dansDataVaultMetadata"), null, null, null, null)
   private val vaultMetadata = Deposit(testDirValid / "valid-easy-submitted").vaultMetadata
   private val optAgreements = Deposit(testDirValid / "valid-easy-submitted").tryOptAgreementsXml.get
-  private val contactData = List(scalaDataset.toFieldMap(
-    scalaDataset.PrimitiveSingleValueField("datasetContactName", "Contact Name"),
-    scalaDataset.PrimitiveSingleValueField("datasetContactEmail", "contact@example.org")
+  private val contactData = List(toFieldMap(
+    new PrimitiveSingleValueField("datasetContactName", "Contact Name"),
+    new PrimitiveSingleValueField("datasetContactEmail", "contact@example.org")
   ))
 
   "toDataverseDataset" should "map profile/title to citation/title" in {

@@ -23,10 +23,9 @@ import nl.knaw.dans.easy.dd2d.mapping.FieldMap
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.dataverse.model.dataset
 import nl.knaw.dans.lib.dataverse.model.dataset.UpdateType.major
+import nl.knaw.dans.lib.dataverse.model.dataset.{ Dataset, PrimitiveSingleValueField }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.dataverse.model.dataset.Dataset
-import nl.knaw.dans.lib.scaladv.model.dataset.{ PrimitiveSingleValueField, toFieldMap }
 import nl.knaw.dans.lib.taskqueue.Task
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
@@ -181,9 +180,10 @@ case class DepositIngestTask(deposit: Deposit,
 
   private def createDatasetContacts(name: String, email: String, optAffiliation: Option[String] = None): Try[List[FieldMap]] = Try {
     val subfields = ListBuffer[PrimitiveSingleValueField]()
-    subfields.append(PrimitiveSingleValueField("datasetContactName", name))
-    subfields.append(PrimitiveSingleValueField("datasetContactEmail", email))
-    optAffiliation.foreach(affiliation => subfields.append(PrimitiveSingleValueField("datasetContactAffiliation", affiliation)))
+    subfields.append(new PrimitiveSingleValueField("datasetContactName", name))
+    subfields.append(new PrimitiveSingleValueField("datasetContactEmail", email))
+    optAffiliation.foreach(affiliation => subfields.append(new PrimitiveSingleValueField("datasetContactAffiliation", affiliation)))
+
     List(toFieldMap(subfields: _*))
   }
 

@@ -16,6 +16,7 @@
 package nl.knaw.dans.easy.dd2d.mapping
 
 import nl.knaw.dans.easy.dd2d.TestSupportFixture
+import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
 
@@ -24,7 +25,7 @@ class DescriptionSpec extends TestSupportFixture with BlockCitation {
 
   "toDescriptionValueObject" should "create Json object for the description value" in {
     val description = <dcterms:description>The poise of the head strikes me at once...</dcterms:description>
-    val result = Serialization.writePretty(Description.toDescriptionValueObject(description))
+    val result = MapperForJava.get().writeValueAsString(Description.toDescriptionValueObject(description))
     findObject(result, s"$DESCRIPTION_VALUE") shouldBe Map("typeName" -> "dsDescriptionValue", "multiple" -> false, "typeClass" -> "primitive", "value" -> "<p>The poise of the head strikes me at once...</p>")
   }
 
@@ -34,7 +35,7 @@ class DescriptionSpec extends TestSupportFixture with BlockCitation {
 
       This is the second paragraph</dcterms:description>
 
-    val result = Serialization.writePretty(Description.toDescriptionValueObject(description))
+    val result = MapperForJava.get().writeValueAsString(Description.toDescriptionValueObject(description))
     findObject(result, s"$DESCRIPTION_VALUE") shouldBe Map("typeName" -> "dsDescriptionValue", "multiple" -> false, "typeClass" -> "primitive", "value" -> "<p>This is the first paragraph<br>      with a newline.</p><p>      This is the second paragraph</p>")
   }
 }

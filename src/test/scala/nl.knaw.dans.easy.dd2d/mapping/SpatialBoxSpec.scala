@@ -16,6 +16,7 @@
 package nl.knaw.dans.easy.dd2d.mapping
 
 import nl.knaw.dans.easy.dd2d.TestSupportFixture
+import nl.knaw.dans.ingest.core.legacy.MapperForJava
 import org.json4s.native.Serialization
 import org.json4s.{ DefaultFormats, Formats }
 
@@ -32,7 +33,7 @@ class SpatialBoxSpec extends TestSupportFixture with BlockTemporalAndSpatial {
             <gml:upperCorner>90.0 179.999</gml:upperCorner>
           </gml:Envelope>
       </gml:boundedBy>
-    val result = Serialization.writePretty(SpatialBox.toEasyTsmSpatialBoxValueObject(spatialBox))
+    val result = MapperForJava.get().writeValueAsString(SpatialBox.toEasyTsmSpatialBoxValueObject(spatialBox))
     findString(result, s"$SPATIAL_BOX_SCHEME.value") shouldBe "longitude/latitude (degrees)"
     findString(result, s"$SPATIAL_BOX_NORTH.value") shouldBe "90.0"
     findString(result, s"$SPATIAL_BOX_EAST.value") shouldBe "179.999"
@@ -48,7 +49,7 @@ class SpatialBoxSpec extends TestSupportFixture with BlockTemporalAndSpatial {
             <gml:upperCorner>469890 209914</gml:upperCorner>
           </gml:Envelope>
       </gml:boundedBy>
-    val result = Serialization.writePretty(SpatialBox.toEasyTsmSpatialBoxValueObject(spatialBox))
+    val result = MapperForJava.get().writeValueAsString(SpatialBox.toEasyTsmSpatialBoxValueObject(spatialBox))
     findString(result, s"$SPATIAL_BOX_SCHEME.value") shouldBe "RD (in m.)"
   }
 

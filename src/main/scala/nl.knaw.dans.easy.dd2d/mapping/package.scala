@@ -15,9 +15,11 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.lib.scaladv.model.dataset.{ CompoundField, ControlledSingleValueField, MetadataField, PrimitiveSingleValueField }
+import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, ControlledSingleValueField, MetadataField, PrimitiveSingleValueField, SingleValueField }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
+import java.util
+import scala.collection.JavaConverters.mapAsJavaMapConverter
 import scala.collection.mutable
 import scala.xml.Node
 
@@ -26,7 +28,7 @@ package object mapping extends DebugEnhancedLogging {
   val XML_NAMESPACE_URI = "http://www.w3.org/XML/1998/namespace"
   val DCTERMS_NAMESPACE_URI = "http://purl.org/dc/terms/"
 
-  type FieldMap = Map[String, MetadataField]
+  type FieldMap = java.util.Map[String, MetadataField]
 
 
   /**
@@ -56,18 +58,21 @@ package object mapping extends DebugEnhancedLogging {
     private val fields = mutable.Map[String, MetadataField]()
 
     def addPrimitiveField(name: String, value: String): Unit = {
-      fields.put(name, PrimitiveSingleValueField(name, value))
+      fields.put(name, new PrimitiveSingleValueField(name, value))
     }
 
     def addCvField(name: String, value: String): Unit = {
-      fields.put(name, ControlledSingleValueField(name, value))
+      fields.put(name, new ControlledSingleValueField(name, value))
     }
+
 
     def addCompoundField(name: String, value: Map[String, MetadataField]): Unit = {
-      fields.put(name, CompoundField(name, value))
+      val list: util.List[util.Map[String, SingleValueField]] = new util.ArrayList[util.Map[String, SingleValueField]]()
+      list.add(value.mapValues(_.asInstanceOf[SingleValueField]).asJava)
+      fields.put(name, new CompoundField(name, false, list))
     }
 
-    def build: FieldMap = fields.toMap
+    def build: FieldMap = fields.toMap.asJava
   }
 
   implicit class OptionExtensions[T](val t: Option[T]) extends AnyVal {

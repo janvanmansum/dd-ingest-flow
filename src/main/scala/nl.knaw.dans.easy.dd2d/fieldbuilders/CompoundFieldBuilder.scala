@@ -16,35 +16,32 @@
 package nl.knaw.dans.easy.dd2d.fieldbuilders
 
 import nl.knaw.dans.easy.dd2d.mapping.FieldMap
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
-import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, PrimitiveSingleValueField, SingleValueField }
+import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, MetadataField, SingleValueField }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.serializeAsJson
 
 import scala.collection.JavaConverters.{ mapAsJavaMapConverter, seqAsJavaListConverter }
-import scala.collection.mutable
+import scala.collection.convert.ImplicitConversions.`map AsScala`
+import scala.collection.{ immutable, mutable }
 
 class CompoundFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder with DebugEnhancedLogging{
-  private val values = new mutable.ListBuffer[Map[String, SingleValueField]]
+  private val values = new mutable.ListBuffer[FieldMap]
 
   def addValue(v: FieldMap): Unit = {
     if (!multipleValues && values.nonEmpty) throw new IllegalArgumentException("Trying to add a second value to a single value field")
-    values.append(v.mapValues{v => // TODO poor error handling but only required until scala lib is fully eliminated
-      val json = serializeAsJson(v).get
-      MapperForJava.get.readValue(json, classOf[PrimitiveSingleValueField])
-    })
+    values.append(v)
   }
 
-  override def build(deduplicate: Boolean = false): Option[CompoundField] = {
+  override def build(deduplicate: Boolean = false): Option[MetadataField] = {
     if (values.nonEmpty) Option {
-      val stringToFields = if (deduplicate) values.toList.distinct
-                           else values.toList
-      new CompoundField(
-        name,
-        multipleValues,
-        stringToFields.map(_.asJava).asJava
-      )
+      val stringToFields: immutable.Seq[FieldMap] = if (deduplicate) values.toList.distinct
+                                                    else values.toList
+      val valueList: java.util.List[java.util.Map[String, SingleValueField]] = stringToFields.map(convert).asJava
+      new CompoundField(name, multipleValues, valueList)
     }
     else Option.empty
+  }
+
+  private def convert(fieldMap: FieldMap):java.util.Map[String, SingleValueField] = {
+    fieldMap.mapValues(_.asInstanceOf[SingleValueField]).asJava
   }
 }
