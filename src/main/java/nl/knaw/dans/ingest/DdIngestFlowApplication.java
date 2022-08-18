@@ -18,8 +18,6 @@ package nl.knaw.dans.ingest;
 
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
-import io.dropwizard.health.conf.HealthConfiguration;
-import io.dropwizard.health.core.HealthCheckBundle;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Bootstrap;
@@ -65,13 +63,6 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
     @Override
     public void initialize(final Bootstrap<DdIngestFlowConfiguration> bootstrap) {
         bootstrap.addBundle(hibernateBundle);
-        bootstrap.addBundle(new HealthCheckBundle<DdIngestFlowConfiguration>() {
-
-            @Override
-            protected HealthConfiguration getHealthConfiguration(final DdIngestFlowConfiguration configuration) {
-                return configuration.getHealthConfiguration();
-            }
-        });
     }
 
     @Override
