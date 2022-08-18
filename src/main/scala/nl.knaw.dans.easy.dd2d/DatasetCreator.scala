@@ -45,6 +45,8 @@ class DatasetCreator(deposit: Deposit,
       val javaDataverseApi = dataverseClient.dataverse("root")
       for {
         jsonString <- Try(MetadataObjectMapper.get().writeValueAsString(dataverseDataset))
+          // serialization hack: with these fields dataverse stumbles over a null pointer exception when publishing
+          .map(_.replace(""""id":0,"datasetId":0,"versionNumber":0,"versionMinorNumber":0,""",""))
         // autoPublish is false, because it seems there is a bug with it in Dataverse (most of the time?)
         response <- Try(if (isMigration)
                           javaDataverseApi.importDataset(jsonString, Optional.of(s"doi:${ deposit.doi }"), false)
