@@ -122,10 +122,10 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
     getPathAsString(json, "$.typeName") shouldBe "test"
     getPathAsBoolean(json, "$.multiple") shouldBe true
 
-//    getPathAsString(json, "$.value[0].subfieldA.typeClass") shouldBe "primitive"
-//    getPathAsString(json, "$.value[0].subfieldA.typeName") shouldBe "subfieldA"
-//    getPathAsBoolean(json, "$.value[0].subfieldA.multiple") shouldBe false
-//    getPathAsString(json, "$.value[0].subfieldA.value") shouldBe "value 1 A"
+    getPathAsString(json, "$.value[0].subfieldA.typeClass") shouldBe "primitive"
+    getPathAsString(json, "$.value[0].subfieldA.typeName") shouldBe "subfieldA"
+    getPathAsBoolean(json, "$.value[0].subfieldA.multiple") shouldBe false
+    getPathAsString(json, "$.value[0].subfieldA.value") shouldBe "value 1 A"
 
     getPathAsString(json, "$.value[0].subfieldB.typeClass") shouldBe "primitive"
     getPathAsString(json, "$.value[0].subfieldB.typeName") shouldBe "subfieldB"
@@ -135,7 +135,7 @@ class CompoundFieldBuilderSpec extends AnyFlatSpec with Matchers with JsonPathSu
     getPathAsString(json, "$.value[1].subfieldA.typeClass") shouldBe "primitive"
     getPathAsString(json, "$.value[1].subfieldA.typeName") shouldBe "subfieldA"
     getPathAsBoolean(json, "$.value[1].subfieldA.multiple") shouldBe false
-//    getPathAsString(json, "$.value[1].subfieldA.value") shouldBe "value 2 A"
+    getPathAsString(json, "$.value[1].subfieldA.value") shouldBe "value 2 A"
 
     getPathAsString(json, "$.value[1].subfieldB.typeClass") shouldBe "primitive"
     getPathAsString(json, "$.value[1].subfieldB.typeName") shouldBe "subfieldB"

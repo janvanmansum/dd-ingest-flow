@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.easy.dd2d
 
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, Dataset, MetadataField, PrimitiveSingleValueField }
 import org.json4s.DefaultFormats
 
@@ -51,6 +52,8 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
       .find(_.getTypeName == "title").get
       .asInstanceOf[PrimitiveSingleValueField]
       .getValue shouldBe "A title"
+    val json = MetadataObjectMapper.get().writeValueAsString(result.get)
+    json should include("""files":[""")
   }
 
   it should "map profile/descriptions to citation/descriptions" in {

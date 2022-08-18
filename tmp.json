@@ -1,0 +1,189 @@
+{
+  "status": "OK",
+  "data": [
+    {
+      "description": "",
+      "label": "dataset.xml",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 49,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "dataset.xml",
+        "contentType": "text/xml",
+        "filesize": 7076,
+        "description": "",
+        "storageIdentifier": "file://182b063859c-a4280c26219b",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "84de379ec4cf73b5781546d3c19b36f3c246ce23"
+        },
+        "creationDate": "2022-08-18"
+      }
+    },
+    {
+      "description": "",
+      "label": "depositor.xml",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 46,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "depositor.xml",
+        "contentType": "text/xml",
+        "filesize": 253,
+        "description": "",
+        "storageIdentifier": "file://182b0637e2f-efef74384a32",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "d89d7d5b862fcec198681e34f3b030fa7796260f"
+        },
+        "creationDate": "2022-08-18"
+      }
+    },
+    {
+      "description": "",
+      "label": "files.xml",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 45,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "files.xml",
+        "contentType": "text/xml",
+        "filesize": 922,
+        "description": "",
+        "storageIdentifier": "file://182b0637c30-5b9206299d14",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "8978f0ace2ec93292918d5d009ec51de5bc89095"
+        },
+        "creationDate": "2022-08-18"
+      }
+    },
+    {
+      "description": "",
+      "label": "location.xml",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 52,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "location.xml",
+        "contentType": "text/xml",
+        "filesize": 560,
+        "description": "",
+        "storageIdentifier": "file://182b0638b5b-a59a64e63f81",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "44901eba9891106c60357c62c521aaf3703cb967"
+        },
+        "creationDate": "2022-08-18"
+      }
+    },
+    {
+      "description": "",
+      "label": "object.xml",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 51,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "object.xml",
+        "contentType": "text/xml",
+        "filesize": 768,
+        "description": "",
+        "storageIdentifier": "file://182b06389ca-b1b733367c61",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "8ebee540c40e11f5b7c8018fea8b7a87b223506c"
+        },
+        "creationDate": "2022-08-18"
+      }
+    },
+    {
+      "description": "",
+      "label": "PAN-00016988-001.jpg",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 47,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "PAN-00016988-001.jpg",
+        "contentType": "image/jpeg",
+        "filesize": 612553,
+        "description": "",
+        "storageIdentifier": "file://182b063807b-ab9565537a5b",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "0d3b4162c0d797384c6fb87778ade0d843307dea"
+        },
+        "creationDate": "2022-08-18"
+      }
+    },
+    {
+      "description": "",
+      "label": "PAN-00016988-002.jpg",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 48,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "PAN-00016988-002.jpg",
+        "contentType": "image/jpeg",
+        "filesize": 583098,
+        "description": "",
+        "storageIdentifier": "file://182b0638303-cb2a89c28296",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "a8e6fbf749017f1d2b557539f5422665542eb841"
+        },
+        "creationDate": "2022-08-18"
+      }
+    },
+    {
+      "description": "",
+      "label": "provenance.xml",
+      "restricted": false,
+      "version": 1,
+      "datasetVersionId": 6,
+      "dataFile": {
+        "id": 50,
+        "persistentId": "",
+        "pidURL": "",
+        "filename": "provenance.xml",
+        "contentType": "text/xml",
+        "filesize": 3081,
+        "description": "",
+        "storageIdentifier": "file://182b0638783-917b00904e6b",
+        "rootDataFileId": -1,
+        "checksum": {
+          "type": "SHA-1",
+          "value": "8e28c3d7e24d010f8e1b261928325e014676aed9"
+        },
+        "creationDate": "2022-08-18"
+      }
+    }
+  ]
+}

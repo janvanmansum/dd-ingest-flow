@@ -19,6 +19,7 @@ import nl.knaw.dans.easy.dd2d.fieldbuilders.{ AbstractFieldBuilder, CompoundFiel
 import nl.knaw.dans.easy.dd2d.mapping._
 import nl.knaw.dans.lib.dataverse.model.dataset
 import nl.knaw.dans.lib.dataverse.model.dataset.{ Dataset, MetadataField }
+import nl.knaw.dans.lib.dataverse.model.file.FileMeta
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.apache.commons.lang.StringUtils
 
@@ -222,6 +223,7 @@ class DepositToDvDatasetMetadataMapper(deduplicate: Boolean,
     addMetadataBlock("dansDataVaultMetadata", "Data Vault Metadata", dataVaultFields)
     val datasetVersion = new dataset.DatasetVersion()
     datasetVersion.setMetadataBlocks(blocks)
+    datasetVersion.setFiles(new util.ArrayList[FileMeta]())
     val ds = new Dataset()
     ds.setDatasetVersion(datasetVersion)
     ds
