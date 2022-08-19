@@ -17,10 +17,10 @@ package nl.knaw.dans.easy.dd2d
 
 import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import nl.knaw.dans.lib.dataverse.model.RoleAssignment
+import nl.knaw.dans.lib.dataverse.model.dataset.Dataset
 import nl.knaw.dans.lib.dataverse.{ DataverseClient, Version }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.dataverse.model.dataset.Dataset
 
 import java.net.URI
 import java.util.regex.Pattern
@@ -45,8 +45,6 @@ class DatasetCreator(deposit: Deposit,
       val javaDataverseApi = dataverseClient.dataverse("root")
       for {
         jsonString <- Try(MetadataObjectMapper.get().writeValueAsString(dataverseDataset))
-          // serialization hack: with these fields dataverse stumbles over a null pointer exception when publishing
-          .map(_.replace(""""id":0,"datasetId":0,"versionNumber":0,"versionMinorNumber":0,""",""))
         // autoPublish is false, because it seems there is a bug with it in Dataverse (most of the time?)
         response <- Try(if (isMigration)
                           javaDataverseApi.importDataset(jsonString, Optional.of(s"doi:${ deposit.doi }"), false)

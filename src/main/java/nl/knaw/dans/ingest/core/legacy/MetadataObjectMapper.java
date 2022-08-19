@@ -35,11 +35,11 @@ public class MetadataObjectMapper {
 
     public static ObjectMapper init () {
         mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule module = new SimpleModule();
         module.addDeserializer(MetadataField.class, new MetadataFieldDeserializer());
         module.addDeserializer(DataverseItem.class, new DataverseItemDeserializer());
         module.addDeserializer(ResultItem.class, new ResultItemDeserializer(mapper));
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.registerModule(module);
         return mapper;
     }
