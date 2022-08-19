@@ -26,8 +26,8 @@ import nl.knaw.dans.ingest.core.AutoIngestArea;
 import nl.knaw.dans.ingest.core.CsvMessageBodyWriter;
 import nl.knaw.dans.ingest.core.ImportArea;
 import nl.knaw.dans.ingest.core.TaskEvent;
-import nl.knaw.dans.ingest.core.health.DansBagValidatorHealthCheck;
-import nl.knaw.dans.ingest.core.health.DataverseHealthCheck;
+import nl.knaw.dans.ingest.health.DansBagValidatorHealthCheck;
+import nl.knaw.dans.ingest.health.DataverseHealthCheck;
 import nl.knaw.dans.ingest.core.legacy.DepositIngestTaskFactoryWrapper;
 import nl.knaw.dans.ingest.core.sequencing.TargetedTaskSequenceManager;
 import nl.knaw.dans.ingest.core.service.EnqueuingService;
@@ -73,13 +73,11 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
             false,
             configuration.getIngestFlow(),
             configuration.getDataverse(),
-            configuration.getManagePrestaging(),
             configuration.getValidateDansBag());
         final DepositIngestTaskFactoryWrapper migrationTaskFactoryWrapper = new DepositIngestTaskFactoryWrapper(
             true,
             configuration.getIngestFlow(),
             configuration.getDataverse(),
-            configuration.getManagePrestaging(),
             configuration.getValidateDansBag());
 
         final EnqueuingService enqueuingService = new EnqueuingServiceImpl(targetedTaskSequenceManager, 3 /* Must support importArea, migrationArea and autoIngestArea */);

@@ -20,8 +20,6 @@ import nl.knaw.dans.easy.dd2d.Deposit;
 import nl.knaw.dans.easy.dd2d.DepositIngestTaskFactory;
 import nl.knaw.dans.easy.dd2d.ZipFileHandler;
 import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator;
-import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo;
-import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfoConfig;
 import nl.knaw.dans.ingest.core.config.DataverseConfigScala;
 import nl.knaw.dans.ingest.core.config.HttpServiceConfig;
 import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
@@ -52,7 +50,6 @@ public class DepositIngestTaskFactoryWrapper {
         boolean isMigration,
         IngestFlowConfig ingestFlowConfig,
         DataverseConfigScala dataverseConfigScala,
-        HttpServiceConfig migrationInfoConfig,
         HttpServiceConfig validationDansBagConfig) {
 
         dataverseClient = buildDataverseClient(dataverseConfigScala);
@@ -71,12 +68,6 @@ public class DepositIngestTaskFactoryWrapper {
             validationDansBagConfig.getConnectionTimeoutMs(),
             validationDansBagConfig.getReadTimeoutMs());
 
-        final MigrationInfo migrationInfo = new MigrationInfo(
-            new MigrationInfoConfig(
-                DepositIngestTaskFactory.appendSlash(migrationInfoConfig.getBaseUrl()),
-                migrationInfoConfig.getConnectionTimeoutMs(),
-                migrationInfoConfig.getReadTimeoutMs())
-        );
 
         final Elem narcisClassification = DepositIngestTaskFactory.readXml(ingestFlowConfig.getMappingDefsDir().resolve("narcis_classification.xml").toFile());
         final Map<String, String> iso1ToDataverseLanguage = getMap(ingestFlowConfig, "iso639-1-to-dv.csv", "ISO639-1", "Dataverse-language");
@@ -95,7 +86,6 @@ public class DepositIngestTaskFactoryWrapper {
             DepositIngestTaskFactory.getActiveMetadataBlocks(dataverseClient).get(),
             Option.apply(validator),
             dataverseClient,
-            Option.apply(migrationInfo),
             dataverseConfigScala.getApi().getPublishAwaitUnlockMaxRetries(),
             dataverseConfigScala.getApi().getPublishAwaitUnlockWaitTimeMs(),
             narcisClassification,

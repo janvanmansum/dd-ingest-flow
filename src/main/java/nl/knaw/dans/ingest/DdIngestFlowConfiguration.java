@@ -22,8 +22,6 @@ import nl.knaw.dans.ingest.core.config.DataverseConfigScala;
 import nl.knaw.dans.ingest.core.config.HttpServiceConfig;
 import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 public class DdIngestFlowConfiguration extends Configuration {
 
@@ -55,14 +53,6 @@ public class DdIngestFlowConfiguration extends Configuration {
 
     public void setValidateDansBag(HttpServiceConfig validateDansBag) {
         this.validateDansBag = validateDansBag;
-    }
-
-    public HttpServiceConfig getManagePrestaging() {
-        return managePrestaging;
-    }
-
-    public void setManagePrestaging(HttpServiceConfig managePrestaging) {
-        this.managePrestaging = managePrestaging;
     }
 
     public DataSourceFactory getTaskEventDatabase() {

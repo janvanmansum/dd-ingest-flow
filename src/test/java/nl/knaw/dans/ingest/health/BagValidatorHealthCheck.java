@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.health;
+package nl.knaw.dans.ingest.health;
 
 import com.codahale.metrics.health.HealthCheck.Result;
 import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator;
 import nl.knaw.dans.ingest.core.legacy.DepositIngestTaskFactoryWrapper;
+import nl.knaw.dans.ingest.health.DansBagValidatorHealthCheck;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertTrue;

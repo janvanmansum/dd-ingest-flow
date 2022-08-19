@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.health;
+package nl.knaw.dans.ingest.health;
 
 import com.codahale.metrics.health.HealthCheck;
 import nl.knaw.dans.lib.dataverse.DataverseClient;

@@ -77,11 +77,6 @@ validateDansBag:
   connectionTimeoutMs: 10000
   readTimeoutMs: 30000
 
-managePrestaging:
-  baseUrl: 'http://dar.dans.knaw.nl:8080'
-  connectionTimeoutMs: 10000
-  readTimeoutMs: 30000
-
 #
 # See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
 #
