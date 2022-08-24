@@ -20,7 +20,7 @@ import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageT
 import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidator, InformationPackageType }
 import nl.knaw.dans.easy.dd2d.mapping.Amd
 import nl.knaw.dans.lib.dataverse.DataverseClient
-import nl.knaw.dans.lib.scaladv.model.dataset.Dataset
+import nl.knaw.dans.lib.dataverse.model.dataset.Dataset
 
 import java.net.URI
 import java.util.regex.Pattern
@@ -73,7 +73,7 @@ class DepositMigrationTask(deposit: Deposit,
   }
 
   override def newDatasetUpdater(dataverseDataset: Dataset): DatasetUpdater = {
-    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = true, dataverseDataset.datasetVersion.metadataBlocks, variantToLicense, supportedLicenses, dataverseClient)
+    new DatasetUpdater(deposit, optFileExclusionPattern, zipFileHandler, isMigration = true, dataverseDataset.getDatasetVersion.getMetadataBlocks, variantToLicense, supportedLicenses, dataverseClient)
   }
 
   override def newDatasetCreator(dataverseDataset: Dataset, depositorRole: String): DatasetCreator = {

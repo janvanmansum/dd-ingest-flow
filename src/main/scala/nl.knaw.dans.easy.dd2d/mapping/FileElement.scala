@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.dd2d.mapping
 
-import nl.knaw.dans.lib.scaladv.model.file.FileMeta
+import nl.knaw.dans.lib.dataverse.model.file.FileMeta
 
 import java.nio.file.Paths
 import scala.collection.mutable
@@ -50,12 +50,12 @@ object FileElement {
     }
                 else None
 
-    FileMeta(
-      label = sanitizedFileName,
-      directoryLabel = sanitizedDirectoryLabel,
-      description = descr,
-      restrict = restr,
-    )
+    val jfm = new FileMeta();
+    jfm.setLabel(sanitizedFileName.orNull);
+    jfm.setDirectoryLabel(sanitizedDirectoryLabel.orNull)
+    jfm.setDescription(descr.orNull)
+    if(restr.isDefined)jfm.setRestricted(restr.get)
+    jfm
   }
 
   private def replaceForbiddenCharactersInPath(s: String): String = {

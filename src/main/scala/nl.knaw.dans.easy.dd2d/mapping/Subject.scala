@@ -37,27 +37,27 @@ object Subject extends BlockCitation with UnsupportedSubjectSchemes {
     matchPrefix.replaceAllIn(n.text, "")
   }
 
-  def toKeyWordValue(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toKeyWordValue(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(KEYWORD_VALUE, node.text)
     m.addPrimitiveField(KEYWORD_VOCABULARY, "")
     m.addPrimitiveField(KEYWORD_VOCABULARY_URI, "")
-    m.toJsonObject
+    m.build
   }
 
-  def toPanKeywordValue(node: Node): JsonObject = {
+  def toPanKeywordValue(node: Node): FieldMap = {
     toKeyWordValue(SCHEME_URI_PAN, SCHEME_PAN)(node)
   }
 
-  def toAatKeywordValue(node: Node): JsonObject = {
+  def toAatKeywordValue(node: Node): FieldMap = {
     toKeyWordValue(SCHEME_URI_AAT, SCHEME_AAT)(node)
   }
 
-  def toKeyWordValue(schemeURI: String, subjectScheme: String)(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toKeyWordValue(schemeURI: String, subjectScheme: String)(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(KEYWORD_VALUE, removeMatchPrefix(node))
     m.addPrimitiveField(KEYWORD_VOCABULARY, subjectScheme)
     m.addPrimitiveField(KEYWORD_VOCABULARY_URI, schemeURI)
-    m.toJsonObject
+    m.build
   }
 }

@@ -19,9 +19,9 @@ import scala.xml.Node
 
 object Creator extends BlockCitation {
 
-  def toAuthorValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toAuthorValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(AUTHOR_NAME, node.text)
-    m.toJsonObject
+    m.build
   }
 }

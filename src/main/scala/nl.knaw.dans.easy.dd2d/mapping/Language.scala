@@ -41,11 +41,11 @@ object Language extends BlockCitation with DebugEnhancedLogging {
     else iso2ToDataverse.get(code)
   }
 
-  def toKeywordValue(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toKeywordValue(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(KEYWORD_VALUE, node.text)
     m.addPrimitiveField(KEYWORD_VOCABULARY, "")
     m.addPrimitiveField(KEYWORD_VOCABULARY_URI, "")
-    m.toJsonObject
+    m.build
   }
 }

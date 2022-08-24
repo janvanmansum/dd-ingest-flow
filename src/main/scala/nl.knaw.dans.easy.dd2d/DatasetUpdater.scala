@@ -18,14 +18,14 @@ package nl.knaw.dans.easy.dd2d
 import nl.knaw.dans.lib.dataverse._
 import nl.knaw.dans.lib.dataverse.model.dataset.FileList
 import nl.knaw.dans.lib.dataverse.model.file.{ FileMeta => JavaFileMeta }
-import nl.knaw.dans.lib.dataverse.model.search
+import nl.knaw.dans.lib.dataverse.model.{ dataset, search }
 import nl.knaw.dans.lib.error.{ TraversableTryExtensions, TryExtensions }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.model.dataset.MetadataBlocks
 import org.json4s.native.Serialization
 
 import java.net.URI
 import java.nio.file.{ Path, Paths }
+import java.util
 import java.util.Optional
 import java.util.regex.Pattern
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
@@ -36,7 +36,7 @@ class DatasetUpdater(deposit: Deposit,
                      optFileExclusionPattern: Option[Pattern],
                      zipFileHandler: ZipFileHandler,
                      isMigration: Boolean = false,
-                     metadataBlocks: MetadataBlocks,
+                     metadataBlocks: util.Map[String, dataset.MetadataBlock],
                      variantToLicense: Map[String, String],
                      supportedLicenses: List[URI],
                      dataverseClient: DataverseClient) extends DatasetEditor(dataverseClient, optFileExclusionPattern, zipFileHandler) with DebugEnhancedLogging {
@@ -88,7 +88,7 @@ class DatasetUpdater(deposit: Deposit,
           _ = debug(s"Number of published versions so far: $numPub")
 
           oldToNewPathMovedFiles <- getOldToNewPathOfFilesToMove(pathToFileMetaInLatestVersion, pathToFileInfo)
-          fileMovements = oldToNewPathMovedFiles.map { case (old, newPath) => (pathToFileMetaInLatestVersion(old).getDataFile.getId, pathToFileInfo(newPath).javaFileMeta) }
+          fileMovements = oldToNewPathMovedFiles.map { case (old, newPath) => (pathToFileMetaInLatestVersion(old).getDataFile.getId, pathToFileInfo(newPath).metadata) }
           // Movement will be realized by updating label and directoryLabel attributes of the file; there is no separate "move-file" API endpoint.
           _ = debug(s"fileMovements = $fileMovements")
 
@@ -145,7 +145,7 @@ class DatasetUpdater(deposit: Deposit,
           pathsToAdd = pathToFileInfo.keySet diff occupiedPaths
           filesToAdd = pathsToAdd.map(pathToFileInfo).toList
           _ = debug(s"filesToAdd = $filesToAdd")
-          fileAdditions <- addFiles(doi, filesToAdd).map(_.mapValues(_.javaFileMeta))
+          fileAdditions <- addFiles(doi, filesToAdd).map(_.mapValues(_.metadata))
 
           // TODO: check that only updating the file metadata works
           _ <- updateFileMetadata(fileReplacements ++ fileMovements ++ fileAdditions)
@@ -294,7 +294,7 @@ class DatasetUpdater(deposit: Deposit,
             fileList <- Try(r.getData)
             id = Try(fileList.getFiles.get(0).getDataFile.getId)
               .getOrElse(throw new IllegalStateException("Could not get ID of replacement file after replace action"))
-          } yield (id, fileInfo.javaFileMeta)
+          } yield (id, fileInfo.metadata)
         }
         for {
           (replacementId, replacementMeta) <- replaceFile()

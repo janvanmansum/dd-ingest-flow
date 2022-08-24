@@ -15,8 +15,9 @@
  */
 package nl.knaw.dans.easy.dd2d.fieldbuilders
 
-import nl.knaw.dans.lib.scaladv.model.dataset.{ MetadataField, PrimitiveMultipleValueField, PrimitiveSingleValueField }
+import nl.knaw.dans.lib.dataverse.model.dataset.{ MetadataField, PrimitiveMultiValueField, PrimitiveSingleValueField }
 
+import scala.collection.JavaConverters.seqAsJavaListConverter
 import scala.collection.mutable
 
 class PrimitiveFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder {
@@ -29,9 +30,9 @@ class PrimitiveFieldBuilder(name: String, multipleValues: Boolean = true) extend
 
   override def build(deduplicate: Boolean = false): Option[MetadataField] = {
     if (values.nonEmpty) {
-      if (multipleValues) Option(PrimitiveMultipleValueField(name, if (deduplicate) values.toList.distinct
-                                                                   else values.toList))
-      else Option(PrimitiveSingleValueField(name, values.head))
+      if (multipleValues) Option(new PrimitiveMultiValueField(name, if (deduplicate) values.toList.distinct.asJava
+                                                                   else values.toList.asJava))
+      else Option(new PrimitiveSingleValueField(name, values.head))
     }
     else Option.empty
   }

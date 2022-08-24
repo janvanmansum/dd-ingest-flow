@@ -18,10 +18,10 @@ package nl.knaw.dans.easy.dd2d.mapping
 import nl.knaw.dans.easy.dd2d.mapping.DepositPropertiesVaultMetadata.{ OTHER_ID_AGENCY, OTHER_ID_VALUE }
 
 object DepositPropertiesOtherDoi {
-  def toOtherIdValue(otherDoi: String): JsonObject = {
-    val m = FieldMap()
+  def toOtherIdValue(otherDoi: String): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(OTHER_ID_AGENCY, "")
     m.addPrimitiveField(OTHER_ID_VALUE, otherDoi)
-    m.toJsonObject
+    m.build
   }
 }

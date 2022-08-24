@@ -15,24 +15,33 @@
  */
 package nl.knaw.dans.easy.dd2d.fieldbuilders
 
-import nl.knaw.dans.easy.dd2d.mapping.JsonObject
-import nl.knaw.dans.lib.scaladv.model.dataset.{ CompoundField, MetadataField }
+import nl.knaw.dans.easy.dd2d.mapping.FieldMap
+import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, MetadataField, SingleValueField }
+import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
-import scala.collection.mutable
+import scala.collection.JavaConverters.{ mapAsJavaMapConverter, seqAsJavaListConverter }
+import scala.collection.convert.ImplicitConversions.`map AsScala`
+import scala.collection.{ immutable, mutable }
 
-class CompoundFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder {
-  private val values = new mutable.ListBuffer[JsonObject]
+class CompoundFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder with DebugEnhancedLogging{
+  private val values = new mutable.ListBuffer[FieldMap]
 
-  def addValue(v: JsonObject): Unit = {
+  def addValue(v: FieldMap): Unit = {
     if (!multipleValues && values.nonEmpty) throw new IllegalArgumentException("Trying to add a second value to a single value field")
     values.append(v)
   }
 
   override def build(deduplicate: Boolean = false): Option[MetadataField] = {
-    if (values.nonEmpty) Option(
-      if (multipleValues) CompoundField(name, if (deduplicate) values.toList.distinct
-                                              else values.toList)
-      else CompoundField(name, values.head))
+    if (values.nonEmpty) Option {
+      val stringToFields: immutable.Seq[FieldMap] = if (deduplicate) values.toList.distinct
+                                                    else values.toList
+      val valueList: java.util.List[java.util.Map[String, SingleValueField]] = stringToFields.map(convert).asJava
+      new CompoundField(name, multipleValues, valueList)
+    }
     else Option.empty
+  }
+
+  private def convert(fieldMap: FieldMap):java.util.Map[String, SingleValueField] = {
+    fieldMap.mapValues(_.asInstanceOf[SingleValueField]).asJava
   }
 }

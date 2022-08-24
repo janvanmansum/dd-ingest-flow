@@ -18,18 +18,18 @@ package nl.knaw.dans.easy.dd2d.mapping
 import scala.xml.Node
 
 object SpatialPoint extends Spatial with BlockTemporalAndSpatial {
-  def toEasyTsmSpatialPointValueObject(spatial: Node): JsonObject = {
+  def toEasyTsmSpatialPointValueObject(spatial: Node): FieldMap = {
     val isRD = isRd(spatial) // TODO: improve error handling
     // TODO: Only one Point expected here, but should be more robust
     val pointElem = (spatial \ "Point").head
     // Passing in spatial to work around the fact that the point element does not have an srsName itself.
     val p = getPoint(isRD)(pointElem)
-    val m = FieldMap()
+    val m = FieldMapBuilder()
 
     m.addCvField(SPATIAL_POINT_SCHEME, if (isRD) RD_SCHEME
                                        else LONLAT_SCHEME)
     m.addPrimitiveField(SPATIAL_POINT_X, p.x)
     m.addPrimitiveField(SPATIAL_POINT_Y, p.y)
-    m.toJsonObject
+    m.build
   }
 }

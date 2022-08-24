@@ -15,13 +15,12 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.ingest.core.legacy.MapperForJava
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
 import nl.knaw.dans.lib.dataverse.model.RoleAssignment
+import nl.knaw.dans.lib.dataverse.model.dataset.Dataset
 import nl.knaw.dans.lib.dataverse.{ DataverseClient, Version }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import nl.knaw.dans.lib.scaladv.model.dataset.Dataset
-import nl.knaw.dans.lib.scaladv.serializeAsJson
 
 import java.net.URI
 import java.util.regex.Pattern
@@ -45,7 +44,7 @@ class DatasetCreator(deposit: Deposit,
     {
       val javaDataverseApi = dataverseClient.dataverse("root")
       for {
-        jsonString <- serializeAsJson(dataverseDataset, logger.underlying.isDebugEnabled)
+        jsonString <- Try(MetadataObjectMapper.get().writeValueAsString(dataverseDataset))
         // autoPublish is false, because it seems there is a bug with it in Dataverse (most of the time?)
         response <- Try(if (isMigration)
                           javaDataverseApi.importDataset(jsonString, Optional.of(s"doi:${ deposit.doi }"), false)
@@ -63,7 +62,7 @@ class DatasetCreator(deposit: Deposit,
           _ <- Try(javaDatasetApi.awaitUnlock())
           pathToFileInfo <- getPathToFileInfo(deposit)
           databaseIdsToFileInfo <- addFiles(persistentId, pathToFileInfo.values.toList)
-          _ <- updateFileMetadata(databaseIdsToFileInfo.mapValues(_.javaFileMeta))
+          _ <- updateFileMetadata(databaseIdsToFileInfo.mapValues(_.metadata))
           _ <- Try(javaDatasetApi.awaitUnlock())
           _ <- configureEnableAccessRequests(deposit, persistentId, canEnable = true)
           _ <- Try(javaDatasetApi.awaitUnlock())
@@ -84,7 +83,7 @@ class DatasetCreator(deposit: Deposit,
     val ra = new RoleAssignment
     ra.setAssignee(s"@${ deposit.depositorUserId }")
     ra.setRole(depositorRole)
-    val str = MapperForJava.get().writeValueAsString(ra)
+    val str = MetadataObjectMapper.get().writeValueAsString(ra)
     debug(s"Assigning role $depositorRole to ${ deposit.depositorUserId }: $str ")
     str
   }

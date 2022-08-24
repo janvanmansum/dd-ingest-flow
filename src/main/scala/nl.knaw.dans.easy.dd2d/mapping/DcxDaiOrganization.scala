@@ -30,8 +30,8 @@ object DcxDaiOrganization extends Contributor with BlockCitation {
       viaf = ((node \ "VIAF").map(_.text).headOption))
   }
 
-  def toContributorValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toContributorValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     val organization = parseOrganization(node)
     if (organization.name.isDefined) {
       m.addPrimitiveField(CONTRIBUTOR_NAME, organization.name.get)
@@ -39,7 +39,7 @@ object DcxDaiOrganization extends Contributor with BlockCitation {
     if (organization.role.isDefined) {
       m.addCvField(CONTRIBUTOR_TYPE, organization.role.map(contributoreRoleToContributorType.getOrElse(_, "Other")).getOrElse("Other"))
     }
-    m.toJsonObject
+    m.build
   }
 
   def isRightsHolder(node: Node): Boolean = {
@@ -52,8 +52,8 @@ object DcxDaiOrganization extends Contributor with BlockCitation {
     organization.name
   }
 
-  def toAuthorValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toAuthorValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     val organization = parseOrganization(node)
     if (organization.name.isDefined) {
       m.addPrimitiveField(AUTHOR_NAME, organization.name.get)
@@ -66,7 +66,7 @@ object DcxDaiOrganization extends Contributor with BlockCitation {
       m.addPrimitiveField(AUTHOR_IDENTIFIER_SCHEME, "VIAF")
       m.addPrimitiveField(AUTHOR_IDENTIFIER, organization.viaf.get)
     }
-    m.toJsonObject
+    m.build
   }
 
   def inAnyOfRoles(roles: List[String])(node: Node): Boolean = {
@@ -74,11 +74,11 @@ object DcxDaiOrganization extends Contributor with BlockCitation {
     roles.exists(author.role.contains)
   }
 
-  def toGrantNumberValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toGrantNumberValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     val organization = parseOrganization(node)
     m.addPrimitiveField(GRANT_NUMBER_AGENCY, organization.name.getOrElse(""))
     m.addPrimitiveField(GRANT_NUMBER_VALUE, "")
-    m.toJsonObject
+    m.build
   }
 }

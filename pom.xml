@@ -51,11 +51,6 @@
             <artifactId>dans-java-utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>nl.knaw.dans.lib</groupId>
-            <artifactId>dans-dataverse-scala-lib_2.12</artifactId>
-            <version>5.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dans-dataverse-client-lib</artifactId>
         </dependency>

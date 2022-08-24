@@ -15,10 +15,13 @@
  */
 package nl.knaw.dans.easy.dd2d
 
-import nl.knaw.dans.lib.scaladv.model.dataset.{ CompoundField, Dataset, PrimitiveSingleValueField, toFieldMap }
+import nl.knaw.dans.ingest.core.legacy.MetadataObjectMapper
+import nl.knaw.dans.lib.dataverse.model.dataset.{ CompoundField, Dataset, MetadataField, PrimitiveSingleValueField }
 import org.json4s.DefaultFormats
 
-import scala.util.Success
+import java.util
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
+import scala.util.{ Success, Try }
 
 class DepositToDataverseMapperSpec extends TestSupportFixture {
 
@@ -27,8 +30,8 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
   private val vaultMetadata = Deposit(testDirValid / "valid-easy-submitted").vaultMetadata
   private val optAgreements = Deposit(testDirValid / "valid-easy-submitted").tryOptAgreementsXml.get
   private val contactData = List(toFieldMap(
-    PrimitiveSingleValueField("datasetContactName", "Contact Name"),
-    PrimitiveSingleValueField("datasetContactEmail", "contact@example.org")
+    new PrimitiveSingleValueField("datasetContactName", "Contact Name"),
+    new PrimitiveSingleValueField("datasetContactEmail", "contact@example.org")
   ))
 
   "toDataverseDataset" should "map profile/title to citation/title" in {
@@ -45,12 +48,12 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-    inside(result) {
-      case Success(Dataset(dsv)) =>
-        dsv.metadataBlocks("citation").fields should contain(
-          PrimitiveSingleValueField("title", "A title")
-        )
-    }
+    citationOf(result)
+      .find(_.getTypeName == "title").get
+      .asInstanceOf[PrimitiveSingleValueField]
+      .getValue shouldBe "A title"
+    val json = MetadataObjectMapper.get().writeValueAsString(result.get)
+    json should include("""files":[""")
   }
 
   it should "map profile/descriptions to citation/descriptions" in {
@@ -69,15 +72,11 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-    inside(result) {
-      case Success(Dataset(dsv)) =>
-        dsv.metadataBlocks("citation").fields should contain(
-          CompoundField("dsDescription",
-            List(
-              Map("dsDescriptionValue" -> PrimitiveSingleValueField("dsDescriptionValue", "<p>Descr 1</p>")),
-              Map("dsDescriptionValue" -> PrimitiveSingleValueField("dsDescriptionValue", "<p>Descr 2</p>"))
-            )))
-    }
+    coumpoundAsMaps(citationOf(result), "dsDescription").flatten shouldBe
+      List(
+        "dsDescriptionValue" -> "<p>Descr 1</p>",
+        "dsDescriptionValue" -> "<p>Descr 2</p>",
+      )
   }
 
   it should "map profile/creatorDetails to citation/author" in {
@@ -116,20 +115,17 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-    inside(result) {
-      case Success(Dataset(dsv)) =>
-        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
-        valueObjectsOfCompoundFields should contain(
-          Map(
-            "authorName" -> PrimitiveSingleValueField("authorName", "A van Helsing"),
-            "authorAffiliation" -> PrimitiveSingleValueField("authorAffiliation", "Anti-Vampire League")
-          ))
-        valueObjectsOfCompoundFields should contain(
-          Map(
-            "authorName" -> PrimitiveSingleValueField("authorName", "T Zonnebloem"),
-            "authorAffiliation" -> PrimitiveSingleValueField("authorAffiliation", "Uitvindersgilde")
-          ))
-    }
+    coumpoundAsMaps(citationOf(result), "author") shouldBe
+      List(
+        Map(
+          "authorName" -> "A van Helsing",
+          "authorAffiliation" -> "Anti-Vampire League",
+        ),
+        Map(
+          "authorName" -> "T Zonnebloem",
+          "authorAffiliation" -> "Uitvindersgilde",
+        ),
+      )
   }
 
   it should "map other DOI to Other ID" in {
@@ -147,15 +143,11 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
       </ddm:DDM>
     val result = mapper.toDataverseDataset(ddm, Option(otherDoi), optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-    inside(result) {
-      case Success(Dataset(dsv)) =>
-        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
-        valueObjectsOfCompoundFields should contain(
-          Map(
-            "otherIdAgency" -> PrimitiveSingleValueField("otherIdAgency", ""),
-            "otherIdValue" -> PrimitiveSingleValueField("otherIdValue", otherDoi)
-          ))
-    }
+    coumpoundAsMaps(citationOf(result), "otherId") shouldBe
+      List(Map(
+        "otherIdAgency" -> "",
+        "otherIdValue" -> otherDoi,
+      ))
   }
 
   it should "not trip over a contributor with an author element in it (DD-963)" in {
@@ -206,19 +198,7 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
       </ddm:DDM>
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
-    result shouldBe a[Success[_]]
-    inside(result) {
-      case Success(Dataset(dsv)) =>
-        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
-        valueObjectsOfCompoundFields shouldNot contain(
-          Map(
-            "distributorName" -> PrimitiveSingleValueField("distributorName", "DANS-KNAW"),
-            "distributorAffiliation" -> PrimitiveSingleValueField("distributorAffiliation", ""),
-            "distributorAbbreviation" -> PrimitiveSingleValueField("distributorAbbreviation", ""),
-            "distributorURL" -> PrimitiveSingleValueField("distributorURL", ""),
-            "distributorLogoURL" -> PrimitiveSingleValueField("distributorLogoURL", "")
-          ))
-    }
+    citationOf(result).find(_.getTypeName == "distibutor") shouldNot be(defined)
   }
 
   it should "not map publisher DANS/KNAW" in {
@@ -247,18 +227,7 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-    inside(result) {
-      case Success(Dataset(dsv)) =>
-        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
-        valueObjectsOfCompoundFields shouldNot contain(
-          Map(
-            "distributorName" -> PrimitiveSingleValueField("distributorName", "DANS/KNAW"),
-            "distributorAffiliation" -> PrimitiveSingleValueField("distributorAffiliation", ""),
-            "distributorAbbreviation" -> PrimitiveSingleValueField("distributorAbbreviation", ""),
-            "distributorURL" -> PrimitiveSingleValueField("distributorURL", ""),
-            "distributorLogoURL" -> PrimitiveSingleValueField("distributorLogoURL", "")
-          ))
-    }
+    citationOf(result).find(_.getTypeName == "distibutor") shouldNot be(defined)
   }
 
   it should "map publisher (if not DANS) to distributor" in {
@@ -287,18 +256,25 @@ class DepositToDataverseMapperSpec extends TestSupportFixture {
 
     val result = mapper.toDataverseDataset(ddm, None, optAgreements, None, contactData, vaultMetadata)
     result shouldBe a[Success[_]]
-    inside(result) {
-      case Success(Dataset(dsv)) =>
-        val valueObjectsOfCompoundFields = dsv.metadataBlocks("citation").fields.filter(_.isInstanceOf[CompoundField]).map(_.asInstanceOf[CompoundField]).flatMap(_.value)
-        valueObjectsOfCompoundFields should contain(
-          Map(
-            "distributorName" -> PrimitiveSingleValueField("distributorName", "PUBLISHER01"),
-            "distributorAffiliation" -> PrimitiveSingleValueField("distributorAffiliation", ""),
-            "distributorAbbreviation" -> PrimitiveSingleValueField("distributorAbbreviation", ""),
-            "distributorURL" -> PrimitiveSingleValueField("distributorURL", ""),
-            "distributorLogoURL" -> PrimitiveSingleValueField("distributorLogoURL", "")
-          ))
-    }
+    coumpoundAsMaps(citationOf(result), "distributor") shouldBe
+      List(Map(
+        "distributorName" -> "PUBLISHER01",
+        "distributorAffiliation" -> "",
+        "distributorAbbreviation" -> "",
+        "distributorURL" -> "",
+        "distributorLogoURL" -> "",
+      ))
   }
 
+  private def citationOf(result: Try[Dataset]) = {
+    result.get.getDatasetVersion.getMetadataBlocks
+      .get("citation").getFields
+  }
+
+  private def coumpoundAsMaps(fields: util.List[MetadataField], otherId: String) = {
+    fields
+      .find(_.getTypeName == otherId).get
+      .asInstanceOf[CompoundField].getValue.map(_.values.map(_.asInstanceOf[PrimitiveSingleValueField]))
+      .map(_.map(f => f.getTypeName -> f.getValue).toMap)
+  }
 }

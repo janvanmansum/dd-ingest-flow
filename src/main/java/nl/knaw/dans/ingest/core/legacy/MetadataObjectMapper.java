@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.ingest.core.legacy;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import nl.knaw.dans.lib.dataverse.DataverseItemDeserializer;
@@ -24,7 +25,7 @@ import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 
-public class MapperForJava {
+public class MetadataObjectMapper {
 
     public static ObjectMapper get() {
         return mapper;
@@ -38,6 +39,7 @@ public class MapperForJava {
         module.addDeserializer(MetadataField.class, new MetadataFieldDeserializer());
         module.addDeserializer(DataverseItem.class, new DataverseItemDeserializer());
         module.addDeserializer(ResultItem.class, new ResultItemDeserializer(mapper));
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.registerModule(module);
         return mapper;
     }

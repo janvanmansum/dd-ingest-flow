@@ -15,8 +15,9 @@
  */
 package nl.knaw.dans.easy.dd2d.fieldbuilders
 
-import nl.knaw.dans.lib.scaladv.model.dataset.{ ControlledMultipleValueField, ControlledSingleValueField, MetadataField }
+import nl.knaw.dans.lib.dataverse.model.dataset.{ ControlledMultiValueField, ControlledSingleValueField, MetadataField }
 
+import scala.collection.JavaConverters.seqAsJavaListConverter
 import scala.collection.mutable
 
 class CvFieldBuilder(name: String, multipleValues: Boolean = true) extends AbstractFieldBuilder {
@@ -29,9 +30,9 @@ class CvFieldBuilder(name: String, multipleValues: Boolean = true) extends Abstr
 
   override def build(deduplicate: Boolean = false): Option[MetadataField] = {
     if (values.nonEmpty) {
-      if (multipleValues) Option(ControlledMultipleValueField(name, if (deduplicate) values.toList.distinct
-                                                                    else values.toList))
-      else Option(ControlledSingleValueField(name, values.head))
+      if (multipleValues) Option(new ControlledMultiValueField(name, if (deduplicate) values.toList.distinct.asJava
+                                                                     else values.toList.asJava))
+      else Option(new ControlledSingleValueField(name, values.head))
     }
     else Option.empty
   }

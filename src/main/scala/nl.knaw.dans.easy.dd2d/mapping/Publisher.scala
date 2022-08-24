@@ -20,14 +20,14 @@ import scala.xml.Node
 object Publisher extends BlockCitation {
   private val dansNames = List("DANS", "DANS-KNAW", "DANS/KNAW")
 
-  def toDistributorValueObject(node: Node): JsonObject = {
-    val m = FieldMap()
+  def toDistributorValueObject(node: Node): FieldMap = {
+    val m = FieldMapBuilder()
     m.addPrimitiveField(DISTRIBUTOR_NAME, node.text)
     m.addPrimitiveField(DISTRIBUTOR_URL, "")
     m.addPrimitiveField(DISTRIBUTOR_LOGO_URL, "")
     m.addPrimitiveField(DISTRIBUTOR_ABBREVIATION, "")
     m.addPrimitiveField(DISTRIBUTOR_AFFILIATION, "")
-    m.toJsonObject
+    m.build
   }
 
   def isDans(node: Node): Boolean = {
