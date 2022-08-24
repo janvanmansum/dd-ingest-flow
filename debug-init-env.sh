@@ -19,3 +19,12 @@ echo -n "Pre-creating log..."
 TEMPDIR=data
 touch $TEMPDIR/dd-ingest-flow.log
 echo "OK"
+
+echo -n "Creating test directories..."
+mkdir -p $TEMPDIR/migration/deposits
+mkdir -p $TEMPDIR/migration/out
+mkdir -p $TEMPDIR/import/inbox
+mkdir -p $TEMPDIR/import/outbox
+mkdir -p $TEMPDIR/auto-ingest/inbox
+mkdir -p $TEMPDIR/auto-ingest/outbox
+echo "OK"

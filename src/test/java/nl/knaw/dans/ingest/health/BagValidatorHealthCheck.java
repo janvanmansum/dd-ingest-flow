@@ -13,39 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.health;
+package nl.knaw.dans.ingest.health;
 
 import com.codahale.metrics.health.HealthCheck.Result;
+import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator;
 import nl.knaw.dans.ingest.core.legacy.DepositIngestTaskFactoryWrapper;
-import nl.knaw.dans.lib.dataverse.DataverseClient;
-import nl.knaw.dans.lib.dataverse.DataverseException;
+import nl.knaw.dans.ingest.health.DansBagValidatorHealthCheck;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
-class DataverseInstanceHealthCheck {
+class BagValidatorHealthCheck {
 
     @Test
-    void checkDataverseAvailable() throws IOException, DataverseException {
+    void checkDansBagValidatorAvailable() {
         DepositIngestTaskFactoryWrapper depositIngestTaskFactoryWrapper = Mockito.mock(DepositIngestTaskFactoryWrapper.class);
-        DataverseClient dataverseInstance = Mockito.mock(DataverseClient.class, RETURNS_DEEP_STUBS);
-        Mockito.when(depositIngestTaskFactoryWrapper.getDataverseClient()).thenReturn(dataverseInstance);
-        Result result = new DataverseHealthCheck(depositIngestTaskFactoryWrapper.getDataverseClient()).check();
+        DansBagValidator dansBagValidator = Mockito.mock(DansBagValidator.class, RETURNS_DEEP_STUBS);
+        Mockito.when(dansBagValidator.checkConnection().isSuccess()).thenReturn(true);
+        Mockito.when(depositIngestTaskFactoryWrapper.getDansBagValidatorInstance()).thenReturn(dansBagValidator);
+        Result result = new DansBagValidatorHealthCheck(depositIngestTaskFactoryWrapper.getDansBagValidatorInstance()).check();
         assertTrue(result.isHealthy());
     }
 
     @Test
-    void checkDataverseNotAvailable() throws IOException, DataverseException {
+    void checkDansBagValidatorNotAvailable() {
         DepositIngestTaskFactoryWrapper depositIngestTaskFactoryWrapper = Mockito.mock(DepositIngestTaskFactoryWrapper.class);
-        DataverseClient dataverseInstance = Mockito.mock(DataverseClient.class, RETURNS_DEEP_STUBS);
-        Mockito.doThrow(IOException.class).when(dataverseInstance).checkConnection();
-        Mockito.when(depositIngestTaskFactoryWrapper.getDataverseClient()).thenReturn(dataverseInstance);
-        Result result = new DataverseHealthCheck(depositIngestTaskFactoryWrapper.getDataverseClient()).check();
+        DansBagValidator dansBagValidator = Mockito.mock(DansBagValidator.class, RETURNS_DEEP_STUBS);
+        Mockito.when(dansBagValidator.checkConnection().isSuccess()).thenReturn(false);
+        Mockito.when(depositIngestTaskFactoryWrapper.getDansBagValidatorInstance()).thenReturn(dansBagValidator);
+        Result result = new DansBagValidatorHealthCheck(depositIngestTaskFactoryWrapper.getDansBagValidatorInstance()).check();
         assertFalse(result.isHealthy());
     }
 }

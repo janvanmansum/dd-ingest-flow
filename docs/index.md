@@ -114,7 +114,7 @@ From `<bag>/metadata/files.xml` the corresponding `<file>` element is looked up:
 * If an `<accessibleToRights>` element is found then the dataset's accessibility is based on the value in it:
 
   accessibleToRights  | Restrict?
-                            --------------------|---------------------------------
+  --------------------|---------------------------------
   `KNOWN`             |  Yes
   `NONE`              |  Yes
   `RESTRICTED_REQUEST`|  Yes
@@ -123,8 +123,8 @@ From `<bag>/metadata/files.xml` the corresponding `<file>` element is looked up:
   Otherwise the dataset's accessibility is based on the `<ddm:accessRights>` value found in
   `<bag>/metadata/dataset.xml`:
 
-  accessRights        | Restrict?
-                            --------------------|---------------------------------
+  accessRights             | Restrict?
+  -------------------------|---------------------------------
   `OPEN_ACCESS_FOR_REGISTERED_USERS`|  Yes
   `NO_ACCESS`              |  Yes
   `REQUEST_PERMISSION`     |  Yes
@@ -225,12 +225,14 @@ ARGUMENTS
 
 ### Server
 
-    positional arguments:
-    {server,check}         available commands
-    
-    named arguments:
-    -h, --help             show this help message and exit
-    -v, --version          show the application version and exit
+```text
+positional arguments:
+{server,check}         available commands
+
+named arguments:
+-h, --help             show this help message and exit
+-v, --version          show the application version and exit
+```
 
 ### Client
 

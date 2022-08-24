@@ -16,16 +16,12 @@
 
 package nl.knaw.dans.ingest;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.health.conf.HealthConfiguration;
 import nl.knaw.dans.ingest.core.config.DataverseConfigScala;
 import nl.knaw.dans.ingest.core.config.HttpServiceConfig;
 import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 public class DdIngestFlowConfiguration extends Configuration {
 
@@ -34,19 +30,6 @@ public class DdIngestFlowConfiguration extends Configuration {
     private HttpServiceConfig validateDansBag;
     private HttpServiceConfig managePrestaging;
     private DataSourceFactory taskEventDatabase;
-
-    @Valid
-    @NotNull
-    @JsonProperty("health")
-    private HealthConfiguration healthConfiguration = new HealthConfiguration();
-
-    public HealthConfiguration getHealthConfiguration() {
-        return healthConfiguration;
-    }
-
-    public void setHealthConfiguration(final HealthConfiguration healthConfiguration) {
-        this.healthConfiguration = healthConfiguration;
-    }
 
     public IngestFlowConfig getIngestFlow() {
         return ingestFlow;
@@ -70,14 +53,6 @@ public class DdIngestFlowConfiguration extends Configuration {
 
     public void setValidateDansBag(HttpServiceConfig validateDansBag) {
         this.validateDansBag = validateDansBag;
-    }
-
-    public HttpServiceConfig getManagePrestaging() {
-        return managePrestaging;
-    }
-
-    public void setManagePrestaging(HttpServiceConfig managePrestaging) {
-        this.managePrestaging = managePrestaging;
     }
 
     public DataSourceFactory getTaskEventDatabase() {

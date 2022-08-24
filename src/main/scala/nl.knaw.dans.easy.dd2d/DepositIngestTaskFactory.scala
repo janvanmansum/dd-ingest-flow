@@ -17,7 +17,6 @@ package nl.knaw.dans.easy.dd2d
 
 import better.files.File
 import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator
-import nl.knaw.dans.easy.dd2d.migrationinfo.MigrationInfo
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.apache.commons.csv.{ CSVFormat, CSVParser }
@@ -37,7 +36,6 @@ import scala.xml.{ Elem, XML }
  * @param isMigrated                                   is this a migrated dataset?
  * @param activeMetadataBlocks                         the metadata blocks enabled in the target dataverse
  * @param optDansBagValidator                          interface to the easy-validate-dans-bag service
- * @param migrationInfo                                optional interface to a migration info service
  * @param publishAwaitUnlockMaxNumberOfRetries         maximum number of times to poll for unlock after publish is called after ingest of the deposit
  * @param publishAwaitUnlockMillisecondsBetweenRetries number of milliseconds to wait between retries of unlock polling after publish
  * @param narcisClassification                         root element of the NARCIS SKOS file
@@ -53,7 +51,6 @@ class DepositIngestTaskFactory(isMigrated: Boolean = false,
                                activeMetadataBlocks: List[String],
                                optDansBagValidator: Option[DansBagValidator],
                                dataverseClient: DataverseClient,
-                               migrationInfo: Option[MigrationInfo],
                                publishAwaitUnlockMaxNumberOfRetries: Int,
                                publishAwaitUnlockMillisecondsBetweenRetries: Int,
                                narcisClassification: Elem,

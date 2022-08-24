@@ -18,8 +18,6 @@ package nl.knaw.dans.ingest;
 
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
-import io.dropwizard.health.conf.HealthConfiguration;
-import io.dropwizard.health.core.HealthCheckBundle;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Bootstrap;
@@ -28,8 +26,8 @@ import nl.knaw.dans.ingest.core.AutoIngestArea;
 import nl.knaw.dans.ingest.core.CsvMessageBodyWriter;
 import nl.knaw.dans.ingest.core.ImportArea;
 import nl.knaw.dans.ingest.core.TaskEvent;
-import nl.knaw.dans.ingest.core.health.DansBagValidatorHealthCheck;
-import nl.knaw.dans.ingest.core.health.DataverseHealthCheck;
+import nl.knaw.dans.ingest.health.DansBagValidatorHealthCheck;
+import nl.knaw.dans.ingest.health.DataverseHealthCheck;
 import nl.knaw.dans.ingest.core.legacy.DepositIngestTaskFactoryWrapper;
 import nl.knaw.dans.ingest.core.sequencing.TargetedTaskSequenceManager;
 import nl.knaw.dans.ingest.core.service.EnqueuingService;
@@ -65,13 +63,6 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
     @Override
     public void initialize(final Bootstrap<DdIngestFlowConfiguration> bootstrap) {
         bootstrap.addBundle(hibernateBundle);
-        bootstrap.addBundle(new HealthCheckBundle<DdIngestFlowConfiguration>() {
-
-            @Override
-            protected HealthConfiguration getHealthConfiguration(final DdIngestFlowConfiguration configuration) {
-                return configuration.getHealthConfiguration();
-            }
-        });
     }
 
     @Override
@@ -82,13 +73,11 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
             false,
             configuration.getIngestFlow(),
             configuration.getDataverse(),
-            configuration.getManagePrestaging(),
             configuration.getValidateDansBag());
         final DepositIngestTaskFactoryWrapper migrationTaskFactoryWrapper = new DepositIngestTaskFactoryWrapper(
             true,
             configuration.getIngestFlow(),
             configuration.getDataverse(),
-            configuration.getManagePrestaging(),
             configuration.getValidateDansBag());
 
         final EnqueuingService enqueuingService = new EnqueuingServiceImpl(targetedTaskSequenceManager, 3 /* Must support importArea, migrationArea and autoIngestArea */);
