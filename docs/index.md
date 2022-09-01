@@ -113,22 +113,23 @@ From `<bag>/metadata/files.xml` the corresponding `<file>` element is looked up:
 * The child elements of `<file>` are used to [determine the description attribute in Dataverse](#description-attribute)
 * If an `<accessibleToRights>` element is found then the dataset's accessibility is based on the value in it:
 
-  accessibleToRights  | Restrict?
-  --------------------|---------------------------------
-  `KNOWN`             |  Yes
-  `NONE`              |  Yes
-  `RESTRICTED_REQUEST`|  Yes
-  `ANONYMOUS`         |  No
 
-  Otherwise the dataset's accessibility is based on the `<ddm:accessRights>` value found in
+| accessibleToRights   | Restrict? |
+|----------------------|-----------|
+| `KNOWN`              | Yes       |
+| `NONE`               | Yes       |
+| `RESTRICTED_REQUEST` | Yes       |
+| `ANONYMOUS`          | No        |
+
+Otherwise the dataset's accessibility is based on the `<ddm:accessRights>` value found in
   `<bag>/metadata/dataset.xml`:
 
-  accessRights             | Restrict?
-  -------------------------|---------------------------------
-  `OPEN_ACCESS_FOR_REGISTERED_USERS`|  Yes
-  `NO_ACCESS`              |  Yes
-  `REQUEST_PERMISSION`     |  Yes
-  `OPEN_ACCESS`            |  No
+| accessRights                       | Restrict? |
+|------------------------------------|-----------|
+| `OPEN_ACCESS_FOR_REGISTERED_USERS` | Yes       |
+| `NO_ACCESS`                        | Yes       |
+| `REQUEST_PERMISSION`               | Yes       |
+| `OPEN_ACCESS`                      | No        |
 
 ##### Description attribute
 
@@ -251,7 +252,7 @@ BUILDING FROM SOURCE
 --------------------
 Prerequisites:
 
-* Java 8 or higher
+* Java 11 or higher
 * Maven 3.3.3 or higher
 * RPM
 
