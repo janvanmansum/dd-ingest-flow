@@ -18,7 +18,7 @@ package nl.knaw.dans.easy.dd2d
 import better.files.File
 import nl.knaw.dans.easy.dd2d.OutboxSubdir.{ FAILED, OutboxSubdir, PROCESSED, REJECTED }
 import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageType
-import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidationResult, DansBagValidator, InformationPackageType }
+import nl.knaw.dans.easy.dd2d.dansbag.{ DansBagValidationResult, DansBagValidator, InformationPackageType, RuleViolation }
 import nl.knaw.dans.easy.dd2d.mapping.FieldMap
 import nl.knaw.dans.lib.dataverse.DataverseClient
 import nl.knaw.dans.lib.dataverse.model.dataset
@@ -43,7 +43,7 @@ import scala.xml.{ Elem, Node }
 /**
  * Checks one deposit and then ingests it into Dataverse.
  *
- * @param deposit  the deposit to ingest
+ * @param deposit the deposit to ingest
  */
 case class DepositIngestTask(deposit: Deposit,
                              optFileExclusionPattern: Option[Pattern],
@@ -63,7 +63,7 @@ case class DepositIngestTask(deposit: Deposit,
                              repordIdToTerm: Map[String, String],
                              outboxDir: File) extends Task[Deposit] with DebugEnhancedLogging {
   trace(deposit)
-  protected val informationPackageType: InformationPackageType = InformationPackageType.SIP
+  protected val informationPackageType: InformationPackageType = InformationPackageType.DEPOSIT
   protected val bagProfileVersion: Int = 1
 
   private val datasetMetadataMapper = new DepositToDvDatasetMetadataMapper(deduplicate, activeMetadataBlocks, narcisClassification, iso1ToDataverseLanguage, iso2ToDataverseLanguage, repordIdToTerm)
@@ -134,16 +134,16 @@ case class DepositIngestTask(deposit: Deposit,
   }
 
   private def rejectIfInvalid(validationResult: DansBagValidationResult): Try[Unit] = Try {
-    if (!validationResult.isCompliant) throw RejectedDepositException(deposit,
+    if (!validationResult.`Is compliant`) throw RejectedDepositException(deposit,
       s"""
-         |Bag was not valid according to Profile Version ${ validationResult.profileVersion }.
+         |Bag was not valid according to Profile Version ${ validationResult.`Profile version` }.
          |Violations:
-         |${ validationResult.ruleViolations.map(_.map(formatViolation).mkString("\n")).getOrElse("") }
+         |${ validationResult.`Rule violations`.map(formatViolation).mkString("\n") }
                       """.stripMargin)
   }
 
-  private def formatViolation(v: (String, String)): String = v match {
-    case (nr, msg) => s" - [$nr] $msg"
+  private def formatViolation(v: RuleViolation): String = v match {
+    case RuleViolation(nr, msg) => s" - [$nr] $msg"
   }
 
   private def getMetadata: Try[Dataset] = {

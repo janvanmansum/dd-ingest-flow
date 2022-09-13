@@ -34,12 +34,12 @@ import scala.util.{ Failure, Try }
  * @param ruleViolations  The rules that were violated. The violations are (rule number, violation
  *                        details) pairs. This field is absent if `isCompliant` is `true`.
  */
-case class DansBagValidationResult(bagUri: String,
-                                   bag: String,
-                                   infoPackageType: InformationPackageType.Value,
-                                   profileVersion: Int,
-                                   isCompliant: Boolean,
-                                   ruleViolations: Option[Seq[(String, String)]])
+case class DansBagValidationResult(`Bag location`: String,
+                                   Name: String,
+                                   `Information package type`: InformationPackageType.Value,
+                                   `Profile version`: String,
+                                   `Is compliant`: Boolean,
+                                   `Rule violations`: Seq[RuleViolation])
 object DansBagValidationResult {
   private implicit val jsonFormats: Formats = DefaultFormats +
     new EnumNameSerializer(InformationPackageType)
@@ -53,5 +53,5 @@ object DansBagValidationResult {
 
 object InformationPackageType extends Enumeration {
   type InformationPackageType = Value
-  val AIP, SIP = Value
+  val DEPOSIT, MIGRATION = Value
 }
