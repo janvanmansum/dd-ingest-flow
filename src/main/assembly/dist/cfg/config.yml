@@ -87,7 +87,7 @@ taskEventDatabase:
     hibernate.hbm2ddl.auto: update
 
 validateDansBag:
-  baseUrl: 'http://localhost:20180'
+  baseUrl: 'http://localhost:20330'
   connectionTimeoutMs: 10000
   readTimeoutMs: 30000
 

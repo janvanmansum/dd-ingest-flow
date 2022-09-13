@@ -18,7 +18,9 @@ package nl.knaw.dans.easy.dd2d.dansbag
 import better.files.File
 import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageType
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import scalaj.http.Http
+import org.json4s.{ DefaultFormats, Formats }
+import org.json4s.native.Serialization
+import scalaj.http.{ Http, MultiPart }
 
 import java.net.URI
 import scala.util.Try
@@ -41,14 +43,15 @@ class DansBagValidator(serviceUri: URI, connTimeoutMs: Int, readTimeoutMs: Int) 
   }
 
   def validateBag(bagDir: File, informationPackageType: InformationPackageType, profileVersion: Int): Try[DansBagValidationResult] = {
+    implicit val jsonFormats: Formats = DefaultFormats
     trace(bagDir)
     Try {
-      val validationUri = serviceUri.resolve(s"validate?infoPackageType=$informationPackageType&profileVersion=$profileVersion&uri=${ bagDir.path.toUri }")
+      val validationUri = serviceUri.resolve(s"validate")
+      val command = DansBagValidationCommand(bagLocation = bagDir.path.toString, informationPackageType)
       logger.debug(s"Calling Dans Bag Validation Service with ${ validationUri.toASCIIString }")
       Http(s"${ validationUri.toASCIIString }")
         .timeout(connTimeoutMs, readTimeoutMs)
-        .method("POST")
-        .header("Accept", "application/json")
+        .postMulti(MultiPart(data = Serialization.write(command), mime = "application/json", name = "command", filename = "command"))
         .asString
     } flatMap {
       case r if r.code == 200 =>
