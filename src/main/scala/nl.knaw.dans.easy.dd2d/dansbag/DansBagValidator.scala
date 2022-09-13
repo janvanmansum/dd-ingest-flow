@@ -47,11 +47,11 @@ class DansBagValidator(serviceUri: URI, connTimeoutMs: Int, readTimeoutMs: Int) 
     trace(bagDir)
     Try {
       val validationUri = serviceUri.resolve(s"validate")
-      val command = DansBagValidationCommand(bagLocation = bagDir.path.toString, informationPackageType)
-      logger.debug(s"Calling Dans Bag Validation Service with ${ validationUri.toASCIIString }")
+      val command = Serialization.write(DansBagValidationCommand(bagLocation = bagDir.path.toString, packageType = informationPackageType.toString))
+      logger.debug(s"Calling Dans Bag Validation Service with  command '$command'")
       Http(s"${ validationUri.toASCIIString }")
         .timeout(connTimeoutMs, readTimeoutMs)
-        .postMulti(MultiPart(data = Serialization.write(command), mime = "application/json", name = "command", filename = "command"))
+        .postMulti(MultiPart(data = command, mime = "application/json", name = "command", filename = "command"))
         .asString
     } flatMap {
       case r if r.code == 200 =>

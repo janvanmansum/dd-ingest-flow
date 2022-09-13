@@ -17,7 +17,7 @@ package nl.knaw.dans.easy.dd2d.dansbag
 
 import nl.knaw.dans.easy.dd2d.dansbag.InformationPackageType.InformationPackageType
 
-case class DansBagValidationCommand(bagLocation: String, packageType: InformationPackageType)
+case class DansBagValidationCommand(bagLocation: String, packageType: String)
 
 
 
