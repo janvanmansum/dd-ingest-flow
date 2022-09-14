@@ -249,23 +249,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration combine.children="override">
-                            <group>Application/Archiving</group>
-                            <mappings combine.children="append">
-                                <mapping>
-                                    <directory>/opt/${dans-provider-name}/${project.artifactId}/bin</directory>
-                                    <filemode>755</filemode>
-                                    <sources>
-                                        <source>
-                                            <location>src/main/assembly/dist/bin</location>
-                                            <includes>
-                                                <include>ingest-flow</include>
-                                            </includes>
-                                        </source>
-                                    </sources>
-                                </mapping>
-                            </mappings>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
