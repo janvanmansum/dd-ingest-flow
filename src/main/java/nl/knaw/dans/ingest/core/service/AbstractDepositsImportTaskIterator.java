@@ -25,8 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.stream.Stream;
 
-public abstract class AbstractDepositsImportTaskIterator implements Iterator<DepositImportTaskWrapper>  {
+public abstract class AbstractDepositsImportTaskIterator implements Iterator<DepositImportTaskWrapper> {
     private static final Logger log = LoggerFactory.getLogger(AbstractDepositsImportTaskIterator.class);
     private final LinkedBlockingDeque<DepositImportTaskWrapper> deque = new LinkedBlockingDeque<>();
     private final Path inboxDir;
@@ -43,9 +44,8 @@ public abstract class AbstractDepositsImportTaskIterator implements Iterator<Dep
     }
 
     protected boolean readAllDepositsFromInbox() {
-        try {
-            Files.list(inboxDir)
-                .map(d -> taskFactory.createIngestTask(d, outBox, eventWriter))
+        try (Stream<Path> paths = Files.list(inboxDir)) {
+            paths.map(d -> taskFactory.createIngestTask(d, outBox, eventWriter))
                 .sorted().forEach(deque::add);
             return !deque.isEmpty();
         }

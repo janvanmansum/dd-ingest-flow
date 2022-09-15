@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.nio.file.Path;
 
-public class StartImport {
+public class StartBatchImport {
     private Path batch;
     private boolean continuePrevious = false;
 
