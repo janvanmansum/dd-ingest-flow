@@ -21,9 +21,11 @@ import nl.knaw.dans.ingest.core.service.TaskEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 public class AbstractIngestArea {
     private static final Logger log = LoggerFactory.getLogger(AbstractIngestArea.class);
@@ -43,7 +45,9 @@ public class AbstractIngestArea {
     }
 
     protected static boolean nonEmpty(Path p) throws IOException {
-        return Files.list(p).findAny().isPresent();
+        try (Stream<Path> files = Files.list(p)) {
+            return files.findAny().isPresent();
+        }
     }
 
     protected void validateInDir(Path inDir) {

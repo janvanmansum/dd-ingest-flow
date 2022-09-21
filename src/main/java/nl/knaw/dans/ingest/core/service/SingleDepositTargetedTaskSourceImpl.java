@@ -22,6 +22,8 @@ import java.nio.file.Path;
 import java.util.Iterator;
 
 public class SingleDepositTargetedTaskSourceImpl implements TargetedTaskSource<DepositImportTaskWrapper> {
+    private final String name;
+
     private final Path deposit;
 
     private final Path outbox;
@@ -30,7 +32,8 @@ public class SingleDepositTargetedTaskSourceImpl implements TargetedTaskSource<D
 
     private final EventWriter eventWriter;
 
-    public SingleDepositTargetedTaskSourceImpl(Path deposit, Path outbox, TaskEventService taskEventService, DepositIngestTaskFactoryWrapper taskFactory) {
+    public SingleDepositTargetedTaskSourceImpl(String name, Path deposit, Path outbox, TaskEventService taskEventService, DepositIngestTaskFactoryWrapper taskFactory) {
+        this.name = name;
         this.deposit = deposit;
         this.outbox = outbox;
         this.taskFactory = taskFactory;

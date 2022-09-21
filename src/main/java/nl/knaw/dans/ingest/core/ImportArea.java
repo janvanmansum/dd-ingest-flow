@@ -18,6 +18,7 @@ package nl.knaw.dans.ingest.core;
 import nl.knaw.dans.ingest.core.legacy.DepositImportTaskWrapper;
 import nl.knaw.dans.ingest.core.legacy.DepositIngestTaskFactoryWrapper;
 import nl.knaw.dans.ingest.core.service.EnqueuingService;
+import nl.knaw.dans.ingest.core.service.SingleDepositTargetedTaskSourceImpl;
 import nl.knaw.dans.ingest.core.service.TargetedTaskSource;
 import nl.knaw.dans.ingest.core.service.TargetedTaskSourceImpl;
 import nl.knaw.dans.ingest.core.service.TaskEventService;
@@ -40,29 +41,47 @@ public class ImportArea extends AbstractIngestArea {
         this.migrationTaskFactory = migrationTaskFactory;
     }
 
-    public String startBatch(Path batchPath, boolean continuePrevious, boolean isMigration) {
-        log.trace("startBatch({}, {}, {})", batchPath, continuePrevious, isMigration);
-        Path relativeBatchDir;
-        if (batchPath.isAbsolute()) {
-            relativeBatchDir = inboxDir.relativize(batchPath);
-            if (relativeBatchDir.startsWith(Paths.get(".."))) {
+    public String startImport(Path inputPath, boolean isBatch, boolean continuePrevious, boolean isMigration) {
+        log.trace("startBatch({}, {}, {})", inputPath, continuePrevious, isMigration);
+        Path relativeInputDir;
+        if (inputPath.isAbsolute()) {
+            relativeInputDir = inboxDir.relativize(inputPath);
+            if (relativeInputDir.startsWith(Paths.get(".."))) {
                 throw new IllegalArgumentException(
-                    String.format("Batch directory must be subdirectory of %s. Provide correct absolute path or a path relative to this directory.", inboxDir));
+                    String.format("Input directory must be subdirectory of %s. Provide correct absolute path or a path relative to this directory.", inboxDir));
             }
         }
         else {
-            relativeBatchDir = batchPath;
+            relativeInputDir = inputPath;
         }
-        Path inDir = inboxDir.resolve(relativeBatchDir);
-        Path outDir = outboxDir.resolve(relativeBatchDir);
-        log.debug("inDir = {}, outDir = {}", inDir, outDir);
-        validateInDir(inDir);
-        initOutbox(outDir, continuePrevious);
-        String batchName = relativeBatchDir.toString();
-        TargetedTaskSource<DepositImportTaskWrapper> taskSource = new TargetedTaskSourceImpl(batchName, inDir, outDir, taskEventService,
-            isMigration ? migrationTaskFactory : taskFactory);
-        batches.put(batchName, taskSource);
+
+        Path batchInDir;
+        Path batchOutDir;
+
+        if (isBatch) {
+            batchInDir = inboxDir.resolve(relativeInputDir);
+            batchOutDir = outboxDir.resolve(relativeInputDir);
+        }
+        else {
+            batchInDir = inboxDir.resolve(relativeInputDir.getParent());
+            batchOutDir = outboxDir.resolve(relativeInputDir.getParent());
+        }
+        log.debug("relativeInputDir = {}, batchInDir = {}, batchOutDir = {}", relativeInputDir, batchInDir, batchOutDir);
+        validateInDir(batchInDir);
+        initOutbox(batchOutDir, continuePrevious || !isBatch);
+        String taskName = relativeInputDir.toString();
+        TargetedTaskSource<DepositImportTaskWrapper> taskSource;
+        if (isBatch) {
+            taskSource = new TargetedTaskSourceImpl(taskName, batchInDir, batchOutDir, taskEventService,
+                isMigration ? migrationTaskFactory : taskFactory);
+        }
+        else {
+            taskSource = new SingleDepositTargetedTaskSourceImpl(taskName, inboxDir.resolve(relativeInputDir), batchOutDir, taskEventService,
+                isMigration ? migrationTaskFactory : taskFactory);
+        }
+        batches.put(taskName, taskSource);
         enqueuingService.executeEnqueue(taskSource);
-        return  relativeBatchDir.toString();
+        return relativeInputDir.toString();
     }
+
 }

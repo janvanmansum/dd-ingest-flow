@@ -16,7 +16,7 @@
 package nl.knaw.dans.ingest.resources;
 
 import nl.knaw.dans.ingest.api.ResponseMessage;
-import nl.knaw.dans.ingest.api.StartBatchImport;
+import nl.knaw.dans.ingest.api.StartImport;
 import nl.knaw.dans.ingest.core.ImportArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,18 +43,19 @@ public class MigrationsResource {
     @POST
     @Path("/:start")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response startBatch(StartBatchImport start) {
+    public Response startBatch(StartImport start) {
         log.trace("Received command = {}", start);
-        String batchName;
+        String taskName;
         try {
-            batchName = migrationArea.startBatch(start.getBatch(), start.isContinue(), true);
+            taskName = migrationArea.startImport(start.getInputPath(), start.isBatch(), start.isContinue(), true);
         }
         catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());
         }
         return Response.accepted(
                 new ResponseMessage(Response.Status.ACCEPTED.getStatusCode(),
-                    String.format("migration request was received (batch = %s, continue = %s", batchName, start.isContinue())))
+                    String.format("migration request was received (batch = %s, continue = %s", taskName, start.isContinue())))
             .build();
     }
+
 }
