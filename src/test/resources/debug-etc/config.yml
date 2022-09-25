@@ -70,9 +70,10 @@ taskEventDatabase:
 
 validateDansBag:
   baseUrl: 'http://localhost:20330'
+  pingUrl: 'http://localhost:20331/ping'
   connectionTimeoutMs: 10000
   readTimeoutMs: 30000
-
+  
 #
 # See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
 #
