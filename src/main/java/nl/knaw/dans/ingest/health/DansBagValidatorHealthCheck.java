@@ -19,6 +19,8 @@ import com.codahale.metrics.health.HealthCheck;
 import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.runtime.BoxedUnit;
+import scala.util.Try;
 
 public class DansBagValidatorHealthCheck extends HealthCheck {
     private static final Logger log = LoggerFactory.getLogger(DansBagValidatorHealthCheck.class);
@@ -33,11 +35,13 @@ public class DansBagValidatorHealthCheck extends HealthCheck {
     protected Result check() {
         log.debug("Checking that Dans Bag Validator is available");
 
-        if (dansBagValidatorInstance.checkConnection().isSuccess()) {
+        try {
+            dansBagValidatorInstance.checkConnection();
             return Result.healthy();
         }
-        else {
-            return Result.unhealthy("Dans Bag Validator is not available");
+        catch (Exception e) {
+            return Result.unhealthy("Dans Bag Validator is not available: %s", e.getMessage());
         }
+
     }
 }

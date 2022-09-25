@@ -45,16 +45,17 @@ public class MigrationsResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response startBatch(StartImport start) {
         log.trace("Received command = {}", start);
-        String batchName;
+        String taskName;
         try {
-            batchName = migrationArea.startBatch(start.getBatch(), start.isContinue(), true);
+            taskName = migrationArea.startImport(start.getInputPath(), start.isBatch(), start.isContinue(), true);
         }
         catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());
         }
         return Response.accepted(
                 new ResponseMessage(Response.Status.ACCEPTED.getStatusCode(),
-                    String.format("migration request was received (batch = %s, continue = %s", batchName, start.isContinue())))
+                    String.format("migration request was received (batch = %s, continue = %s", taskName, start.isContinue())))
             .build();
     }
+
 }

@@ -18,17 +18,20 @@ package nl.knaw.dans.ingest;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import nl.knaw.dans.ingest.core.config.DataverseConfigScala;
-import nl.knaw.dans.ingest.core.config.HttpServiceConfig;
+import nl.knaw.dans.ingest.core.config.DataverseExtra;
+import nl.knaw.dans.ingest.core.config.ValidateDansBagConfig;
 import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
-
+import nl.knaw.dans.lib.util.DataverseClientFactory;
 
 public class DdIngestFlowConfiguration extends Configuration {
 
     private IngestFlowConfig ingestFlow;
-    private DataverseConfigScala dataverse;
-    private HttpServiceConfig validateDansBag;
-    private HttpServiceConfig managePrestaging;
+
+    private DataverseClientFactory dataverse;
+
+    private DataverseExtra dataverseExtra;
+
+    private ValidateDansBagConfig validateDansBag;
     private DataSourceFactory taskEventDatabase;
 
     public IngestFlowConfig getIngestFlow() {
@@ -39,19 +42,28 @@ public class DdIngestFlowConfiguration extends Configuration {
         this.ingestFlow = ingestFlow;
     }
 
-    public DataverseConfigScala getDataverse() {
+
+    public DataverseClientFactory getDataverse() {
         return dataverse;
     }
 
-    public void setDataverse(DataverseConfigScala dataverse) {
+    public void setDataverse(DataverseClientFactory dataverse) {
         this.dataverse = dataverse;
     }
 
-    public HttpServiceConfig getValidateDansBag() {
+    public DataverseExtra getDataverseExtra() {
+        return dataverseExtra;
+    }
+
+    public void setDataverseExtra(DataverseExtra dataverseExtra) {
+        this.dataverseExtra = dataverseExtra;
+    }
+
+    public ValidateDansBagConfig getValidateDansBag() {
         return validateDansBag;
     }
 
-    public void setValidateDansBag(HttpServiceConfig validateDansBag) {
+    public void setValidateDansBag(ValidateDansBagConfig validateDansBag) {
         this.validateDansBag = validateDansBag;
     }
 

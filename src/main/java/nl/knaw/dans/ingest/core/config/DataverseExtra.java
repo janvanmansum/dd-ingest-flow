@@ -15,34 +15,23 @@
  */
 package nl.knaw.dans.ingest.core.config;
 
-import java.net.URI;
+public class DataverseExtra {
+    private int publishAwaitUnlockMaxRetries;
+    private int publishAwaitUnlockWaitTimeMs;
 
-public class HttpServiceConfig {
-    private URI baseUrl;
-    private int connectionTimeoutMs;
-    private int readTimeoutMs;
-
-    public URI getBaseUrl() {
-        return baseUrl;
+    public int getPublishAwaitUnlockMaxRetries() {
+        return publishAwaitUnlockMaxRetries;
     }
 
-    public void setBaseUrl(URI baseUrl) {
-        this.baseUrl = baseUrl;
+    public void setPublishAwaitUnlockMaxRetries(int publishAwaitUnlockMaxRetries) {
+        this.publishAwaitUnlockMaxRetries = publishAwaitUnlockMaxRetries;
     }
 
-    public int getConnectionTimeoutMs() {
-        return connectionTimeoutMs;
+    public int getPublishAwaitUnlockWaitTimeMs() {
+        return publishAwaitUnlockWaitTimeMs;
     }
 
-    public void setConnectionTimeoutMs(int connectionTimeoutMs) {
-        this.connectionTimeoutMs = connectionTimeoutMs;
-    }
-
-    public int getReadTimeoutMs() {
-        return readTimeoutMs;
-    }
-
-    public void setReadTimeoutMs(int readTimeoutMs) {
-        this.readTimeoutMs = readTimeoutMs;
+    public void setPublishAwaitUnlockWaitTimeMs(int publishAwaitUnlockWaitTimeMs) {
+        this.publishAwaitUnlockWaitTimeMs = publishAwaitUnlockWaitTimeMs;
     }
 }

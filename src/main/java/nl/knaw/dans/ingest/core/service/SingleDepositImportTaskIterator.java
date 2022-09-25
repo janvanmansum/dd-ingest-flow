@@ -13,25 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.config;
+package nl.knaw.dans.ingest.core.service;
 
-public class DataverseConfigScala {
-    private HttpServiceConfig http;
-    private DataverseApiConfig api;
+import nl.knaw.dans.ingest.core.legacy.DepositIngestTaskFactoryWrapper;
 
-    public HttpServiceConfig getHttp() {
-        return http;
-    }
+import java.nio.file.Path;
 
-    public void setHttp(HttpServiceConfig http) {
-        this.http = http;
-    }
-
-    public DataverseApiConfig getApi() {
-        return api;
-    }
-
-    public void setApi(DataverseApiConfig api) {
-        this.api = api;
+public class SingleDepositImportTaskIterator extends AbstractDepositsImportTaskIterator {
+    public SingleDepositImportTaskIterator(Path deposit, Path outBox, DepositIngestTaskFactoryWrapper taskFactory,
+        EventWriter eventWriter) {
+        super(null, outBox, taskFactory, eventWriter);
+        addTaskForDeposit(deposit);
     }
 }

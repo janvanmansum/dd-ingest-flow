@@ -20,15 +20,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 
 public class StartImport {
-    private Path batch;
+    private Path inputPath;
+
+    private boolean isBatch = false;
     private boolean continuePrevious = false;
 
-    public Path getBatch() {
-        return batch;
+    public Path getInputPath() {
+        return inputPath;
     }
 
-    public void setBatch(Path batch) {
-        this.batch = batch;
+    public void setInputPath(Path inputPath) {
+        this.inputPath = inputPath;
+    }
+
+    public boolean isBatch() {
+        return isBatch;
+    }
+
+    public void setBatch(boolean batch) {
+        isBatch = batch;
     }
 
     @JsonProperty("continue")
@@ -44,7 +54,8 @@ public class StartImport {
     @Override
     public String toString() {
         return "StartImport{" +
-            "batch=" + batch +
+            "inputPath=" + inputPath +
+            ", isBatch=" + isBatch +
             ", continuePrevious=" + continuePrevious +
             '}';
     }
