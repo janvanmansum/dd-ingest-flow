@@ -72,12 +72,14 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
         final DepositIngestTaskFactoryWrapper ingestTaskFactoryWrapper = new DepositIngestTaskFactoryWrapper(
             false,
             configuration.getIngestFlow(),
-            configuration.getDataverse(),
+            configuration.getDataverse().build(),
+            configuration.getDataverseExtra(),
             configuration.getValidateDansBag());
         final DepositIngestTaskFactoryWrapper migrationTaskFactoryWrapper = new DepositIngestTaskFactoryWrapper(
             true,
             configuration.getIngestFlow(),
-            configuration.getDataverse(),
+            configuration.getDataverse().build(),
+            configuration.getDataverseExtra(),
             configuration.getValidateDansBag());
 
         final EnqueuingService enqueuingService = new EnqueuingServiceImpl(targetedTaskSequenceManager, 3 /* Must support importArea, migrationArea and autoIngestArea */);

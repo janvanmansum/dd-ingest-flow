@@ -17,7 +17,7 @@ package nl.knaw.dans.ingest.core.config;
 
 import java.net.URI;
 
-public class HttpServiceConfig {
+public class ValidateDansBagConfig {
     private URI baseUrl;
     private int connectionTimeoutMs;
     private int readTimeoutMs;

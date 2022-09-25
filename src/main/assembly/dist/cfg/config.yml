@@ -64,17 +64,14 @@ ingestFlow:
 # Parameters related to communication with the Dataverse instance
 #
 dataverse:
-  http:
-    baseUrl: 'http://localhost:8080'
-    connectionTimeoutMs: 10000
-    readTimeoutMs: 30000
-  api:
-    apiVersion: 1
-    apiKey: 'changeme'
-    publishAwaitUnlockMaxRetries: 900
-    publishAwaitUnlockWaitTimeMs: 3000
-    awaitUnlockMaxRetries: 30
-    awaitUnlockWaitTimeMs: 500
+  baseUrl: 'http://localhost:8080'
+  apiKey: 'changeme'
+  unblockKey: 'changeme'
+  awaitLockStateMaxNumberOfRetries: 30
+  awaitLockStateMillisecondsBetweenRetries: 500
+  # TODO: add to dans-dataverse-client-lib
+  #  connectionTimeoutMs: 10000
+  #  readTimeoutMs: 30000
 
 taskEventDatabase:
   driverClass: org.postgresql.Driver

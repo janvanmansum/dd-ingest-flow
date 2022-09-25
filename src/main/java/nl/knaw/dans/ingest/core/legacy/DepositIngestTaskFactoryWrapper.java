@@ -20,12 +20,11 @@ import nl.knaw.dans.easy.dd2d.Deposit;
 import nl.knaw.dans.easy.dd2d.DepositIngestTaskFactory;
 import nl.knaw.dans.easy.dd2d.ZipFileHandler;
 import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator;
-import nl.knaw.dans.ingest.core.config.DataverseConfigScala;
-import nl.knaw.dans.ingest.core.config.HttpServiceConfig;
+import nl.knaw.dans.ingest.core.config.DataverseExtra;
+import nl.knaw.dans.ingest.core.config.ValidateDansBagConfig;
 import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
 import nl.knaw.dans.ingest.core.service.EventWriter;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
-import nl.knaw.dans.lib.util.DataverseClientFactory;
 import scala.Option;
 import scala.collection.immutable.List;
 import scala.collection.immutable.Map;
@@ -46,10 +45,11 @@ public class DepositIngestTaskFactoryWrapper {
     public DepositIngestTaskFactoryWrapper(
         boolean isMigration,
         IngestFlowConfig ingestFlowConfig,
-        DataverseConfigScala dataverseConfigScala,
-        HttpServiceConfig validationDansBagConfig) {
+        DataverseClient dataverseClient,
+        DataverseExtra dataverseExtra,
+        ValidateDansBagConfig validationDansBagConfig) {
 
-        dataverseClient = buildDataverseClient(dataverseConfigScala);
+        this.dataverseClient = dataverseClient;
 
         validator = new DansBagValidator(
             DepositIngestTaskFactory.appendSlash(validationDansBagConfig.getBaseUrl()),
@@ -74,24 +74,14 @@ public class DepositIngestTaskFactoryWrapper {
             DepositIngestTaskFactory.getActiveMetadataBlocks(dataverseClient).get(),
             Option.apply(validator),
             dataverseClient,
-            dataverseConfigScala.getApi().getPublishAwaitUnlockMaxRetries(),
-            dataverseConfigScala.getApi().getPublishAwaitUnlockWaitTimeMs(),
+            dataverseExtra.getPublishAwaitUnlockMaxRetries(),
+            dataverseExtra.getPublishAwaitUnlockWaitTimeMs(),
             narcisClassification,
             iso1ToDataverseLanguage,
             iso2ToDataverseLanguage,
             variantToLicense,
             supportedLicenses,
             reportIdToTerm);
-    }
-
-    private DataverseClient buildDataverseClient(DataverseConfigScala dataverseConfigScala) {
-        DataverseClientFactory dataverseClientFactory = new DataverseClientFactory();
-        dataverseClientFactory.setBaseUrl(dataverseConfigScala.getHttp().getBaseUrl());
-        dataverseClientFactory.setApiKey(dataverseConfigScala.getApi().getApiKey());
-        dataverseClientFactory.setUnblockKey(dataverseConfigScala.getApi().getUnblockKey());
-        dataverseClientFactory.setAwaitLockStateMaxNumberOfRetries(dataverseConfigScala.getApi().getAwaitUnlockMaxRetries());
-        dataverseClientFactory.setAwaitLockStateMillisecondsBetweenRetries(dataverseConfigScala.getApi().getAwaitUnlockWaitTimeMs());
-        return dataverseClientFactory.build();
     }
 
     private Map<String, String> getMap(IngestFlowConfig ingestFlowConfig, String mappingCsv, String keyColumn, String valueColumn) {

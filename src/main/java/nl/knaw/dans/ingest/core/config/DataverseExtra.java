@@ -15,23 +15,23 @@
  */
 package nl.knaw.dans.ingest.core.config;
 
-public class DataverseConfigScala {
-    private HttpServiceConfig http;
-    private DataverseApiConfig api;
+public class DataverseExtra {
+    private int publishAwaitUnlockMaxRetries;
+    private int publishAwaitUnlockWaitTimeMs;
 
-    public HttpServiceConfig getHttp() {
-        return http;
+    public int getPublishAwaitUnlockMaxRetries() {
+        return publishAwaitUnlockMaxRetries;
     }
 
-    public void setHttp(HttpServiceConfig http) {
-        this.http = http;
+    public void setPublishAwaitUnlockMaxRetries(int publishAwaitUnlockMaxRetries) {
+        this.publishAwaitUnlockMaxRetries = publishAwaitUnlockMaxRetries;
     }
 
-    public DataverseApiConfig getApi() {
-        return api;
+    public int getPublishAwaitUnlockWaitTimeMs() {
+        return publishAwaitUnlockWaitTimeMs;
     }
 
-    public void setApi(DataverseApiConfig api) {
-        this.api = api;
+    public void setPublishAwaitUnlockWaitTimeMs(int publishAwaitUnlockWaitTimeMs) {
+        this.publishAwaitUnlockWaitTimeMs = publishAwaitUnlockWaitTimeMs;
     }
 }
