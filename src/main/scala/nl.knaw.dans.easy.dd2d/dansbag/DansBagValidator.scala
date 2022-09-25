@@ -25,21 +25,26 @@ import scalaj.http.{ Http, MultiPart }
 import java.net.URI
 import scala.util.Try
 
-class DansBagValidator(serviceUri: URI, connTimeoutMs: Int, readTimeoutMs: Int) extends DebugEnhancedLogging {
-  def checkConnection(): Try[Unit] = {
-    logger.debug("Checking if validator service can be reached")
-    Try {
-      Http(s"$serviceUri")
+class DansBagValidator(serviceUri: URI, pingUri: URI, connTimeoutMs: Int, readTimeoutMs: Int) extends DebugEnhancedLogging {
+  def checkConnection(): Unit = {
+    logger.debug(s"Checking if validator service can be reached at $pingUri")
+    val result = Try {
+      Http(s"$pingUri")
         .timeout(connTimeoutMs, readTimeoutMs)
         .method("GET")
         .header("Accept", "text/plain")
         .asString
     } map {
       case r if r.code == 200 =>
+        if (r.body.trim != "pong")
+          throw new RuntimeException("Validate DANS bag ping URL did not respond with 'pong'")
         logger.debug("OK: validator service is reachable.")
         ()
-      case _ => throw new RuntimeException("Connection to Validate DANS Bag Service could not be established")
+      case r => throw new RuntimeException(s"Connection to Validate DANS Bag Service could not be established. Service responded with ${r.statusLine}")
     }
+
+    // Force exception if result is a Failure
+    result.get
   }
 
   def validateBag(bagDir: File, informationPackageType: InformationPackageType, profileVersion: Int): Try[DansBagValidationResult] = {

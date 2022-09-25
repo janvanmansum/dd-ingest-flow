@@ -47,15 +47,10 @@ public class DepositIngestTaskFactoryWrapper {
         IngestFlowConfig ingestFlowConfig,
         DataverseClient dataverseClient,
         DataverseExtra dataverseExtra,
-        ValidateDansBagConfig validationDansBagConfig) {
+        DansBagValidator dansBagValidator) {
 
         this.dataverseClient = dataverseClient;
-
-        validator = new DansBagValidator(
-            DepositIngestTaskFactory.appendSlash(validationDansBagConfig.getBaseUrl()),
-            validationDansBagConfig.getConnectionTimeoutMs(),
-            validationDansBagConfig.getReadTimeoutMs());
-
+        this.validator = dansBagValidator;
 
         final Elem narcisClassification = DepositIngestTaskFactory.readXml(ingestFlowConfig.getMappingDefsDir().resolve("narcis_classification.xml").toFile());
         final Map<String, String> iso1ToDataverseLanguage = getMap(ingestFlowConfig, "iso639-1-to-dv.csv", "ISO639-1", "Dataverse-language");
@@ -100,12 +95,5 @@ public class DepositIngestTaskFactoryWrapper {
     public DepositImportTaskWrapper createIngestTask(Path depositDir, Path outboxDir, EventWriter eventWriter) {
         return new DepositImportTaskWrapper(factory.createDepositIngestTask(new Deposit(File.apply(depositDir)), File.apply(outboxDir)), eventWriter);
     }
-
-    public DataverseClient getDataverseClient() {
-        return dataverseClient;
-    }
-
-    public DansBagValidator getDansBagValidatorInstance() {
-        return validator;
-    }
 }
+

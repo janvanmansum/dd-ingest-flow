@@ -22,6 +22,8 @@ import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import nl.knaw.dans.easy.dd2d.DepositIngestTaskFactory;
+import nl.knaw.dans.easy.dd2d.dansbag.DansBagValidator;
 import nl.knaw.dans.ingest.core.AutoIngestArea;
 import nl.knaw.dans.ingest.core.CsvMessageBodyWriter;
 import nl.knaw.dans.ingest.core.ImportArea;
@@ -38,6 +40,7 @@ import nl.knaw.dans.ingest.db.TaskEventDAO;
 import nl.knaw.dans.ingest.resources.EventsResource;
 import nl.knaw.dans.ingest.resources.ImportsResource;
 import nl.knaw.dans.ingest.resources.MigrationsResource;
+import nl.knaw.dans.lib.dataverse.DataverseClient;
 
 import java.util.concurrent.ExecutorService;
 
@@ -69,18 +72,25 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
     public void run(final DdIngestFlowConfiguration configuration, final Environment environment) {
         final ExecutorService taskExecutor = configuration.getIngestFlow().getTaskQueue().build(environment);
         final TargetedTaskSequenceManager targetedTaskSequenceManager = new TargetedTaskSequenceManager(taskExecutor);
+        final DataverseClient dataverseClient = configuration.getDataverse().build();
+
+        final DansBagValidator validator =  new DansBagValidator(
+            DepositIngestTaskFactory.appendSlash(configuration.getValidateDansBag().getBaseUrl()),
+            configuration.getValidateDansBag().getPingUrl(),
+            configuration.getValidateDansBag().getConnectionTimeoutMs(),
+            configuration.getValidateDansBag().getReadTimeoutMs());
         final DepositIngestTaskFactoryWrapper ingestTaskFactoryWrapper = new DepositIngestTaskFactoryWrapper(
             false,
             configuration.getIngestFlow(),
-            configuration.getDataverse().build(),
+            dataverseClient,
             configuration.getDataverseExtra(),
-            configuration.getValidateDansBag());
+            validator);
         final DepositIngestTaskFactoryWrapper migrationTaskFactoryWrapper = new DepositIngestTaskFactoryWrapper(
             true,
             configuration.getIngestFlow(),
-            configuration.getDataverse().build(),
+            dataverseClient,
             configuration.getDataverseExtra(),
-            configuration.getValidateDansBag());
+            validator);
 
         final EnqueuingService enqueuingService = new EnqueuingServiceImpl(targetedTaskSequenceManager, 3 /* Must support importArea, migrationArea and autoIngestArea */);
         final TaskEventDAO taskEventDAO = new TaskEventDAO(hibernateBundle.getSessionFactory());
@@ -110,8 +120,8 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
             enqueuingService
         );
 
-        environment.healthChecks().register("Dataverse", new DataverseHealthCheck(ingestTaskFactoryWrapper.getDataverseClient()));
-        environment.healthChecks().register("DansBagValidator", new DansBagValidatorHealthCheck(ingestTaskFactoryWrapper.getDansBagValidatorInstance()));
+        environment.healthChecks().register("Dataverse", new DataverseHealthCheck(dataverseClient));
+        environment.healthChecks().register("DansBagValidator", new DansBagValidatorHealthCheck(validator));
 
         environment.lifecycle().manage(autoIngestArea);
         environment.jersey().register(new ImportsResource(importArea));

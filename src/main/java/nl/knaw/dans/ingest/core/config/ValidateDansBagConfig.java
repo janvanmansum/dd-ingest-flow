@@ -19,6 +19,9 @@ import java.net.URI;
 
 public class ValidateDansBagConfig {
     private URI baseUrl;
+
+    private URI pingUrl;
+
     private int connectionTimeoutMs;
     private int readTimeoutMs;
 
@@ -28,6 +31,14 @@ public class ValidateDansBagConfig {
 
     public void setBaseUrl(URI baseUrl) {
         this.baseUrl = baseUrl;
+    }
+
+    public URI getPingUrl() {
+        return pingUrl;
+    }
+
+    public void setPingUrl(URI pingUrl) {
+        this.pingUrl = pingUrl;
     }
 
     public int getConnectionTimeoutMs() {
