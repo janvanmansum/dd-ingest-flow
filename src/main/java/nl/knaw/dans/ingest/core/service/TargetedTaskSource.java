@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.ingest.core.service;
 
+import nl.knaw.dans.ingest.core.TaskEvent;
 import nl.knaw.dans.ingest.core.sequencing.TargetedTask;
 
 import java.util.Iterator;

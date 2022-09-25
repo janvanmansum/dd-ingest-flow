@@ -40,8 +40,12 @@ public class EnqueuingServiceImpl implements EnqueuingService {
         log.trace("executeEnqueue({})", source);
         enqueuingExecutor.execute(() -> {
             log.debug("Start enqueuing tasks");
-            for (T t: source) {
-                enqueue(t);
+            try {
+                for (T t : source) {
+                    enqueue(t);
+                }
+            } catch (Exception e) {
+                log.error("Enqueuing could not start because of an error", e);
             }
         });
     }
