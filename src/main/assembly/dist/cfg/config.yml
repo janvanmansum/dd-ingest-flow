@@ -73,6 +73,10 @@ dataverse:
   #  connectionTimeoutMs: 10000
   #  readTimeoutMs: 30000
 
+dataverseExtra:
+  publishAwaitUnlockMaxRetries: 900
+  publishAwaitUnlockWaitTimeMs: 3000
+
 taskEventDatabase:
   driverClass: org.postgresql.Driver
   url: jdbc:postgresql://localhost:5432/dd_ingest_flow
