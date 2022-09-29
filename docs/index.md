@@ -17,7 +17,7 @@ DESCRIPTION
 
 ### Summary
 
-The `dd-ingest-flow` service imports [DANS deposit directories](deposit-directory.md) into Dataverse. If successful, this will result in a new dataset in
+The `dd-ingest-flow` service imports [deposit directories]{:target=_blank} into Dataverse. If successful, this will result in a new dataset in
 Dataverse or a new version of a an existing dataset. The input deposit directories must be located in a directory on local disk storage known as
 an [ingest area](#ingest-areas).
 
@@ -45,12 +45,12 @@ deposits the program will first order them by the timestamp in the `Created` ele
 
 The processing of a deposit consists of the following steps:
 
-1. Check that the deposit is a valid [deposit directory](deposit-directory.md)
-2. Check that the bag in the deposit is a valid DANS bag.
+1. Check that the deposit is a valid [deposit directory]{:target=_blank}.
+2. Check that the bag in the deposit is a valid [DANS bag]{:target=_blank}.
 3. Map the dataset level metadata to the metadata fields expected in the target Dataverse.
 4. If:
     * deposit represents first version of a dataset: create a new dataset draft.
-    * deposit represents an update to an existing dataset: [draft a new version](#update-deposit)
+    * deposit represents an update to an existing dataset: [draft a new version](#update-deposit).
 5. Publish the new dataset-version.
 
 #### Update-deposit
@@ -200,27 +200,6 @@ will be enabled.*
 
 Note that it is therefore possible for an update deposit to disable permission requests on a dataset, but not to enable them.
 
-### Importing pre-staged files
-
-#### Overview
-
-Pre-staged files are files that are uploaded to the final location in storage prior to running the `import` command. For this to work the location must conform
-to the storage scheme that Dataverse uses. Unfortunately this scheme does not seem to be documented.
-
-For the migration from EASY the following procedure is envisioned:
-
-1. Import a batch of deposits the regular way, so without prestaging files.
-2. Test metadata mapping + fix problems in software.
-3. Remove Dataverse, including database, but excluding files in file storage (object store or disk).
-4. Reinstall Dataverse and other components.
-5. Import batch again, but now with pre-staged files.
-
-#### Mechanics
-
-To be able to import pre-staged files `dd-dans-deposit-to-dataverse` needs some metadata about those files. This metadata can be loaded into a database
-by [`dd-migration-info`](https://dans-knaw.github.io/dd-migration-info/){:target=_blank} after step 2 and then accessed in step 5
-by `dd-dans-deposit-to-dataverse`.
-
 ARGUMENTS
 ---------
 
@@ -237,7 +216,8 @@ named arguments:
 
 ### Client
 
-TO DO
+The service has a RESTful API. In [dans-datastation-tools]{:target=_blank} commands to manage the service are available. These commands have names starting with
+`ingest-flow-`.
 
 INSTALLATION AND CONFIGURATION
 ------------------------------
@@ -273,7 +253,15 @@ Alternatively, to build the tarball execute:
 mvn clean install assembly:single
 ```
 
-[DANS BagIt Profile v1]: https://dans-knaw.github.io/dans-bagit-profile/versions/1.0.0/
+[DANS bag]: {{ dans_bagit_profile }}
+
+[DANS BagIt Profile v1]: {{ dans_bagit_profile }}
+
+[deposit directories]: {{ deposit_directory }}
+
+[deposit directory]: {{ deposit_directory }}
+
+[dans-datastation-tools]: https://dans-knaw.github.io/dans-datastation-tools/
 
 [dd-sword2]: https://dans-knaw.github.io/dd-sword2/
 

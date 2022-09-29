@@ -23,7 +23,12 @@ repo_url: https://github.com/DANS-KNAW/dd-ingest-flow
 
 nav:
   - Manual: index.md
-  - Deposit Directory Layout: deposit-directory.md
+  - Development: dev.md
+  - ⇒ DANS Data Station Architecture: arch.md
+
+extra:
+  deposit_directory: https://dans-knaw.github.io/dans-datastation-architecture/deposit-directory/
+  dans_bagit_profile: https://dans-knaw.github.io/dans-bagit-profile/versions/1.0.0/
 
 plugins:
   - markdownextradata
