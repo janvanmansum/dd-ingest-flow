@@ -25,10 +25,15 @@ import nl.knaw.dans.ingest.core.service.TaskEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ImportArea extends AbstractIngestArea {
     private static final Logger log = LoggerFactory.getLogger(ImportArea.class);
@@ -43,6 +48,12 @@ public class ImportArea extends AbstractIngestArea {
 
     public String startImport(Path inputPath, boolean isBatch, boolean continuePrevious, boolean isMigration) {
         log.trace("startBatch({}, {}, {})", inputPath, continuePrevious, isMigration);
+        if (isBatch) {
+            validateBatchDirectory(inputPath);
+        }
+        else {
+            validateDepositDirectory(inputPath);
+        }
         Path relativeInputDir;
         if (inputPath.isAbsolute()) {
             relativeInputDir = inboxDir.relativize(inputPath);
@@ -84,4 +95,29 @@ public class ImportArea extends AbstractIngestArea {
         return relativeInputDir.toString();
     }
 
+    private void validateBatchDirectory(Path input) {
+        if (Files.isDirectory(input)) {
+            try (Stream<Path> subPaths = Files.list(input)) {
+                List<Path> paths = subPaths.collect(Collectors.toList());
+                for (Path f : paths) {
+                    validateDepositDirectory(f);
+                }
+            }
+            catch (IOException e) {
+                throw new IllegalArgumentException(String.format("Cannot read %s", input));
+            }
+            catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(String.format("Invalid batch: %s. At least one non-deposit: %s", input, e.getMessage()));
+            }
+        }
+        else {
+            throw new IllegalArgumentException(String.format("File %s is not a directory. Cannot be a batch.", input));
+        }
+    }
+
+    private void validateDepositDirectory(Path input) {
+        if (!Files.isRegularFile(input.resolve("deposit.properties"))) {
+            throw new IllegalArgumentException(String.format("Directory %s does not contain file deposit.properties. Not a valid deposit directory", input));
+        }
+    }
 }

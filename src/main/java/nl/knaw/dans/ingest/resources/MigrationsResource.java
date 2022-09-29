@@ -43,8 +43,8 @@ public class MigrationsResource {
     @POST
     @Path("/:start")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response startBatch(StartImport start) {
-        log.trace("Received command = {}", start);
+    public Response startImport(StartImport start) {
+        log.info("Received command = {}", start);
         String taskName;
         try {
             taskName = migrationArea.startImport(start.getInputPath(), start.isBatch(), start.isContinue(), true);
