@@ -1,0 +1,140 @@
+<ddm:DDM xmlns:ddm="http://easy.dans.knaw.nl/schemas/md/ddm/"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcx-dai="http://easy.dans.knaw.nl/schemas/dcx/dai/"
+         xsi:schemaLocation="http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd">
+    <ddm:profile>
+        <dc:title xml:lang="en">Title of the dataset</dc:title>
+        <dc:description xml:lang="la">
+            Lorem ipsum dolor sit amet,
+
+            consectetur adipiscing elit.
+            Lorem ipsum.
+        </dc:description>
+        <dc:creator>Bergman, W.A.</dc:creator>
+        <dcx-dai:creatorDetails>
+            <dcx-dai:author>
+                <dcx-dai:titles>Prof.</dcx-dai:titles>
+                <dcx-dai:initials>D.N.</dcx-dai:initials>
+                <dcx-dai:insertions>van den</dcx-dai:insertions>
+                <dcx-dai:surname>Aarden</dcx-dai:surname>
+                <dcx-dai:DAI>123456789</dcx-dai:DAI>
+                <dcx-dai:role>Distributor</dcx-dai:role>
+                <dcx-dai:organization>
+                    <dcx-dai:name xml:lang="en">Utrecht University</dcx-dai:name>
+                </dcx-dai:organization>
+            </dcx-dai:author>
+            <dcx-dai:organization>
+                <dcx-dai:name xml:lang="en">Anti-Vampire League</dcx-dai:name>
+                <dcx-dai:ISNI>isni</dcx-dai:ISNI>
+                <dcx-dai:VIAF>viaf</dcx-dai:VIAF>
+            </dcx-dai:organization>
+        </dcx-dai:creatorDetails>
+        <ddm:created>2012-12</ddm:created>
+        <ddm:available>2013-05-01</ddm:available>
+        <ddm:audience xml:lang="nl">D20000</ddm:audience>
+        <ddm:audience>D24000</ddm:audience>
+        <ddm:accessRights xml:lang="en">OPEN_ACCESS_FOR_REGISTERED_USERS</ddm:accessRights>
+    </ddm:profile>
+    <ddm:dcmiMetadata>
+        <dct:license xsi:type="dct:URI">http://creativecommons.org/licenses/by-sa/4.0</dct:license>
+        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>
+        <dct:source>HTTP</dct:source>
+        <dct:source>FTP</dct:source>
+        <dct:title>Alt title 1</dct:title>
+        <dct:alternative>Alt title 2</dct:alternative>
+        <dct:identifier xsi:type="id-type:EASY2">easy-dataset:18335</dct:identifier>
+        <dct:identifier xsi:type="id-type:EASY1">easy-dataset:18336</dct:identifier>
+        <dct:identifier>easy-dataset:18337</dct:identifier>
+        <dct:identifier xsi:type="ISBN">isbn identifier 1</dct:identifier>
+        <dct:identifier xsi:type="ISSN">issn identifier 1</dct:identifier>
+        <dct:identifier xsi:type="id-type:ISBN">isbn identifier 2</dct:identifier>
+        <dct:identifier xsi:type="id-type:ISSN">issn identifier 2</dct:identifier>
+        <dct:identifier xsi:type="DAI">dai identifier</dct:identifier>
+        <dct:identifier xsi:type="id-type:NWO-PROJECTNR">12345</dct:identifier>
+        <dct:identifier xsi:type="NWO-PROJECTNR">6789</dct:identifier>
+        <dct:identifier xsi:type="ARCHIS-ZAAK-IDENTIFICATIE" xml:type="ARCHIS-MONUMENT">6789</dct:identifier>
+        <dct:description>Metadata description</dct:description>
+        <dct:description descriptionType="TechnicalInfo">Technical metadata description</dct:description>
+        <dct:modified>2015-09-08</dct:modified>
+        <dct:date>2015-09-07</dct:date>
+        <dct:dateAccepted>2015-09-06</dct:dateAccepted>
+        <dct:dateCopyrighted>2015-09-05</dct:dateCopyrighted>
+        <dct:issued>2015-09-04</dct:issued>
+        <dct:valid>yes</dct:valid>
+        <dct:publisher>Synthegra</dct:publisher>
+        <dct:publisher>DANS</dct:publisher>
+        <dct:coverage>no</dct:coverage>
+        <dct:language encodingScheme="ISO639-2" code="dut">In het Nederlands.</dct:language>
+        <dct:language encodingScheme="ISO639-1" code="dut">nld</dct:language>
+        <dct:language xsi:type="ISO639-1" code="de">not used</dct:language>
+        <dct:language xsi:type="ISO639-2" code="ger">not used</dct:language>
+        <dct:language>nld</dct:language>
+        <dct:subject>no tags subject</dct:subject>
+        <dct:subject schemeURI="https://data.cultureelerfgoed.nl/term/id/pan/PAN"
+                     subjectScheme="PAN thesaurus ideaaltypes">Broader Match: knoop
+        </dct:subject>
+        <dct:subject schemeURI="http://vocab.getty.edu/aat/"
+                     subjectScheme="Art and Architecture Thesaurus">Broader Match: button
+        </dct:subject>
+        <dcx-dai:contributorDetails>
+            <dcx-dai:author>
+                <dcx-dai:initials>J</dcx-dai:initials>
+                <dcx-dai:surname>Doe</dcx-dai:surname>
+                <dcx-dai:role>ProjectManager</dcx-dai:role>
+            </dcx-dai:author>
+        </dcx-dai:contributorDetails>
+        <dcx-dai:contributorDetails>
+            <dcx-dai:author>
+                <dcx-dai:initials>R</dcx-dai:initials>
+                <dcx-dai:surname>Smith</dcx-dai:surname>
+                <dcx-dai:role>RightsHolder</dcx-dai:role>
+            </dcx-dai:author>
+        </dcx-dai:contributorDetails>
+        <dcx-dai:contributorDetails>
+            <dcx-dai:author>
+                <dcx-dai:initials>X</dcx-dai:initials>
+                <dcx-dai:surname xml:lang="de">Men</dcx-dai:surname>
+                <dcx-dai:role>ProjectLeader</dcx-dai:role>
+            </dcx-dai:author>
+        </dcx-dai:contributorDetails>
+
+        <dcx-dai:contributorDetails>
+            <dcx-dai:organization>
+                <dcx-dai:name xml:lang="en">Anti-Vampire League</dcx-dai:name>
+                <dcx-dai:role>
+                    Funder
+                </dcx-dai:role>
+                <dcx-dai:ISNI>http://isni.org/isni/0000000121032683</dcx-dai:ISNI>
+            </dcx-dai:organization>
+            <dcx-dai:organization>
+                <dcx-dai:name xml:lang="en">Important</dcx-dai:name>
+                <dcx-dai:role>Important guy</dcx-dai:role>
+                <dcx-dai:ISNI>http://isni.org/isni/0000000121032684</dcx-dai:ISNI>
+            </dcx-dai:organization>
+        </dcx-dai:contributorDetails>
+        <ddm:datesOfCollection>2022-01-01/2022-02-01</ddm:datesOfCollection>
+        <ddm:datesOfCollection>
+            2021-01-01/2021-02-01
+        </ddm:datesOfCollection>
+        <ddm:datesOfCollection>
+            2020-01-01/
+        </ddm:datesOfCollection>
+        <ddm:datesOfCollection>
+            /2019-02-01
+        </ddm:datesOfCollection>
+
+        <ddm:relation href="https://knaw.nl/">Relation</ddm:relation>
+        <ddm:conformsTo>Conforms To</ddm:conformsTo>
+        <ddm:acquisitionMethod subjectScheme="ABR verwervingswijzen"
+                               schemeURI="https://data.cultureelerfgoed.nl/term/id/abr/554ca1ec-3ed8-42d3-ae4b-47bcb848b238">
+            Method 1
+        </ddm:acquisitionMethod>
+
+        <ddm:acquisitionMethod subjectScheme="ABR something else"
+                               schemeURI="https://data.cultureelerfgoed.nl/term/id/abr/554ca1ec-3ed8-42d3-ae4b-47bcb848b238">
+            Method 2
+        </ddm:acquisitionMethod>
+    </ddm:dcmiMetadata>
+</ddm:DDM>

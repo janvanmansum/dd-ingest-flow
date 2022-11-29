@@ -15,30 +15,27 @@
  */
 package nl.knaw.dans.ingest.core;
 
-import nl.knaw.dans.ingest.core.legacy.DepositIngestTaskFactoryWrapper;
+import nl.knaw.dans.ingest.core.service.DepositIngestTaskFactory;
 import nl.knaw.dans.ingest.core.service.EnqueuingService;
 import nl.knaw.dans.ingest.core.service.TaskEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AbstractIngestArea {
     private static final Logger log = LoggerFactory.getLogger(AbstractIngestArea.class);
     protected final Path inboxDir;
     protected final Path outboxDir;
-    protected final DepositIngestTaskFactoryWrapper taskFactory;
+    protected final DepositIngestTaskFactory taskFactory;
     protected final TaskEventService taskEventService;
     protected final EnqueuingService enqueuingService;
 
     public AbstractIngestArea(Path inboxDir, Path outboxDir,
-        DepositIngestTaskFactoryWrapper taskFactory, TaskEventService taskEventService, EnqueuingService enqueuingService) {
+        DepositIngestTaskFactory taskFactory, TaskEventService taskEventService, EnqueuingService enqueuingService) {
         this.inboxDir = inboxDir.toAbsolutePath();
         this.outboxDir = outboxDir.toAbsolutePath();
         this.taskFactory = taskFactory;
