@@ -77,8 +77,6 @@ class DepositToDvDatasetMetadataMapperTest {
             .writer()
             .withDefaultPrettyPrinter()
             .writeValueAsString(result);
-
-        System.out.println("STR: " + str);
     }
 
     @Test
