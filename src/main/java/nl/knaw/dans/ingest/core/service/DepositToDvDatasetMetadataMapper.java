@@ -20,7 +20,6 @@ import nl.knaw.dans.ingest.core.service.builder.ArchaeologyFieldBuilder;
 import nl.knaw.dans.ingest.core.service.builder.CitationFieldBuilder;
 import nl.knaw.dans.ingest.core.service.builder.DataVaultFieldBuilder;
 import nl.knaw.dans.ingest.core.service.builder.FieldBuilder;
-import nl.knaw.dans.ingest.core.service.builder.PrimitiveFieldBuilder;
 import nl.knaw.dans.ingest.core.service.builder.RelationFieldBuilder;
 import nl.knaw.dans.ingest.core.service.builder.RightsFieldBuilder;
 import nl.knaw.dans.ingest.core.service.builder.TemporalSpatialFieldBuilder;
@@ -56,6 +55,7 @@ import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
@@ -69,8 +69,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RIGHTS_HOLDER;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SCHEME_ABR_VERWERVINGSWIJZE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SCHEME_URI_ABR_VERWERVINGSWIJZE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.TITLE;
 
 @Slf4j
 public class DepositToDvDatasetMetadataMapper {
@@ -96,7 +99,6 @@ public class DepositToDvDatasetMetadataMapper {
         this.iso2ToDataverseLanguage = iso2ToDataverseLanguage;
     }
 
-    // TODO check nullable state
     public Dataset toDataverseDataset(
         @NonNull Document ddm,
         @Nullable String otherDoiId,
@@ -108,8 +110,11 @@ public class DepositToDvDatasetMetadataMapper {
 
         // TODO otherDoiId should be "", not null when sending to dataverse
 
-        // TODO check for required fields (title?)
         if (activeMetadataBlocks.contains("citation")) {
+            // this is not very java-esque
+            checkRequiredField(TITLE, getTitles(ddm));
+            checkRequiredField(SUBJECT, getAudiences(ddm));
+
             var alternativeTitles = getAlternativeTitles(ddm).collect(Collectors.toList());
             citationFields.addTitle(getTitles(ddm));
             citationFields.addAlternativeTitle(alternativeTitles.stream().map(Node::getTextContent));
@@ -144,7 +149,7 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addKeywords(getSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue);
             citationFields.addKeywords(getLanguages(ddm).filter(Language::isNotIsoLanguage), Language.toKeywordValue);
             citationFields.addPublications(getIdentifiers(ddm).filter(Identifier::isRelatedPublication), Identifier.toRelatedPublicationValue);
-            citationFields.addLanguages(getLanguages(ddm), node -> Language.isoToDataverse(node.getTextContent(), iso1ToDataverseLanguage, iso2ToDataverseLanguage));
+            citationFields.addLanguages(getLanguages(ddm), node -> Language.toCitationBlockLanguage(node, iso1ToDataverseLanguage, iso2ToDataverseLanguage));
             citationFields.addProductionDate(getCreated(ddm).map(Base::toYearMonthDayFormat));
             citationFields.addContributors(getContributorDetails(ddm).filter(Contributor::isValidContributor), Contributor.toContributorValueObject);
             citationFields.addGrantNumbers(getIdentifiers(ddm).filter(Identifier::isNwoGrantNumber), Identifier.toNwoGrantNumber);
@@ -163,6 +168,7 @@ public class DepositToDvDatasetMetadataMapper {
         }
 
         if (activeMetadataBlocks.contains("dansRights")) {
+            checkRequiredField(RIGHTS_HOLDER, getRightsHolders(ddm));
             rightsFields.addRightsHolders(getRightsHolders(ddm));
 
             rightsFields.addPersonalDataPresent(getPersonalDataPresent(agreements).map(PersonalStatement::toHasPersonalDataValue));
@@ -224,7 +230,8 @@ public class DepositToDvDatasetMetadataMapper {
         return XPathEvaluator.nodes(agreements, "//agreements:personalDataStatement");
     }
 
-    void processMetadataBlock(Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder) {
+    void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder) {
+        // TODO figure out how to deduplicate compound fields (just on key, or also on value?)
         var compoundFields = builder.getCompoundFields().values()
             .stream()
             .map(CompoundFieldBuilder::build)
@@ -233,7 +240,12 @@ public class DepositToDvDatasetMetadataMapper {
         var primitiveFields = builder.getPrimitiveFields()
             .values()
             .stream()
-            .map(PrimitiveFieldBuilder::build);
+            .map(b -> b.build(deduplicate));
+
+        if (deduplicate) {
+            compoundFields = compoundFields.distinct();
+            primitiveFields = primitiveFields.distinct();
+        }
 
         var result = Stream.of(compoundFields, primitiveFields)
             .flatMap(i -> i)
@@ -250,12 +262,12 @@ public class DepositToDvDatasetMetadataMapper {
     Dataset assembleDataverseDataset() {
         var fields = new HashMap<String, MetadataBlock>();
 
-        processMetadataBlock(fields, "citation", "Citation Metadata", citationFields);
-        processMetadataBlock(fields, "dansRights", "Rights Metadata", rightsFields);
-        processMetadataBlock(fields, "dansRelationMetadata", "Relation Metadata", relationFields);
-        processMetadataBlock(fields, "dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologyFields);
-        processMetadataBlock(fields, "dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields);
-        processMetadataBlock(fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder);
+        processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields);
+        processMetadataBlock(deduplicate, fields, "dansRights", "Rights Metadata", rightsFields);
+        processMetadataBlock(deduplicate, fields, "dansRelationMetadata", "Relation Metadata", relationFields);
+        processMetadataBlock(deduplicate, fields, "dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologyFields);
+        processMetadataBlock(deduplicate, fields, "dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields);
+        processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder);
 
         var version = new DatasetVersion();
         version.setMetadataBlocks(fields);
@@ -276,17 +288,14 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getTemporal(Document ddm) {
-        // TODO verify namespace
         return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/ddm:temporal");
     }
 
     Stream<Node> getSpatial(Document ddm) {
-        // TODO verify namespace
         return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:spatial");
     }
 
     Stream<Node> getBoundedBy(Document ddm) {
-        // TODO verify namespace
         return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:spatial//gml:boundedBy");
     }
 
@@ -299,8 +308,6 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getAcquisitionMethods(Document ddm) {
-        // TODO verify namespace of second element
-        // TODO: (from scala) also take attribute namespace into account (should be ddm)
         var expr = String.format(
             "//ddm:dcmiMetadata/ddm:acquisitionMethod[@subjectScheme = '%s' and @schemeURI = '%s']",
             SCHEME_ABR_VERWERVINGSWIJZE, SCHEME_URI_ABR_VERWERVINGSWIJZE
@@ -310,7 +317,6 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getReportNumbers(Document ddm) {
-        // TODO verify namespace
         return XPathEvaluator.nodes(ddm,
             "//ddm:dcmiMetadata/ddm:reportNumber");
     }
@@ -393,7 +399,6 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<String> getDataSources(Document ddm) {
-        // TODO verify the correct namespace, there are no examples?
         return XPathEvaluator.strings(ddm, "//ddm:dcmiMetadata/dcterms:source");
     }
 
@@ -401,4 +406,14 @@ public class DepositToDvDatasetMetadataMapper {
         return XPathEvaluator.strings(ddm, "//ddm:dcmiMetadata/dcterms:rightsHolder");
     }
 
+    void checkRequiredField(String fieldName, Stream<String> nodes) {
+        var result = nodes
+            .map(String::trim)
+            .filter(StringUtils::isNotBlank)
+            .findFirst();
+
+        if (result.isEmpty()) {
+            throw new MissingRequiredFieldException(fieldName);
+        }
+    }
 }
