@@ -46,8 +46,7 @@ public class DansBagValidatorImpl implements DansBagValidator {
     public void checkConnection() {
         try (var response = httpClient.target(pingUri)
             .request(MediaType.TEXT_PLAIN)
-            .get()
-            .readEntity(Response.class)) {
+            .get()) {
 
             if (response.getStatus() != 200) {
                 var content = response.readEntity(String.class);
