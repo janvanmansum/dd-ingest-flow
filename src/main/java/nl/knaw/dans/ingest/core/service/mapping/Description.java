@@ -61,7 +61,7 @@ public class Description extends Base {
             .collect(Collectors.joining(""));
     }
 
-    public static boolean isValidDescription(Node node) {
+    public static boolean isNotBlank(Node node) {
         return StringUtils.isNotBlank(node.getTextContent());
     }
 
