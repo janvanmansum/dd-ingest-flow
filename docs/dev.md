@@ -54,7 +54,7 @@ Now you can start the service:
 start-service.sh
 ```
 
-### Prepare and start an ingest
+## Prepare and start an ingest
 
 Once the dependencies and services are started you can prepare batches and start them
 with [dans-datastation-tools]{:target=_blank}.
