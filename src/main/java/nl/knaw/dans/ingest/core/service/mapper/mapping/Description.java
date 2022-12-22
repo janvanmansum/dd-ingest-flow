@@ -65,11 +65,16 @@ public class Description extends Base {
         return StringUtils.isNotBlank(node.getTextContent());
     }
 
-    public static boolean isNonTechnicalInfo(Node node) {
-        return !isTechnicalInfo(node);
+    public static boolean hasNoDescriptionType(Node node) {
+        return !hasAttribute(node, "descriptionType");
     }
 
     public static boolean isTechnicalInfo(Node node) {
         return hasAttributeValue(node, "descriptionType", "TechnicalInfo");
+    }
+
+    public static boolean hasDescriptionTypeOther(Node node) {
+        boolean b = hasAttributeValue(node, "descriptionType", "Other");
+        return b;
     }
 }
