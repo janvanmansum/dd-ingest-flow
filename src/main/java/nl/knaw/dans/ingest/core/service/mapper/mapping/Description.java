@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -65,16 +66,13 @@ public class Description extends Base {
         return StringUtils.isNotBlank(node.getTextContent());
     }
 
-    public static boolean hasNoDescriptionType(Node node) {
-        return !hasAttribute(node, "descriptionType");
-    }
-
-    public static boolean isTechnicalInfo(Node node) {
-        return hasAttributeValue(node, "descriptionType", "TechnicalInfo");
+    public static boolean isNotMapped(Node node) {
+        var descr = getAttribute(node, "descriptionType");
+        // TODO add series when implemented
+        return descr.isEmpty() || !List.of("Other").contains(descr.get().getTextContent());
     }
 
     public static boolean hasDescriptionTypeOther(Node node) {
-        boolean b = hasAttributeValue(node, "descriptionType", "Other");
-        return b;
+        return hasAttributeValue(node, "descriptionType", "Other") && isNotBlank(node);
     }
 }

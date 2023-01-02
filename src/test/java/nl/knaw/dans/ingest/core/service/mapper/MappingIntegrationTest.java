@@ -131,7 +131,7 @@ class MappingIntegrationTest {
 
         var result = mapDdmToDataset(doc);
         var str = toJsonString(result);
-        assertFalse(str.contains("not known description type"));
+        assertEquals(2, str.split("not known description type").length);
         assertEquals(2, str.split("technical description").length);
         assertEquals(2, str.split("Lorem ipsum").length);
         var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
@@ -140,6 +140,6 @@ class MappingIntegrationTest {
         assertThat(field.getValue())
             .extracting(DESCRIPTION_VALUE)
             .extracting("value")
-            .containsOnly("<p>Lorem ipsum.</p>", "<p>technical description</p>");
+            .containsOnly("<p>Lorem ipsum.</p>", "<p>technical description</p>", "<p>not known description type</p>");
     }
 }
