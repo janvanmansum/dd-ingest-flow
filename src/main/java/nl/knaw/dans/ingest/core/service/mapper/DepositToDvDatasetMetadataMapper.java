@@ -131,6 +131,7 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addOtherIds(getIdentifiers(ddm).filter(Identifier::canBeMappedToOtherId), Identifier.toOtherIdValue);
             citationFields.addOtherIdsStrings(Stream.ofNullable(otherDoiId), DepositPropertiesOtherDoi.toOtherIdValue);
 
+            citationFields.addContributors(getMetadataDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);
             citationFields.addAuthors(getCreators(ddm), Author.toAuthorValueObject);
             citationFields.addDatasetContact(Stream.ofNullable(contactData), Contact.toOtherIdValue);
             citationFields.addDescription(getDescriptions(ddm).filter(Description::isNotBlank), Description.toDescription);
@@ -139,14 +140,9 @@ public class DepositToDvDatasetMetadataMapper {
                 citationFields.addDescription(Stream.of(alternativeTitles.get(alternativeTitles.size() - 1)), Description.toDescription);
             }
 
-            citationFields.addDescription(getMetadataDescriptions(ddm)
-                .filter(Description::isNotBlank)
-                .filter(Description::isNonTechnicalInfo), Description.toDescription);
+            citationFields.addDescription(getMetadataDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription);
 
             citationFields.addDescription(getOtherDescriptions(ddm).filter(Description::isNotBlank), Description.toPrefixedDescription);
-            citationFields.addDescription(getMetadataDescriptions(ddm)
-                .filter(Description::isNotBlank)
-                .filter(Description::isTechnicalInfo), Description.toDescription);
 
             citationFields.addSubject(getAudiences(ddm), Audience::toCitationBlockSubject);
 
