@@ -131,7 +131,7 @@ public abstract class DatasetEditor {
     }
 
     protected String getLicense(Node node) {
-        return XPathEvaluator.nodes(node, "//ddm:dcmiMetadata/dcterms:license")
+        return XPathEvaluator.nodes(node, "/ddm:DDM/ddm:dcmiMetadata/dcterms:license")
             .filter(License::isLicenseUri)
             .findFirst()
             .map(n -> License.getLicenseUri(supportedLicenses, variantToLicense, n))
@@ -210,7 +210,7 @@ public abstract class DatasetEditor {
     }
 
     Instant getDateAvailable(Deposit deposit) {
-        return XPathEvaluator.strings(deposit.getDdm(), "//ddm:profile/ddm:available")
+        return XPathEvaluator.strings(deposit.getDdm(), "/ddm:DDM/ddm:profile/ddm:available")
             .map(DatasetEditor::parseDate)
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Deposit without a ddm:available element"));
@@ -222,7 +222,7 @@ public abstract class DatasetEditor {
         var ddm = deposit.getDdm();
         var files = deposit.getFilesXml();
 
-        var accessRights = XPathEvaluator.nodes(ddm, "//ddm:profile/ddm:accessRights")
+        var accessRights = XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:accessRights")
             .findFirst()
             .orElseThrow();
 

@@ -25,7 +25,7 @@ class AccessRightsTest extends BaseTest {
     @Test
     void toDefaultRestrict_should_return_false_when_access_rights_is_OPEN_ACCESS() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  OPEN_ACCESS"
             + "</ddm:accessRights>\n");
 
@@ -35,7 +35,7 @@ class AccessRightsTest extends BaseTest {
     @Test
     void toDefaultRestrict_should_return_true_when_access_rights_is_OPEN_ACCESS_FOR_REGISTERED_USERS() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  OPEN_ACCESS_FOR_REGISTERED_USERS"
             + "</ddm:accessRights>\n");
 
@@ -45,7 +45,7 @@ class AccessRightsTest extends BaseTest {
     @Test
     void toDefaultRestrict_should_return_true_when_access_rights_is_REQUEST_PERMISSION() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  REQUEST_PERMISSION"
             + "</ddm:accessRights>\n");
 
@@ -55,7 +55,7 @@ class AccessRightsTest extends BaseTest {
     @Test
     void toDefaultRestrict_should_return_true_when_access_rights_is_NO_ACCESS() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  NO_ACCESS"
             + "</ddm:accessRights>\n");
 
@@ -65,7 +65,7 @@ class AccessRightsTest extends BaseTest {
     @Test
     void toDefaultRestrict_should_return_true_when_access_rights_is_something_else() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  SOMETHING"
             + "</ddm:accessRights>\n");
 
@@ -75,13 +75,13 @@ class AccessRightsTest extends BaseTest {
     @Test
     void isEnableRequests_should_be_false_if_one_file_has_explicitly_accessibleTo_equals_NONE() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  OPEN_ACCESS"
             + "</ddm:accessRights>\n");
 
         var files = readDocumentFromString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
             + "<files xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" \n"
-            + "        xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "        xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "    <file filepath=\"data/leeg.txt\">\n"
             + "        <ddm:accessibleToRights>ANONYMOUS</ddm:accessibleToRights>\n"
             + "    </file>\n"
@@ -99,13 +99,13 @@ class AccessRightsTest extends BaseTest {
     @Test
     void isEnableRequests_should_be_false_if_one_file_has_implicitly_accessibleTo_equals_NONE() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  NO_ACCESS"
             + "</ddm:accessRights>\n");
 
         var files = readDocumentFromString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
             + "<files xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" \n"
-            + "        xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "        xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "    <file filepath=\"data/leeg.txt\">\n"
             + "    </file>\n"
             + "    <file filepath=\"data/sub/leeg2.txt\">\n"
@@ -119,13 +119,13 @@ class AccessRightsTest extends BaseTest {
     @Test
     void isEnableRequests_should_be_true_if_all_files_explicitly_permission_request() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  NO_ACCESS"
             + "</ddm:accessRights>\n");
 
         var files = readDocumentFromString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
             + "<files xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" \n"
-            + "        xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "        xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "    <file filepath=\"data/leeg.txt\">\n"
             + "        <ddm:accessibleToRights>RESTRICTED_REQUEST</ddm:accessibleToRights>\n"
             + "    </file>\n"
@@ -140,13 +140,13 @@ class AccessRightsTest extends BaseTest {
     @Test
     void isEnableRequests_should_be_true_if_all_implicitly_and_explicitly_defined_accessibleTo_is_RESTRICTED_REQUEST_or_more_open() throws Exception {
         var doc = readDocumentFromString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<ddm:accessRights xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "<ddm:accessRights xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "  REQUEST_PERMISSION"
             + "</ddm:accessRights>\n");
 
         var files = readDocumentFromString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
             + "<files xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" \n"
-            + "        xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+            + "        xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "    <file filepath=\"data/leeg.txt\">\n"
             + "        <ddm:accessibleToRights>RESTRICTED_REQUEST</ddm:accessibleToRights>\n"
             + "    </file>\n"
