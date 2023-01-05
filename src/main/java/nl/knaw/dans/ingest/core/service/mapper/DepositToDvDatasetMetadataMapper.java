@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XPathEvaluator;
+import nl.knaw.dans.ingest.core.service.exception.MissingRequiredFieldException;
 import nl.knaw.dans.ingest.core.service.mapper.builder.ArchaeologyFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.CitationFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.DataVaultFieldBuilder;
@@ -27,7 +28,6 @@ import nl.knaw.dans.ingest.core.service.mapper.builder.FieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.RelationFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.RightsFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.TemporalSpatialFieldBuilder;
-import nl.knaw.dans.ingest.core.service.exception.MissingRequiredFieldException;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.AbrAcquisitionMethod;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.AbrReportType;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Audience;
@@ -54,10 +54,12 @@ import nl.knaw.dans.ingest.core.service.mapper.mapping.Subject;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.SubjectAbr;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.TemporalAbr;
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
+import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -134,7 +136,7 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addContributors(getMetadataDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);
             citationFields.addAuthors(getCreators(ddm), Author.toAuthorValueObject);
             citationFields.addDatasetContact(Stream.ofNullable(contactData), Contact.toOtherIdValue);
-            citationFields.addDescription(getDescriptions(ddm).filter(Description::isNotBlank), Description.toDescription);
+            citationFields.addDescription(getDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription);
 
             if (alternativeTitles.size() > 0) {
                 citationFields.addDescription(Stream.of(alternativeTitles.get(alternativeTitles.size() - 1)), Description.toDescription);
@@ -164,6 +166,8 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDateOfCollections(getDatesOfCollection(ddm)
                 .filter(DatesOfCollection::isValidDistributorDate), DatesOfCollection.toDistributorValueObject);
             citationFields.addDataSources(getDataSources(ddm));
+            citationFields.addSeries(getMetadataDescriptions(ddm).filter(Description::isSeriesInformation),Description.toSeries);
+
         }
         else {
             throw new IllegalStateException("Metadatablock citation should always be active");
@@ -236,8 +240,7 @@ public class DepositToDvDatasetMetadataMapper {
         // TODO figure out how to deduplicate compound fields (just on key, or also on value?)
         var compoundFields = builder.getCompoundFields().values()
             .stream()
-            .map(CompoundFieldBuilder::build)
-            .map(m -> (MetadataField) m);
+            .map(this::compoundBuild);
 
         var primitiveFields = builder.getPrimitiveFields()
             .values()
@@ -259,6 +262,18 @@ public class DepositToDvDatasetMetadataMapper {
         block.setFields(result);
 
         fields.put(title, block);
+    }
+
+    private MetadataField compoundBuild(CompoundFieldBuilder compoundFieldBuilder) {
+        // TODO rewrite in the dataverse library
+        CompoundField compoundField = compoundFieldBuilder.build();
+        if (compoundField.isMultiple())
+            return compoundField;
+        else return new MetadataField(compoundField.getTypeClass(),compoundField.getTypeName(),false) {
+            public Map<String, SingleValueField> getValue() {
+                return compoundField.getValue().get(0);
+            }
+        };
     }
 
     Dataset assembleDataverseDataset() {
