@@ -131,7 +131,10 @@ public class DepositMigrationTask extends DepositIngestTask {
 
             var dataset = dataverseClient.dataset(persistentId);
 
-            dataset.releaseMigrated(date.get(), true);
+
+            var datePublishJsonLd = String.format("{\"http://schema.org/datePublished\": \"%s\"}", date.get());
+
+            dataset.releaseMigrated(datePublishJsonLd, true);
             dataset.awaitUnlock(publishAwaitUnlockMaxNumberOfRetries, publishAwaitUnlockMillisecondsBetweenRetries);
         }
         catch (IOException | DataverseException e) {
