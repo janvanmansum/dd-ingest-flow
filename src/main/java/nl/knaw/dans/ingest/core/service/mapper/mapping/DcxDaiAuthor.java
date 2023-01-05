@@ -80,7 +80,7 @@ public final class DcxDaiAuthor extends Base {
         }
         if (StringUtils.isNotBlank(author.getRole())) {
             var value = contributorRoleToContributorType.getOrDefault(author.getRole(), "Other");
-            builder.addSubfield(CONTRIBUTOR_TYPE, value);
+            builder.addControlledSubfield(CONTRIBUTOR_TYPE, value);
         }
     };
 
