@@ -114,32 +114,28 @@ public class DepositMigrationTask extends DepositIngestTask {
     }
 
     @Override
-    void publishDataset(String persistentId) throws Exception {
-        try {
-            var deposit = getDeposit();
-            var amd = deposit.getAmd();
+    void publishDataset(String persistentId) throws IOException, DataverseException {
 
-            if (amd == null) {
-                throw new Exception(String.format("no AMD found for %s", persistentId));
-            }
+        var deposit = getDeposit();
+        var amd = deposit.getAmd();
 
-            var date = Amd.toPublicationDate(amd);
-
-            if (date.isEmpty()) {
-                throw new IllegalArgumentException(String.format("no publication date found in AMD for %s", persistentId));
-            }
-
-            var dataset = dataverseClient.dataset(persistentId);
-
-
-            var datePublishJsonLd = String.format("{\"http://schema.org/datePublished\": \"%s\"}", date.get());
-
-            dataset.releaseMigrated(datePublishJsonLd, true);
-            dataset.awaitUnlock(publishAwaitUnlockMaxNumberOfRetries, publishAwaitUnlockMillisecondsBetweenRetries);
+        if (amd == null) {
+            throw new RuntimeException(String.format("no AMD found for %s", persistentId));
         }
-        catch (IOException | DataverseException e) {
-            log.error("Unable to publish dataset", e);
+
+        var date = Amd.toPublicationDate(amd);
+
+        if (date.isEmpty()) {
+            throw new IllegalArgumentException(String.format("no publication date found in AMD for %s", persistentId));
         }
+
+        var dataset = dataverseClient.dataset(persistentId);
+
+        var datePublishJsonLd = String.format("{\"http://schema.org/datePublished\": \"%s\"}", date.get());
+
+        dataset.releaseMigrated(datePublishJsonLd, true);
+        dataset.awaitUnlock(publishAwaitUnlockMaxNumberOfRetries, publishAwaitUnlockMillisecondsBetweenRetries);
+
     }
 
     @Override
