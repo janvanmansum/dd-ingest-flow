@@ -33,7 +33,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isOldAbr_should_return_true_if_schemeURI_of_old_ABR_is_used_and_subjectScheme_matches_name() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -49,7 +49,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isOldAbr_should_return_false_if_schemeURI_does_not_match() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -65,7 +65,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isOldAbr_should_return_false_if_subjectScheme_does_not_match() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -85,7 +85,7 @@ class SubjectAbrTest extends BaseTest {
         var valueUri = "https://data.cultureelerfgoed.nl/term/id/rn/" + termUuid;
 
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"%s\"\n"
@@ -105,7 +105,7 @@ class SubjectAbrTest extends BaseTest {
         var valueUri = "https://data.cultureelerfgoed.nl/term/id/rn/" + termUuid;
 
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"%s\"\n"
@@ -121,7 +121,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isAbrArtifact_should_return_true_for_subject_element_matching_schemeURI_and_subjectScheme_attributes() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -137,7 +137,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isAbrArtifact_should_return_false_for_wrong_schemeURI() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -153,7 +153,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isAbrArtifact_should_return_false_for_wrong_subjectScheme() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -169,7 +169,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isAbrComplex_should_return_true_for_subject_element_matching_schemeURI_and_subjectScheme_attributes() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -185,7 +185,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isAbrComplex_should_return_false_for_wrong_schemeURI() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -201,7 +201,7 @@ class SubjectAbrTest extends BaseTest {
     @Test
     void isAbrComplex_should_return_false_for_wrong_subjectScheme() throws Exception {
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"https://test4.com/supersecret/\"\n"
@@ -221,7 +221,7 @@ class SubjectAbrTest extends BaseTest {
         var valueUri = "https://data.cultureelerfgoed.nl/term/id/rn/" + termUuid;
 
         var doc = readDocumentFromString(String.format(
-            "<ddm:subject xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:subject xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    schemeURI=\"%s\"\n"
                 + "    subjectScheme=\"%s\"\n"
                 + "    valueURI=\"%s\"\n"

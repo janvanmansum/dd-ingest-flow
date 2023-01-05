@@ -65,7 +65,7 @@ class PersonalStatementTest extends BaseTest {
 
     @Test
     void test_with_agreements_xml() throws Exception {
-        var doc = xmlReader.readXmlString("<agreements xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/bag/metadata/agreements/ https://easy.dans.knaw.nl/schemas/bag/metadata/agreements/agreements.xsd\"\n"
+        var doc = xmlReader.readXmlString("<agreements\n"
             + "            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
             + "            xmlns:dcterms=\"http://purl.org/dc/terms/\"\n"
             + "            xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/agreements/\"\n"

@@ -320,7 +320,7 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getAcquisitionMethods(Document ddm) {
         var expr = String.format(
-            "//ddm:dcmiMetadata/ddm:acquisitionMethod[@subjectScheme = '%s' and @schemeURI = '%s']",
+            "/ddm:DDM/ddm:dcmiMetadata/ddm:acquisitionMethod[@subjectScheme = '%s' and @schemeURI = '%s']",
             SCHEME_ABR_VERWERVINGSWIJZE, SCHEME_URI_ABR_VERWERVINGSWIJZE
         );
 

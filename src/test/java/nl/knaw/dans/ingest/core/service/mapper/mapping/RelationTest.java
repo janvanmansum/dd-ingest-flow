@@ -32,10 +32,9 @@ class RelationTest extends BaseTest {
     void test_to_relation_object() throws Exception {
 
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:DDM xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-                + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-                + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
+                + "         xmlns:dct=\"http://purl.org/dc/terms/\">\n"
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:license xsi:type=\"dct:URI\">http://creativecommons.org/licenses/by-sa/4.0</dct:license>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"

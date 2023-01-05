@@ -26,7 +26,7 @@ class DatesOfCollectionTest extends BaseTest {
 
     @Test
     void toDateOfCollectionValue_should_split_correctly_formatted_date_range_in_start_and_end_subfields() throws Exception {
-        var doc = readDocumentFromString("<ddm:datesOfCollection xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+        var doc = readDocumentFromString("<ddm:datesOfCollection xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "    2022-01-01/2022-02-01\n"
             + "</ddm:datesOfCollection>\n");
 
@@ -47,7 +47,7 @@ class DatesOfCollectionTest extends BaseTest {
 
     @Test
     void toDateOfCollectionValue_should_handle_ranges_without_start() throws Exception {
-        var doc = readDocumentFromString("<ddm:datesOfCollection xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+        var doc = readDocumentFromString("<ddm:datesOfCollection xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "    /2022-02-01\n"
             + "</ddm:datesOfCollection>\n");
 
@@ -68,7 +68,7 @@ class DatesOfCollectionTest extends BaseTest {
 
     @Test
     void toDateOfCollectionValue_should_handle_ranges_without_end() throws Exception {
-        var doc = readDocumentFromString("<ddm:datesOfCollection xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\">\n"
+        var doc = readDocumentFromString("<ddm:datesOfCollection xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "    2022-01-01/   \n"
             + "</ddm:datesOfCollection>\n");
 
