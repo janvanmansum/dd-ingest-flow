@@ -179,7 +179,7 @@ public class FileElement extends Base {
     }
 
     public static Map<Path, FileInfo> pathToFileInfo(Deposit deposit) {
-        var defaultRestrict = XPathEvaluator.nodes(deposit.getDdm(), "//ddm:profile/ddm:accessRights")
+        var defaultRestrict = XPathEvaluator.nodes(deposit.getDdm(), "/ddm:DDM/ddm:profile/ddm:accessRights")
             .map(AccessRights::toDefaultRestrict)
             .findFirst()
             .orElse(true);
