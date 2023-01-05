@@ -89,11 +89,10 @@ class MappingIntegrationTest {
     @Test
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:DDM xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
             + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
             + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-            + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-            + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
+            + "         xmlns:dct=\"http://purl.org/dc/terms/\">\n"
             + ddmProfile
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
@@ -116,11 +115,10 @@ class MappingIntegrationTest {
     @Test
     void DD_1216_description_type_technical_info_maps_once_to_description() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            "<ddm:DDM xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
                 + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-                + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-                + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
+                + "         xmlns:dct=\"http://purl.org/dc/terms/\">\n"
                 + ddmProfile
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
