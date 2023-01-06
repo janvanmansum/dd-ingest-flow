@@ -119,8 +119,8 @@ public final class DcxDaiAuthor extends Base {
     }
 
     public static boolean isRightsHolder(Node node) {
-        var author = parseAuthor(node);
-        return StringUtils.contains(author.getRole(), "RightsHolder");
+        var organization = parseAuthor(node);
+        return organization.getRole() != null && "RightsHolder".equals(organization.getRole().trim());
     }
 
     public static String toRightsHolder(Node node) {
