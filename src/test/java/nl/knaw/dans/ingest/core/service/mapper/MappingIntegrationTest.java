@@ -74,8 +74,7 @@ class MappingIntegrationTest {
     private final String rootAttributes = "xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
         + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
         + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-        + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-        + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ https://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\"\n";
+        + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n";
     private final String ddmProfile = ""
         + "    <ddm:profile>\n"
         + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
