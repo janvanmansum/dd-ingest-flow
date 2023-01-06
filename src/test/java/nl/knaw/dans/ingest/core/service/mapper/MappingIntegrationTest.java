@@ -22,7 +22,6 @@ import nl.knaw.dans.ingest.core.service.XmlReader;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -41,12 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MappingIntegrationTest {
 
-    private final Set<String> activeMetadataBlocks = Set.of("citation", "dansRights", "dansRelationalMetadata", "dansArchaeologyMetadata", "dansTemporalSpatial", "dansDataVaultMetadata");
-    private final XmlReader xmlReader = new XmlReaderImpl();
-
-    private final Map<String, String> iso1ToDataverseLanguage = new HashMap<>();
-    private final Map<String, String> iso2ToDataverseLanguage = new HashMap<>();
-    private final VaultMetadata vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "otherIdVersion", "swordToken");
     private final String ddmProfile = "    <ddm:profile>\n"
         + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
         + "        <dc:description xml:lang=\"la\">Lorem ipsum.</dc:description>\n"
@@ -58,29 +51,35 @@ class MappingIntegrationTest {
         + "    </ddm:profile>\n";
 
     private Document readDocumentFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
-        return xmlReader.readXmlString(xml);
+        return new XmlReaderImpl().readXmlString(xml);
     }
 
-    private Dataset mapDdmToDataset(Document doc) {
+    private Dataset mapDdmToDataset(Document ddm) {
+        final Set<String> activeMetadataBlocks = Set.of("citation", "dansRights", "dansRelationalMetadata", "dansArchaeologyMetadata", "dansTemporalSpatial", "dansDataVaultMetadata");
+        final VaultMetadata vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "otherIdVersion", "swordToken");
+        final Map<String, String> iso1ToDataverseLanguage = new HashMap<>();
+        final Map<String, String> iso2ToDataverseLanguage = new HashMap<>();
+        iso1ToDataverseLanguage.put("nl", "Dutch");
+        iso1ToDataverseLanguage.put("de", "German");
+
+        iso2ToDataverseLanguage.put("dut", "Dutch");
+        iso2ToDataverseLanguage.put("ger", "German");
         return new DepositToDvDatasetMetadataMapper(
             true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage
-        ).toDataverseDataset(doc, null, null, null, null, vaultMetadata);
+        ).toDataverseDataset(ddm, null, null, null, null, vaultMetadata);
     }
 
-    private String toJsonString(Dataset result) throws JsonProcessingException {
+    private String toPrettyJsonString(Dataset result) throws JsonProcessingException {
         return new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()
             .writeValueAsString(result);
     }
 
-    @BeforeEach
-    void setUp() {
-        iso1ToDataverseLanguage.put("nl", "Dutch");
-        iso1ToDataverseLanguage.put("de", "German");
-
-        iso2ToDataverseLanguage.put("dut", "Dutch");
-        iso2ToDataverseLanguage.put("ger", "German");
+    private String toCompactJsonString(Dataset result) throws JsonProcessingException {
+        return new ObjectMapper()
+            .writer()
+            .writeValueAsString(result);
     }
 
     @Test
@@ -107,7 +106,7 @@ class MappingIntegrationTest {
             .extracting(AUTHOR_NAME)
             .extracting("value")
             .containsOnly(expected);
-        assertEquals(2, toJsonString(result).split(expected).length);
+        assertEquals(2, toPrettyJsonString(result).split(expected).length);
     }
 
     @Test
@@ -127,7 +126,7 @@ class MappingIntegrationTest {
                 + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc);
-        var str = toJsonString(result);
+        var str = toPrettyJsonString(result);
         assertThat(str).contains("not known description type");
         assertThat(str).contains("technical description");
         assertThat(str).contains("Lorem ipsum");
@@ -161,11 +160,8 @@ class MappingIntegrationTest {
         //  {"typeClass" : "compound", "typeName" : "series", "multiple" : false, "value" :
         //  {"seriesName" : {"typeClass" : "primitive", "typeName" : "seriesInformation", "multiple" : false, "value" : "<p>series 123</p>"}}
         //  }
-        var str = new ObjectMapper()
-            .writer()
-            .writeValueAsString(result);
-
+        var str = toCompactJsonString(result);
         assertThat(str).contains("<p>series 123</p>");
-        assertThat(str).contains("\"value\":{\"seriesInformation\"");
+        assertThat(str).contains("\"value\":{\"seriesInformation\""); // NB: no square bracket
     }
 }
