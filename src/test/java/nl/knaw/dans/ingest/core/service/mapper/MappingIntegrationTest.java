@@ -110,7 +110,8 @@ class MappingIntegrationTest {
             .extracting(AUTHOR_NAME)
             .extracting("value")
             .containsOnly(expected);
-        assertEquals(2, toPrettyJsonString(result).split(expected).length);
+        // not as description and author
+        assertThat(toPrettyJsonString(result)).containsOnlyOnce(expected);
     }
 
     @Test
@@ -127,9 +128,9 @@ class MappingIntegrationTest {
 
         var result = mapDdmToDataset(doc);
         var str = toPrettyJsonString(result);
-        assertThat(str).contains("not known description type");
-        assertThat(str).contains("technical description");
-        assertThat(str).contains("Lorem ipsum");
+        assertThat(str).containsOnlyOnce("not known description type");
+        assertThat(str).containsOnlyOnce("technical description");
+        assertThat(str).containsOnlyOnce("Lorem ipsum");
         var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(DESCRIPTION)).findFirst().orElseThrow();
@@ -152,12 +153,16 @@ class MappingIntegrationTest {
 
         var result = mapDdmToDataset(doc);
 
-        // TODO improve test after DD-1237 (note that the single compound field is an anonymous class)
+        // TODO improve assertions after DD-1237 (note that the single compound field is an anonymous class)
         //  {"typeClass" : "compound", "typeName" : "series", "multiple" : false, "value" :
         //  {"seriesName" : {"typeClass" : "primitive", "typeName" : "seriesInformation", "multiple" : false, "value" : "<p>series 123</p>"}}
         //  }
         var str = toCompactJsonString(result);
-        assertThat(str).contains("<p>series 123</p>");
-        assertThat(str).contains("\"value\":{\"seriesInformation\""); // NB: no square bracket
+
+        // not as description and series
+        assertThat(str).containsOnlyOnce("<p>series 123</p>");
+
+        // no square bracket
+        assertThat(str).containsOnlyOnce("\"value\":{\"seriesInformation\"");
     }
 }
