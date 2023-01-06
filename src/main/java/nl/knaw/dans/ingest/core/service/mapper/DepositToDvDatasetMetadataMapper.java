@@ -69,6 +69,7 @@ import org.w3c.dom.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -267,13 +268,22 @@ public class DepositToDvDatasetMetadataMapper {
     private MetadataField compoundBuild(CompoundFieldBuilder compoundFieldBuilder) {
         // TODO rewrite in the dataverse library
         CompoundField compoundField = compoundFieldBuilder.build();
-        if (compoundField.isMultiple())
+        if (compoundField.isMultiple()) {
             return compoundField;
-        else return new MetadataField(compoundField.getTypeClass(),compoundField.getTypeName(),false) {
-            public Map<String, SingleValueField> getValue() {
-                return compoundField.getValue().get(0);
-            }
-        };
+        }
+        else {
+            return new MetadataField(compoundField.getTypeClass(), compoundField.getTypeName(), false) {
+
+                public Map<String, SingleValueField> getValue() {
+                    List<Map<String, SingleValueField>> value = compoundField.getValue();
+                    if (value != null && !value.isEmpty()) {
+                        return value.get(0);
+                    }
+                    else
+                        return null;
+                }
+            };
+        }
     }
 
     Dataset assembleDataverseDataset() {
