@@ -40,16 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MappingIntegrationTest {
 
-    private final String ddmProfile = "    <ddm:profile>\n"
-        + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
-        + "        <dc:description xml:lang=\"la\">Lorem ipsum.</dc:description>\n"
-        + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
-        + "        <ddm:created>2012-12</ddm:created>\n"
-        + "        <ddm:available>2013-05-01</ddm:available>\n"
-        + "        <ddm:audience>D24000</ddm:audience>\n"
-        + "        <ddm:accessRights xml:lang=\"en\">OPEN_ACCESS</ddm:accessRights>\n"
-        + "    </ddm:profile>\n";
-
     private Document readDocumentFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
         return new XmlReaderImpl().readXmlString(xml);
     }
@@ -82,14 +72,26 @@ class MappingIntegrationTest {
             .writeValueAsString(result);
     }
 
+    private final String rootAttributes = "xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+        + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+        + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
+        + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
+        + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ https://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\"\n";
+    private final String ddmProfile = ""
+        + "    <ddm:profile>\n"
+        + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
+        + "        <dc:description xml:lang=\"la\">Lorem ipsum.</dc:description>\n"
+        + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
+        + "        <ddm:created>2012-12</ddm:created>\n"
+        + "        <ddm:available>2013-05-01</ddm:available>\n"
+        + "        <ddm:audience>D24000</ddm:audience>\n"
+        + "        <ddm:accessRights xml:lang=\"en\">OPEN_ACCESS</ddm:accessRights>\n"
+        + "    </ddm:profile>\n";
+
     @Test
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
-            + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-            + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-            + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-            + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
+            "<ddm:DDM " + rootAttributes + ">\n"
             + ddmProfile
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
@@ -112,11 +114,7 @@ class MappingIntegrationTest {
     @Test
     void DD_1216_description_type_technical_info_maps_once_to_description() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
-                + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-                + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-                + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-                + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
+            "<ddm:DDM " + rootAttributes + ">\n"
                 + ddmProfile
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
@@ -142,11 +140,7 @@ class MappingIntegrationTest {
     @Test
     void DD_1216_description_type_series_information_maps_only_to_series() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
-                + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-                + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-                + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-                + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
+            "<ddm:DDM " + rootAttributes + ">\n"
                 + ddmProfile
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
