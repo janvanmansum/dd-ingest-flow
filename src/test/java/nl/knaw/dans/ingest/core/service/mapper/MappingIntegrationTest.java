@@ -152,7 +152,7 @@ class MappingIntegrationTest {
 
         var result = mapDdmToDataset(doc);
 
-        // TODO improve test (note that the single compound field is an anonymous class)
+        // TODO improve test after DD-1237 (note that the single compound field is an anonymous class)
         //  {"typeClass" : "compound", "typeName" : "series", "multiple" : false, "value" :
         //  {"seriesName" : {"typeClass" : "primitive", "typeName" : "seriesInformation", "multiple" : false, "value" : "<p>series 123</p>"}}
         //  }
