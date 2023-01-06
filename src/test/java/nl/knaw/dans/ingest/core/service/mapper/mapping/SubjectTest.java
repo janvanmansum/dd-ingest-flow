@@ -30,7 +30,7 @@ class SubjectTest extends BaseTest {
     @Test
     void hasNoCvAttributes_should_return_false_for_ABR_subjects() throws Exception {
         var doc = readDocumentFromString("<ddm:subject xml:lang=\"nl\" \n"
-            + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
             + "    valueURI=\"https://data.cultureelerfgoed.nl/term/id/abr/2179d872-888f-4807-a6d5-5e5afaa616c4\" \n"
             + "    subjectScheme=\"ABR Complextypen\" \n"
             + "    schemeURI=\"https://data.cultureelerfgoed.nl/term/id/abr/e9546020-4b28-4819-b0c2-29e7c864c5c0\">\n"
@@ -43,7 +43,7 @@ class SubjectTest extends BaseTest {
     @Test
     void hasNoCvAttributes_should_return_true_for_a_subject_with_no_subjectScheme_and_schemeURI_attributes() throws Exception {
         var doc = readDocumentFromString("<ddm:subject xml:lang=\"nl\" \n"
-            + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+            + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
             + "    >\n"
             + "    bewoning (inclusief verdediging)\n"
             + "</ddm:subject>");
@@ -55,7 +55,7 @@ class SubjectTest extends BaseTest {
     void isPanTerm_should_return_true_if_both_schemeURI_and_subjectScheme_match() throws Exception {
         var doc = readDocumentFromString(String.format(
             "<ddm:subject xml:lang=\"nl\" \n"
-                + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+                + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    valueURI=\"https://data.cultureelerfgoed.nl/term/id/abr/2179d872-888f-4807-a6d5-5e5afaa616c4\" \n"
                 + "    subjectScheme=\"%s\" \n"
                 + "    schemeURI=\"%s\">\n"
@@ -69,7 +69,7 @@ class SubjectTest extends BaseTest {
     void isPanTerm_should_return_false_if_schemeURI_does_not_match_for_pan() throws Exception {
         var doc = readDocumentFromString(String.format(
             "<ddm:subject xml:lang=\"nl\" \n"
-                + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+                + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    valueURI=\"https://data.cultureelerfgoed.nl/term/id/abr/2179d872-888f-4807-a6d5-5e5afaa616c4\" \n"
                 + "    subjectScheme=\"%s\" \n"
                 + "    schemeURI=\"%s\">\n"
@@ -83,7 +83,7 @@ class SubjectTest extends BaseTest {
     void isPanTerm_should_return_false_if_subjectScheme_does_not_match() throws Exception {
         var doc = readDocumentFromString(String.format(
             "<ddm:subject xml:lang=\"nl\" \n"
-                + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+                + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    valueURI=\"https://data.cultureelerfgoed.nl/term/id/abr/2179d872-888f-4807-a6d5-5e5afaa616c4\" \n"
                 + "    subjectScheme=\"%s\" \n"
                 + "    schemeURI=\"%s\">\n"
@@ -97,7 +97,7 @@ class SubjectTest extends BaseTest {
     void isAatTerm_should_return_true_if_both_schemeURI_and_subjectScheme_match() throws Exception {
         var doc = readDocumentFromString(String.format(
             "<ddm:subject xml:lang=\"nl\" \n"
-                + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+                + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    valueURI=\"https://data.cultureelerfgoed.nl/term/id/abr/2179d872-888f-4807-a6d5-5e5afaa616c4\" \n"
                 + "    subjectScheme=\"%s\" \n"
                 + "    schemeURI=\"%s\">\n"
@@ -111,7 +111,7 @@ class SubjectTest extends BaseTest {
     void isAatTerm_should_return_false_if_schemeURI_does_not_match() throws Exception {
         var doc = readDocumentFromString(String.format(
             "<ddm:subject xml:lang=\"nl\" \n"
-                + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+                + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    valueURI=\"https://data.cultureelerfgoed.nl/term/id/abr/2179d872-888f-4807-a6d5-5e5afaa616c4\" \n"
                 + "    subjectScheme=\"%s\" \n"
                 + "    schemeURI=\"%s\">\n"
@@ -125,7 +125,7 @@ class SubjectTest extends BaseTest {
     void isAatTerm_should_return_false_if_subjectScheme_does_not_match() throws Exception {
         var doc = readDocumentFromString(String.format(
             "<ddm:subject xml:lang=\"nl\" \n"
-                + "    xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+                + "    xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
                 + "    valueURI=\"https://data.cultureelerfgoed.nl/term/id/abr/2179d872-888f-4807-a6d5-5e5afaa616c4\" \n"
                 + "    subjectScheme=\"%s\" \n"
                 + "    schemeURI=\"%s\">\n"

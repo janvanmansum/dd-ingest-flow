@@ -18,7 +18,6 @@ package nl.knaw.dans.ingest.core.service.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
-import nl.knaw.dans.ingest.core.service.XmlReader;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
@@ -72,7 +71,7 @@ class MappingIntegrationTest {
             .writeValueAsString(result);
     }
 
-    private final String rootAttributes = "xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\"\n"
+    private final String rootAttributes = "xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
         + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
         + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
         + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
@@ -91,7 +90,11 @@ class MappingIntegrationTest {
     @Test
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
+            "<ddm:DDM xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
+            + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+            + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
+            + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
+            + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
             + ddmProfile
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"

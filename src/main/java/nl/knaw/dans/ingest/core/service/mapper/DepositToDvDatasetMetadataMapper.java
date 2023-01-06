@@ -306,36 +306,36 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getDescriptions(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:profile/dcterms:description | //ddm:profile/dc:description");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/dcterms:description | /ddm:DDM/ddm:profile/dc:description");
     }
 
     Stream<Node> getMetadataDescriptions(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:description");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:description");
     }
 
     Stream<Node> getTemporal(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/ddm:temporal");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:temporal");
     }
 
     Stream<Node> getSpatial(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:spatial");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:spatial");
     }
 
     Stream<Node> getBoundedBy(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:spatial//gml:boundedBy");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:spatial//gml:boundedBy");
     }
 
     Stream<Node> getSubjects(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:subject");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:subject");
     }
 
     Stream<Node> getLanguages(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:language");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:language");
     }
 
     Stream<Node> getAcquisitionMethods(Document ddm) {
         var expr = String.format(
-            "//ddm:dcmiMetadata/ddm:acquisitionMethod[@subjectScheme = '%s' and @schemeURI = '%s']",
+            "/ddm:DDM/ddm:dcmiMetadata/ddm:acquisitionMethod[@subjectScheme = '%s' and @schemeURI = '%s']",
             SCHEME_ABR_VERWERVINGSWIJZE, SCHEME_URI_ABR_VERWERVINGSWIJZE
         );
 
@@ -344,92 +344,92 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getReportNumbers(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:dcmiMetadata/ddm:reportNumber");
+            "/ddm:DDM/ddm:dcmiMetadata/ddm:reportNumber");
     }
 
     Stream<Node> getRelations(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:dcmiMetadata//*");
+            "/ddm:DDM/ddm:dcmiMetadata//*");
     }
 
     Stream<Node> getInCollections(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:dcmiMetadata/ddm:inCollection");
+            "/ddm:DDM/ddm:dcmiMetadata/ddm:inCollection");
     }
 
     Stream<String> getLanguageAttributes(Document ddm) {
-        return XPathEvaluator.strings(ddm, "//ddm:profile//@xml:lang | //ddm:dcmiMetadata//@xml:lang");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:profile//@xml:lang | /ddm:DDM/ddm:dcmiMetadata//@xml:lang");
     }
 
     Stream<Node> getContributorDetailsOrganizations(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:dcmiMetadata/dcx-dai:contributorDetails/dcx-dai:organization");
+            "/ddm:DDM/ddm:dcmiMetadata/dcx-dai:contributorDetails/dcx-dai:organization");
     }
 
     Stream<Node> getContributorDetailsAuthors(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:dcmiMetadata/dcx-dai:contributorDetails/dcx-dai:author");
+            "/ddm:DDM/ddm:dcmiMetadata/dcx-dai:contributorDetails/dcx-dai:author");
     }
 
     Stream<Node> getContributorDetails(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcx-dai:contributorDetails[dcx-dai:author] | //ddm:dcmiMetadata/dcx-dai:contributorDetails[dcx-dai:organization]");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcx-dai:contributorDetails[dcx-dai:author] | /ddm:DDM/ddm:dcmiMetadata/dcx-dai:contributorDetails[dcx-dai:organization]");
     }
 
     Stream<Node> getCreated(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:profile/ddm:created");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:created");
     }
 
     Stream<String> getAudiences(Document ddm) {
-        return XPathEvaluator.strings(ddm, "//ddm:profile/ddm:audience");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:profile/ddm:audience");
     }
 
     Stream<Node> getIdentifiers(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:identifier");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:identifier");
     }
 
     Stream<String> getTitles(Document ddm) {
-        return XPathEvaluator.strings(ddm, "//ddm:profile/dc:title");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:profile/dc:title");
     }
 
     Stream<Node> getAlternativeTitles(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:dcmiMetadata/dcterms:title", "//ddm:dcmiMetadata/dcterms:alternative");
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:title", "/ddm:DDM/ddm:dcmiMetadata/dcterms:alternative");
     }
 
     Stream<Node> getCreators(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:profile/dcx-dai:creatorDetails | //ddm:profile/dcx-dai:creator | //ddm:profile/dc:creator");
+            "/ddm:DDM/ddm:profile/dcx-dai:creatorDetails | /ddm:DDM/ddm:profile/dcx-dai:creator | /ddm:DDM/ddm:profile/dc:creator");
     }
 
     Stream<Node> getOtherDescriptions(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "//ddm:dcmiMetadata/dcterms:date",
-            "//ddm:dcmiMetadata/dcterms:dateAccepted",
-            "//ddm:dcmiMetadata/dcterms:dateCopyrighted",
-            "//ddm:dcmiMetadata/dcterms:modified",
-            "//ddm:dcmiMetadata/dcterms:issued",
-            "//ddm:dcmiMetadata/dcterms:valid",
-            "//ddm:dcmiMetadata/dcterms:coverage");
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:date",
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:dateAccepted",
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:dateCopyrighted",
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:modified",
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:issued",
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:valid",
+            "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage");
     }
 
     Stream<Node> getPublishers(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/dcterms:publisher");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:publisher");
     }
 
     Stream<Node> getAvailable(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:profile/ddm:available");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:available");
     }
 
     Stream<Node> getDatesOfCollection(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "//ddm:dcmiMetadata/ddm:datesOfCollection");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:datesOfCollection");
     }
 
     Stream<String> getDataSources(Document ddm) {
-        return XPathEvaluator.strings(ddm, "//ddm:dcmiMetadata/dcterms:source");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:source");
     }
 
     Stream<String> getRightsHolders(Document ddm) {
-        return XPathEvaluator.strings(ddm, "//ddm:dcmiMetadata/dcterms:rightsHolder");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:rightsHolder");
     }
 
     void checkRequiredField(String fieldName, Stream<String> nodes) {

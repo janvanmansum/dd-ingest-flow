@@ -44,9 +44,11 @@ public abstract class AbstractDepositsImportTaskIterator implements Iterator<Dep
         this.eventWriter = eventWriter;
     }
 
-    protected List<Path> readAllDepositsFromInbox() {
+    protected List<Path> getAllDepositPathsFromInbox() {
         try (Stream<Path> paths = Files.list(inboxDir).filter(Files::isDirectory)) {
-            return paths.collect(Collectors.toList());
+            var pathList = paths.collect(Collectors.toList());
+            log.debug("Found {} deposits", pathList.size());
+            return pathList;
         }
         catch (IOException e) {
             throw new IllegalStateException("Could not read deposits from inbox", e);
