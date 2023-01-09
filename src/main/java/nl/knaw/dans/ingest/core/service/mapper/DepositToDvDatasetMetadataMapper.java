@@ -168,7 +168,8 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDateOfCollections(getDatesOfCollection(ddm)
                 .filter(DatesOfCollection::isValidDistributorDate), DatesOfCollection.toDistributorValueObject);
             citationFields.addDataSources(getDataSources(ddm));
-            citationFields.addSeries(XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:description").filter(Description::isSeriesInformation),Description.toSeries);
+            citationFields.addNotesText(getProvenance(ddm));
+            citationFields.addSeries(getDcmiDdmDescriptions(ddm).filter(Description::isSeriesInformation),Description.toSeries);
 
         }
         else {
@@ -326,6 +327,10 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getDcmiDdmDescriptions(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:description");
+    }
+
+    Stream<Node> getProvenance(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:provenance");
     }
 
     Stream<Node> getTemporal(Document ddm) {

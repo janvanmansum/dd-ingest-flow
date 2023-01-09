@@ -21,6 +21,8 @@ import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
+import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveMultiValueField;
+import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -34,6 +36,7 @@ import java.util.Set;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -165,5 +168,28 @@ class MappingIntegrationTest {
 
         // no square bracket
         assertThat(str).containsOnlyOnce("\"value\":{\"seriesInformation\"");
+    }
+
+    @Test
+    void DD_1216_provenance_maps_to_notes() throws Exception {
+        var doc = readDocumentFromString(
+            "<ddm:DDM " + rootAttributes + ">\n"
+                + ddmProfile
+                + "    <ddm:dcmiMetadata>\n"
+                + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
+                + "        <dct:provenance>copied xml to csv</dct:provenance>\n"
+                + "    </ddm:dcmiMetadata>\n"
+                + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc);
+        var str = toPrettyJsonString(result);
+
+        assertThat(str).containsOnlyOnce("copied xml to csv");
+        assertThat(str).doesNotContain("<p>copied xml to csv</p>");
+
+        var field = (PrimitiveSingleValueField) result.getDatasetVersion().getMetadataBlocks()
+            .get("citation").getFields().stream()
+            .filter(f -> f.getTypeName().equals(NOTES_TEXT)).findFirst().orElseThrow();
+        assertThat(field.getValue()).isEqualTo("copied xml to csv");
     }
 }
