@@ -97,7 +97,7 @@ class MappingIntegrationTest {
             + ddmProfile
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
-            + "        <dct:description descriptionType=\"Other\">Author from description other</dct:description>\n"
+            + "        <ddm:description descriptionType=\"Other\">Author from description other</ddm:description>\n"
             + "    </ddm:dcmiMetadata>\n"
             + "</ddm:DDM>\n");
 
@@ -121,8 +121,9 @@ class MappingIntegrationTest {
                 + ddmProfile
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
-                + "        <dct:description descriptionType=\"TechnicalInfo\">technical description</dct:description>\n"
-                + "        <dct:description descriptionType=\"NotKnown\">not known description type</dct:description>\n"
+                + "        <dct:description>plain description</dct:description>\n"
+                + "        <ddm:description descriptionType=\"TechnicalInfo\">technical description</ddm:description>\n"
+                + "        <ddm:description descriptionType=\"NotKnown\">not known description type</ddm:description>\n"
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
@@ -137,7 +138,7 @@ class MappingIntegrationTest {
         assertThat(field.getValue())
             .extracting(DESCRIPTION_VALUE)
             .extracting("value")
-            .containsOnly("<p>Lorem ipsum.</p>", "<p>technical description</p>", "<p>not known description type</p>");
+            .containsOnly("<p>plain description</p>", "<p>Lorem ipsum.</p>", "<p>technical description</p>", "<p>not known description type</p>");
     }
 
     @Test
@@ -147,7 +148,7 @@ class MappingIntegrationTest {
                 + ddmProfile
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
-                + "        <dct:description descriptionType=\"SeriesInformation\">series 123</dct:description>\n"
+                + "        <ddm:description descriptionType=\"SeriesInformation\">series 123</ddm:description>\n"
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 

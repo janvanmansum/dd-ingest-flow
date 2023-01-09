@@ -134,16 +134,17 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addOtherIds(getIdentifiers(ddm).filter(Identifier::canBeMappedToOtherId), Identifier.toOtherIdValue);
             citationFields.addOtherIdsStrings(Stream.ofNullable(otherDoiId), DepositPropertiesOtherDoi.toOtherIdValue);
 
-            citationFields.addContributors(getMetadataDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);
+            citationFields.addContributors(getDcmiDdmDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);
             citationFields.addAuthors(getCreators(ddm), Author.toAuthorValueObject);
             citationFields.addDatasetContact(Stream.ofNullable(contactData), Contact.toOtherIdValue);
-            citationFields.addDescription(getDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription);
+            citationFields.addDescription(getProfileDescriptions(ddm), Description.toDescription);
 
             if (alternativeTitles.size() > 0) {
                 citationFields.addDescription(Stream.of(alternativeTitles.get(alternativeTitles.size() - 1)), Description.toDescription);
             }
 
-            citationFields.addDescription(getMetadataDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription);
+            citationFields.addDescription(getDcmiDctermsDescriptions(ddm), Description.toDescription);
+            citationFields.addDescription(getDcmiDdmDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription);
 
             citationFields.addDescription(getOtherDescriptions(ddm).filter(Description::isNotBlank), Description.toPrefixedDescription);
 
@@ -167,7 +168,7 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDateOfCollections(getDatesOfCollection(ddm)
                 .filter(DatesOfCollection::isValidDistributorDate), DatesOfCollection.toDistributorValueObject);
             citationFields.addDataSources(getDataSources(ddm));
-            citationFields.addSeries(getMetadataDescriptions(ddm).filter(Description::isSeriesInformation),Description.toSeries);
+            citationFields.addSeries(XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:description").filter(Description::isSeriesInformation),Description.toSeries);
 
         }
         else {
@@ -315,12 +316,16 @@ public class DepositToDvDatasetMetadataMapper {
         return dataset;
     }
 
-    Stream<Node> getDescriptions(Document ddm) {
+    Stream<Node> getProfileDescriptions(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/dcterms:description | /ddm:DDM/ddm:profile/dc:description");
     }
 
-    Stream<Node> getMetadataDescriptions(Document ddm) {
+    Stream<Node> getDcmiDctermsDescriptions(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:description");
+    }
+
+    Stream<Node> getDcmiDdmDescriptions(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:description");
     }
 
     Stream<Node> getTemporal(Document ddm) {
