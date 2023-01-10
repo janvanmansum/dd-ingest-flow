@@ -26,7 +26,7 @@ public final class InCollection extends Base {
 
     public static String toCollection(Node node) {
         return Optional.ofNullable(node.getAttributes())
-            .map(n -> Optional.ofNullable(n.getNamedItemNS(XmlReader.NAMESPACE_DDM, "valueUri")))
+            .map(n -> Optional.ofNullable(n.getNamedItemNS(XmlReader.NAMESPACE_DDM, "valueURI")))
             .flatMap(i -> i)
             .map(Node::getTextContent)
             .orElseGet(() -> {
