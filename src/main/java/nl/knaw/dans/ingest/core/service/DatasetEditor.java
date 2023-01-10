@@ -36,17 +36,19 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 
 @Slf4j
 public abstract class DatasetEditor {
@@ -65,7 +67,7 @@ public abstract class DatasetEditor {
     protected final ZipFileHandler zipFileHandler;
 
     protected final ObjectMapper objectMapper;
-    private final DateTimeFormatter dateAvailableFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final SimpleDateFormat dateAvailableFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     protected DatasetEditor(DataverseClient dataverseClient,
         boolean isMigration,
@@ -201,7 +203,7 @@ public abstract class DatasetEditor {
         }
         else {
             var api = dataverseClient.dataset(persistentId);
-            var embargo = new Embargo(dateAvailableFormat.format(dateAvailable), "",
+            var embargo = new Embargo(dateAvailableFormat.format(Date.from(dateAvailable)), "",
                 ArrayUtils.toPrimitive(fileIds.toArray(Integer[]::new)));
 
             api.setEmbargo(embargo);
