@@ -399,10 +399,11 @@ public class DatasetUpdater extends DatasetEditor {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private String getDoiByIsVersionOf() {
-        return Optional.of(deposit.getIsVersionOf())
-            .map(item -> String.format("dansBagId:%s", item))
-            .orElse(null);
+    private String getDoiByIsVersionOf() throws IOException, DataverseException {
+        var isVersionOf = deposit.getIsVersionOf();
+        if (isVersionOf == null)
+            throw new IllegalArgumentException("Update-deposit without Is-Version-Of");
+        return getDoi(String.format("dansBagId:%s", isVersionOf));
     }
 
     String getDoi(String query) throws IOException, DataverseException {
