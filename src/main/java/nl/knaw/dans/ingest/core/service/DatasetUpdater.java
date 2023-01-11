@@ -182,7 +182,7 @@ public class DatasetUpdater extends DatasetEditor {
                 var fileIdsToEmbargo = union(fileReplacements.keySet(), fileAdditions.keySet())
                     .stream()
                     .map(key -> Map.entry(key, fileReplacements.getOrDefault(key, fileAdditions.get(key))))
-                    .filter(entry -> !"easy-migration".equals(entry.getValue().getDirectoryLabel()))
+                    .filter(entry -> !"easy-migration.zip".equals(entry.getValue().getLabel()))
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toSet());
 
