@@ -76,8 +76,7 @@ public class DatasetCreator extends DatasetEditor {
             return persistentId;
         }
         catch (Exception e) {
-            log.error("Error creating dataset", e);
-            throw new FailedDepositException(deposit, "could not import/create dataset", e);
+            throw new FailedDepositException(deposit, "Error creating dataset, deleting draft", e);
         }
     }
 

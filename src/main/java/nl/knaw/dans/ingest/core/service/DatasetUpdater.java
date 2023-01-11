@@ -30,6 +30,7 @@ import nl.knaw.dans.lib.dataverse.model.search.DatasetResultItem;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -91,18 +92,18 @@ public class DatasetUpdater extends DatasetEditor {
 
                 var pathToFileInfo = getFileInfo();
                 log.debug("pathToFileInfo = {}", pathToFileInfo);
-                var pathToFileInfoInLatestVersion = getFilesInfoInLatestVersion(api);
+                var pathToFileMetaInLatestVersion = getFilesInfoInLatestVersion(api);
 
-                validateFileMetas(pathToFileInfoInLatestVersion);
+                validateFileMetas(pathToFileMetaInLatestVersion);
 
                 var versions = api.getAllVersions().getData();
                 var publishedVersions = versions.stream().filter(v -> v.getVersionState().equals("RELEASED")).count();
                 log.debug("Number of published versions so far: {}", publishedVersions);
 
                 // move old paths to new paths
-                var oldToNewPathMovedFiles = getOldToNewPathOfFilesToMove(pathToFileInfoInLatestVersion, pathToFileInfo);
+                var oldToNewPathMovedFiles = getOldToNewPathOfFilesToMove(pathToFileMetaInLatestVersion, pathToFileInfo);
                 var fileMovements = oldToNewPathMovedFiles.keySet().stream()
-                    .map(path -> Map.entry(pathToFileInfoInLatestVersion.get(path).getDataFile().getId(), pathToFileInfo.get(path).getMetadata()))
+                    .map(path -> Map.entry(pathToFileMetaInLatestVersion.get(path).getDataFile().getId(), pathToFileInfo.get(path).getMetadata()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 log.debug("fileMovements = {}", fileMovements);
 
@@ -115,12 +116,13 @@ public class DatasetUpdater extends DatasetEditor {
                  *
                  * - trying to add a file with a name that already exists. This happens when a file A is renamed to B, while B is also part of the latest version
                  */
-                var fileReplacementCandidates = pathToFileInfoInLatestVersion.entrySet().stream()
-                    .filter(k -> !oldToNewPathMovedFiles.containsKey(k.getKey()))
-                    .filter(k -> !oldToNewPathMovedFiles.containsValue(k.getKey())) // TODO in the OG version, this was a Set; check what performance is like
+                var fileReplacementCandidates = pathToFileMetaInLatestVersion.entrySet().stream()
+                    .filter(pathToFileInfoEntry -> !oldToNewPathMovedFiles.containsKey(pathToFileInfoEntry.getKey()))
+                    .filter(pathToFileInfoEntry -> !oldToNewPathMovedFiles.containsValue(pathToFileInfoEntry.getKey())) // TODO in the OG version, this was a Set; check what performance is like
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
                 var filesToReplace = getFilesToReplace(pathToFileInfo, fileReplacementCandidates);
+                log.debug("filesToReplace = {}", filesToReplace);
                 var fileReplacements = replaceFiles(api, filesToReplace);
                 log.debug("fileReplacements = {}", fileReplacements);
 
@@ -138,10 +140,10 @@ public class DatasetUpdater extends DatasetEditor {
                  * This may be a bit confusing, but the goals is to make sure that the underlying FILE remains present (after all, it is to be renamed/moved). The
                  * path itself WILL be "removed" from the latest version by the move. (It MAY be filled again by a file addition in the same update, though.)
                  */
-                var pathsToDelete = diff(diff(pathToFileInfoInLatestVersion.keySet(), candidateRemainingFiles), oldToNewPathMovedSet);
+                var pathsToDelete = diff(diff(pathToFileMetaInLatestVersion.keySet(), candidateRemainingFiles), oldToNewPathMovedSet);
                 log.debug("pathsToDelete = {}", pathsToDelete);
 
-                var fileDeletions = getFileDeletions(pathsToDelete, pathToFileInfoInLatestVersion);
+                var fileDeletions = getFileDeletions(pathsToDelete, pathToFileMetaInLatestVersion);
                 log.debug("fileDeletions = {}", fileDeletions);
 
                 deleteFiles(api, fileDeletions);
@@ -161,7 +163,7 @@ public class DatasetUpdater extends DatasetEditor {
                  * All paths in the deposit that are not occupied, are new files to be added.
                  */
 
-                var diffed = diff(diff(pathToFileInfoInLatestVersion.keySet(), oldToNewPathMovedSet), pathsToDelete);
+                var diffed = diff(diff(pathToFileMetaInLatestVersion.keySet(), oldToNewPathMovedSet), pathsToDelete);
                 var occupiedPaths = union(diffed, oldToNewPathMovedFiles.values());
 
                 log.debug("occupiedPaths = {}", occupiedPaths);
@@ -180,7 +182,7 @@ public class DatasetUpdater extends DatasetEditor {
                 var fileIdsToEmbargo = union(fileReplacements.keySet(), fileAdditions.keySet())
                     .stream()
                     .map(key -> Map.entry(key, fileReplacements.getOrDefault(key, fileAdditions.get(key))))
-                    .filter(entry -> !"easy-migration".equals(entry.getValue().getDirectoryLabel()))
+                    .filter(entry -> !"easy-migration.zip".equals(entry.getValue().getLabel()))
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toSet());
 
@@ -274,15 +276,29 @@ public class DatasetUpdater extends DatasetEditor {
         var results = new HashMap<Integer, FileMeta>();
 
         for (var entry : filesToReplace.entrySet()) {
+            log.debug("Replacing file with ID = {}", entry.getKey());
             var fileApi = dataverseClient.file(entry.getKey());
 
             var meta = new FileMeta();
             meta.setForceReplace(true);
             var json = objectMapper.writeValueAsString(meta);
+            var wrappedZip = zipFileHandler.wrapIfZipFile(entry.getValue().getPath());
+            var file = wrappedZip.orElse(entry.getValue().getPath());
+
+            log.debug("Calling replaceFileItem({}, {})", entry.getValue().getPath(), json);
             var result = fileApi.replaceFileItem(
-                Optional.of(entry.getValue().getPath().toFile()),
+                Optional.of(file.toFile()),
                 Optional.of(json)
             );
+
+            if (wrappedZip.isPresent()) {
+                try {
+                    Files.deleteIfExists(wrappedZip.get());
+                }
+                catch (IOException e) {
+                    log.error("Unable to delete zipfile {}", wrappedZip.get(), e);
+                }
+            }
 
             var id = -1;
 
@@ -336,7 +352,7 @@ public class DatasetUpdater extends DatasetEditor {
         var checksumsToPathNonDuplicatedFilesInDeposit = getChecksumsToPathOfNonDuplicateFiles(depositChecksums);
         var checksumsToPathNonDuplicatedFilesInLatestVersion = getChecksumsToPathOfNonDuplicateFiles(latestFileChecksums);
 
-        var intersects = checksumsToPathNonDuplicatedFilesInLatestVersion.keySet().stream()
+        var intersects = checksumsToPathNonDuplicatedFilesInDeposit.keySet().stream()
             .filter(checksumsToPathNonDuplicatedFilesInLatestVersion::containsKey)
             .collect(Collectors.toSet());
 

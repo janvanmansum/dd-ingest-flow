@@ -272,6 +272,7 @@ public class DepositToDvDatasetMetadataMapper {
         processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder);
 
         var version = new DatasetVersion();
+        version.setTermsOfAccess("N/a"); // TODO: retrieve from input
         version.setMetadataBlocks(fields);
         version.setFiles(new ArrayList<>());
 
