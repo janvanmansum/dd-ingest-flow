@@ -30,13 +30,19 @@ import javax.validation.constraints.NotNull;
 
 public class DdIngestFlowConfiguration extends Configuration {
 
+    @NotNull
     private IngestFlowConfig ingestFlow;
 
+    @NotNull
     private DataverseClientFactory dataverse;
 
+    @NotNull
     private DataverseExtra dataverseExtra;
 
+    @NotNull
     private ValidateDansBagConfig validateDansBag;
+
+    @NotNull
     private DataSourceFactory taskEventDatabase;
 
     @Valid

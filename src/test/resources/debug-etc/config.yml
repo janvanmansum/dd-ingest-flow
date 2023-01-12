@@ -58,6 +58,11 @@ dataverse:
   #  connectionTimeoutMs: 10000
   #  readTimeoutMs: 30000
 
+dataverseExtra:
+  publishAwaitUnlockMaxRetries: 900
+  publishAwaitUnlockWaitTimeMs: 3000
+
+
 taskEventDatabase:
   driverClass: org.hsqldb.jdbcDriver
   url: jdbc:hsqldb:hsql://localhost:9001/dd-ingest-flow
