@@ -79,6 +79,9 @@ public abstract class AbstractDepositsImportTaskIterator implements Iterator<Dep
     }
 
     protected void addTask(DepositIngestTask task) {
+        if (log.isDebugEnabled()) {
+            log.debug("Adding task for {}", task.getDeposit().getDir().getFileName());
+        }
         deque.add(task);
     }
 
