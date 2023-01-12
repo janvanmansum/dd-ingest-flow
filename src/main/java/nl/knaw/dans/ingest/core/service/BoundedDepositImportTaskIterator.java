@@ -15,14 +15,18 @@
  */
 package nl.knaw.dans.ingest.core.service;
 
-import java.nio.file.Path;
+import nl.knaw.dans.ingest.core.service.exception.InvalidDepositException;
 
-public class BoundedDepositImportTaskIterator extends  AbstractDepositsImportTaskIterator {
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
+
+public class BoundedDepositImportTaskIterator extends AbstractDepositsImportTaskIterator {
     public BoundedDepositImportTaskIterator(Path inboxDir, Path outBox, DepositIngestTaskFactory taskFactory,
         EventWriter eventWriter) {
         super(inboxDir, outBox, taskFactory, eventWriter);
-        for(var p: getAllDepositPathsFromInbox()) {
-            addTaskForDeposit(p);
-        }
+        createDepositIngestTasks(getAllDepositPathsFromInbox()).forEach(this::addTask);
     }
+
 }

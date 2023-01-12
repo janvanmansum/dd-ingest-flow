@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
@@ -55,15 +56,32 @@ public abstract class AbstractDepositsImportTaskIterator implements Iterator<Dep
         }
     }
 
+    protected List<DepositIngestTask> createDepositIngestTasks(List<Path> depositPaths) {
+        var tasks = new LinkedList<DepositIngestTask>();
+        for (var p : depositPaths) {
+            try {
+                tasks.add(taskFactory.createIngestTask(p, outBox, eventWriter));
+            }
+            catch (InvalidDepositException | IOException e) {
+                throw new IllegalArgumentException("Could not create task for deposit", e);
+            }
+        }
+        return tasks.stream().sorted().collect(Collectors.toList());
+    }
+
     protected void addTaskForDeposit(Path dir) {
         try {
-            var task = taskFactory.createIngestTask(dir, outBox, eventWriter);
-            deque.add(task);
+            addTask(taskFactory.createIngestTask(dir, outBox, eventWriter));
         }
         catch (IOException | InvalidDepositException e) {
             log.error("Error while creating task", e);
         }
     }
+
+    protected void addTask(DepositIngestTask task) {
+        deque.add(task);
+    }
+
 
     @Override
     public boolean hasNext() {
