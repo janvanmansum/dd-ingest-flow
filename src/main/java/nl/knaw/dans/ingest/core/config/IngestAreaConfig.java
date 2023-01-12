@@ -20,7 +20,6 @@ import java.nio.file.Path;
 public class IngestAreaConfig {
     private Path inbox;
     private Path outbox;
-    private String depositorRole;
 
     public Path getInbox() {
         return inbox;
@@ -36,13 +35,5 @@ public class IngestAreaConfig {
 
     public void setOutbox(Path outbox) {
         this.outbox = outbox;
-    }
-
-    public String getDepositorRole() {
-        return depositorRole;
-    }
-
-    public void setDepositorRole(String depositorRole) {
-        this.depositorRole = depositorRole;
     }
 }
