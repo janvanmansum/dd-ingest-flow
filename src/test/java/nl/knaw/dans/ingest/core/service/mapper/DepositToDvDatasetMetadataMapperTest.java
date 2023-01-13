@@ -103,7 +103,7 @@ class DepositToDvDatasetMetadataMapperTest {
             .withDefaultPrettyPrinter()
             .writeValueAsString(result);
 
-        assertTrue(str.contains("doi:a/b"));
+        assertThat(str).contains("doi:a/b");
     }
 
     @Test
