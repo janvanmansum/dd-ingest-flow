@@ -112,10 +112,7 @@ public class DepositToDvDatasetMetadataMapper {
         @Nullable VaultMetadata vaultMetadata
     ) throws MissingRequiredFieldException {
 
-        // TODO otherDoiId should be "", not null when sending to dataverse
-
         if (activeMetadataBlocks.contains("citation")) {
-            // this is not very java-esque
             checkRequiredField(TITLE, getTitles(ddm));
             checkRequiredField(SUBJECT, getAudiences(ddm));
 

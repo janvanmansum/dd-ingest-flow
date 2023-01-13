@@ -81,6 +81,11 @@ public class Deposit {
     }
 
     public String getOtherDoiId() {
+        // prevent "doi:null" values
+        if (StringUtils.isBlank(doi)) {
+            return null;
+        }
+
         var result = String.format("doi:%s", doi);
 
         if (StringUtils.isNotBlank(getDataverseId()) && !StringUtils.equals(getDataversePid(), result)) {
