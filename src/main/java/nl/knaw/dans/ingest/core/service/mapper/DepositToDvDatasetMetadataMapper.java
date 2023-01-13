@@ -131,7 +131,6 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addOtherIds(getIdentifiers(ddm).filter(Identifier::canBeMappedToOtherId), Identifier.toOtherIdValue);
             citationFields.addOtherIdsStrings(Stream.ofNullable(otherDoiId), DepositPropertiesOtherDoi.toOtherIdValue);
 
-            citationFields.addContributors(getMetadataDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);
             citationFields.addAuthors(getCreators(ddm), Author.toAuthorValueObject);
             citationFields.addDatasetContact(Stream.ofNullable(contactData), Contact.toOtherIdValue);
             citationFields.addDescription(getDescriptions(ddm).filter(Description::isNotBlank), Description.toDescription);
@@ -154,6 +153,7 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addLanguages(getLanguages(ddm), node -> Language.toCitationBlockLanguage(node, iso1ToDataverseLanguage, iso2ToDataverseLanguage));
             citationFields.addProductionDate(getCreated(ddm).map(Base::toYearMonthDayFormat));
             citationFields.addContributors(getContributorDetails(ddm).filter(Contributor::isValidContributor), Contributor.toContributorValueObject);
+            citationFields.addContributors(getMetadataDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);
             citationFields.addGrantNumbers(getIdentifiers(ddm).filter(Identifier::isNwoGrantNumber), Identifier.toNwoGrantNumber);
 
             citationFields.addDistributor(getPublishers(ddm).filter(Publisher::isNotDans), Publisher.toDistributorValueObject);
