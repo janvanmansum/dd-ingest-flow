@@ -90,12 +90,12 @@ public final class DcxDaiOrganization {
 
     public static boolean isRightsHolderOrFunder(Node node) {
         var organization = parseOrganization(node);
-        return Set.of("RightsHolder", "Funder").contains(organization.getRole());
+        return organization.getRole() != null && Set.of("RightsHolder", "Funder").contains(organization.getRole());
     }
 
     public static boolean isRightsHolder(Node node) {
         var organization = parseOrganization(node);
-        return StringUtils.contains(organization.getRole(), "RightsHolder");
+        return organization.getRole() != null && "RightsHolder".equals(organization.getRole().trim());
     }
 
     public static String toRightsHolder(Node node) {
@@ -105,6 +105,6 @@ public final class DcxDaiOrganization {
 
     public static boolean isFunder(Node node) {
         var organization = parseOrganization(node);
-        return StringUtils.contains(organization.getRole(), "Funder");
+        return organization.getRole() != null && "Funder".equals(organization.getRole().trim());
     }
 }

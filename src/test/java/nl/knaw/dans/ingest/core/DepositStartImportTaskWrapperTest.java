@@ -94,7 +94,6 @@ public class DepositStartImportTaskWrapperTest {
         );
 
         return task;
-//        return new DepositIngestTask(task, eventWriter);
     }
 
     @BeforeEach

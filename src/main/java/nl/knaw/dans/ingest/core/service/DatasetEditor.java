@@ -36,11 +36,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +69,7 @@ public abstract class DatasetEditor {
     protected final ZipFileHandler zipFileHandler;
 
     protected final ObjectMapper objectMapper;
-    private final DateTimeFormatter dateAvailableFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final SimpleDateFormat dateAvailableFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     protected DatasetEditor(DataverseClient dataverseClient,
         boolean isMigration,
@@ -89,7 +93,21 @@ public abstract class DatasetEditor {
     }
 
     static Instant parseDate(String value) {
-        return LocalDate.parse(value).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        try {
+            log.debug("Trying to parse {} as LocalDate", value);
+            return LocalDate.parse(value).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        }
+        catch (DateTimeParseException e) {
+            try {
+                log.debug("Trying to parse {} as ZonedDateTime", value);
+                return ZonedDateTime.parse(value).toInstant();
+            }
+            catch (DateTimeParseException ee) {
+                log.debug("Trying to parse {} as LocalDateTime", value);
+                var id = ZoneId.systemDefault().getRules().getOffset(Instant.now());
+                return LocalDateTime.parse(value).toInstant(id);
+            }
+        }
     }
 
     public abstract String performEdit() throws IOException, DataverseException, InterruptedException;
@@ -181,7 +199,7 @@ public abstract class DatasetEditor {
             var files = api.getFiles(Version.LATEST.toString()).getData();
 
             var items = files.stream()
-                .filter(f -> !"easy-migration".equals(f.getDirectoryLabel()))
+                .filter(f -> !"easy-migration.zip".equals(f.getLabel()))
                 .map(FileMeta::getDataFile)
                 .map(DataFile::getId)
                 .collect(Collectors.toList());
@@ -201,7 +219,7 @@ public abstract class DatasetEditor {
         }
         else {
             var api = dataverseClient.dataset(persistentId);
-            var embargo = new Embargo(dateAvailableFormat.format(dateAvailable), "",
+            var embargo = new Embargo(dateAvailableFormat.format(Date.from(dateAvailable)), "",
                 ArrayUtils.toPrimitive(fileIds.toArray(Integer[]::new)));
 
             api.setEmbargo(embargo);

@@ -59,7 +59,7 @@ public class FileElement extends Base {
         var dirPath = Optional.ofNullable(pathInDataset.getParent()).map(Path::toString).orElse(null);
         var sanitizedDirLabel = replaceForbiddenCharactersInPath(dirPath);
 
-        var restricted = getChildNode(node, "dcterms:accessibleToRights")
+        var restricted = getChildNode(node, "files:accessibleToRights")
             .map(Node::getTextContent)
             .map(accessibilityToRestrict::get)
             .orElse(defaultRestrict);

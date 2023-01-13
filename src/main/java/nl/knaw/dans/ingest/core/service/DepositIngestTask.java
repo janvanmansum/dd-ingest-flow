@@ -274,7 +274,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     void publishDataset(String persistentId) throws Exception {
-
         try {
             var dataset = dataverseClient.dataset(persistentId);
 
@@ -283,6 +282,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         }
         catch (IOException | DataverseException e) {
             log.error("Unable to publish dataset", e);
+            throw e;
         }
     }
 

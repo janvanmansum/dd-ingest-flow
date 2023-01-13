@@ -299,6 +299,7 @@ public class DepositToDvDatasetMetadataMapper {
         processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder);
 
         var version = new DatasetVersion();
+        version.setTermsOfAccess("N/a"); // TODO: retrieve from input
         version.setMetadataBlocks(fields);
         version.setFiles(new ArrayList<>());
 
@@ -445,7 +446,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<String> getDataSources(Document ddm) {
-        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:source");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dc:source");
     }
 
     Stream<String> getRightsHolders(Document ddm) {
