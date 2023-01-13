@@ -60,6 +60,6 @@ class DepositTest {
         deposit.setDataverseId("c");
         deposit.setDoi("a/b");
 
-        assertEquals("doi:a/b", deposit.getOtherDoiId());
+        assertEquals("doi:a/c", deposit.getOtherDoiId());
     }
 }

@@ -86,13 +86,13 @@ public class Deposit {
             return null;
         }
 
-        var result = String.format("doi:%s", doi);
+        var result = getDataversePid();
 
-        if (StringUtils.isNotBlank(getDataverseId()) && !StringUtils.equals(getDataversePid(), result)) {
+        if (StringUtils.equals(String.format("doi:%s", doi), result)) {
+            return null;
+        } else {
             return result;
         }
-
-        return null;
     }
 
     public String getDepositId() {
