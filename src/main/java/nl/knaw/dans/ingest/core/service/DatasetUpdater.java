@@ -103,7 +103,7 @@ public class DatasetUpdater extends DatasetEditor {
                 // move old paths to new paths
                 var oldToNewPathMovedFiles = getOldToNewPathOfFilesToMove(pathToFileMetaInLatestVersion, pathToFileInfo);
                 var fileMovements = oldToNewPathMovedFiles.keySet().stream()
-                    .map(path -> Map.entry(pathToFileMetaInLatestVersion.get(path).getDataFile().getId(), pathToFileInfo.get(path).getMetadata()))
+                    .map(path -> Map.entry(pathToFileMetaInLatestVersion.get(path).getDataFile().getId(), pathToFileInfo.get(oldToNewPathMovedFiles.get(path)).getMetadata()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 log.debug("fileMovements = {}", fileMovements);
 
