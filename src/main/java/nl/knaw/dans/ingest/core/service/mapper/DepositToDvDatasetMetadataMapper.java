@@ -130,8 +130,6 @@ public class DepositToDvDatasetMetadataMapper {
 
             citationFields.addOtherIds(getIdentifiers(ddm).filter(Identifier::canBeMappedToOtherId), Identifier.toOtherIdValue);
             citationFields.addOtherIdsStrings(Stream.ofNullable(otherDoiId), DepositPropertiesOtherDoi.toOtherIdValue);
-
-            citationFields.addContributors(getDcmiDdmDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);
             citationFields.addAuthors(getCreators(ddm), Author.toAuthorValueObject);
             citationFields.addDatasetContact(Stream.ofNullable(contactData), Contact.toOtherIdValue);
             citationFields.addDescription(getProfileDescriptions(ddm), Description.toDescription);
