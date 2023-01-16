@@ -19,10 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReader;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
-import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapper;
 import nl.knaw.dans.ingest.core.service.mapper.builder.ArchaeologyFieldBuilder;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -83,7 +81,7 @@ class DepositToDvDatasetMetadataMapperTest {
 
         var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "otherIdVersion", "swordToken");
 
-        var result = mapper.toDataverseDataset(doc, null, null, null, null, vaultMetadata);
+        var result = mapper.toDataverseDataset(doc, null, null, null, null, vaultMetadata, false);
         var str = new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()
@@ -97,7 +95,7 @@ class DepositToDvDatasetMetadataMapperTest {
 
         var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "doi:a/b", "otherIdVersion", "swordToken");
 
-        var result = mapper.toDataverseDataset(doc, null, null, null, null, vaultMetadata);
+        var result = mapper.toDataverseDataset(doc, null, null, null, null, vaultMetadata, false);
         var str = new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()
@@ -113,7 +111,7 @@ class DepositToDvDatasetMetadataMapperTest {
 
         var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", null, "otherIdVersion", "swordToken");
 
-        var result = mapper.toDataverseDataset(doc, null, null, null, null, vaultMetadata);
+        var result = mapper.toDataverseDataset(doc, null, null, null, null, vaultMetadata, false);
         var str = new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()

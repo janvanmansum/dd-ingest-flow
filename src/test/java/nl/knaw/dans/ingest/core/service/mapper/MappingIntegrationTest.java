@@ -21,7 +21,6 @@ import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
-import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -46,7 +45,7 @@ class MappingIntegrationTest {
         return new XmlReaderImpl().readXmlString(xml);
     }
 
-    private Dataset mapDdmToDataset(Document ddm) {
+    private Dataset mapDdmToDataset(Document ddm, boolean hasRestrictedOrNoneFiles) {
         final Set<String> activeMetadataBlocks = Set.of("citation", "dansRights", "dansRelationalMetadata", "dansArchaeologyMetadata", "dansTemporalSpatial", "dansDataVaultMetadata");
         final VaultMetadata vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "otherIdVersion", "swordToken");
         final Map<String, String> iso1ToDataverseLanguage = new HashMap<>();
@@ -58,7 +57,7 @@ class MappingIntegrationTest {
         iso2ToDataverseLanguage.put("ger", "German");
         return new DepositToDvDatasetMetadataMapper(
             true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage
-        ).toDataverseDataset(ddm, null, null, null, null, vaultMetadata);
+        ).toDataverseDataset(ddm, null, null, null, null, vaultMetadata, hasRestrictedOrNoneFiles);
     }
 
     private String toPrettyJsonString(Dataset result) throws JsonProcessingException {
@@ -104,7 +103,7 @@ class MappingIntegrationTest {
             + "    </ddm:dcmiMetadata>\n"
             + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc);
+        var result = mapDdmToDataset(doc, false);
         var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals("contributor")).findFirst().orElseThrow();
@@ -130,7 +129,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc);
+        var result = mapDdmToDataset(doc, false);
         var str = toPrettyJsonString(result);
         assertThat(str).containsOnlyOnce("not known description type");
         assertThat(str).containsOnlyOnce("technical description");
@@ -155,7 +154,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc);
+        var result = mapDdmToDataset(doc, false);
 
         // TODO improve assertions after DD-1237 (note that the single compound field is an anonymous class)
         //  {"typeClass" : "compound", "typeName" : "series", "multiple" : false, "value" :
@@ -181,7 +180,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc);
+        var result = mapDdmToDataset(doc, false);
         var str = toPrettyJsonString(result);
 
         assertThat(str).containsOnlyOnce("copied xml to csv");
@@ -191,5 +190,46 @@ class MappingIntegrationTest {
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(NOTES_TEXT)).findFirst().orElseThrow();
         assertThat(field.getValue()).isEqualTo("copied xml to csv");
+    }
+
+    @Test
+    void DD_1216_DctAccesRights_maps_to_description() throws Exception {
+        var doc = readDocumentFromString(
+            "<ddm:DDM " + rootAttributes + ">\n"
+                + ddmProfile
+                + "    <ddm:dcmiMetadata>\n"
+                + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
+                + "        <dct:accessRights>Some story</dct:accessRights>\n"
+                + "    </ddm:dcmiMetadata>\n"
+                + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc, false);
+        var str = toPrettyJsonString(result);
+
+        assertThat(str).containsOnlyOnce("<p>Some story</p>");
+
+        var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
+            .get("citation").getFields().stream()
+            .filter(f -> f.getTypeName().equals(DESCRIPTION)).findFirst().orElseThrow();
+        assertThat(field.getValue())
+            .extracting(DESCRIPTION_VALUE)
+            .extracting("value")
+            .containsOnly("<p>Some story</p>", "<p>Lorem ipsum.</p>");
+        assertEquals("N/a",result.getDatasetVersion().getTermsOfAccess());
+    }
+
+    @Test
+    void DD_1216_DctAccesRights_maps_to_termsofaccess() throws Exception {
+        var doc = readDocumentFromString(
+            "<ddm:DDM " + rootAttributes + ">\n"
+                + ddmProfile
+                + "    <ddm:dcmiMetadata>\n"
+                + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
+                + "        <dct:accessRights>Some story</dct:accessRights>\n"
+                + "    </ddm:dcmiMetadata>\n"
+                + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc, true);
+        assertEquals("Some story", result.getDatasetVersion().getTermsOfAccess());
     }
 }
