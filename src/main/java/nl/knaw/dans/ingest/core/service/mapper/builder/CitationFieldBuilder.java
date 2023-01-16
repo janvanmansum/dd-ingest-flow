@@ -113,7 +113,7 @@ public class CitationFieldBuilder extends FieldBuilder {
     }
 
     public void addDataSources(Stream<String> dataSources) {
-        addSingleString(DATA_SOURCES, dataSources);
+        addMultiplePrimitivesString(DATA_SOURCES, dataSources);
     }
 
     public void addNotesText(Stream<Node> stream) {

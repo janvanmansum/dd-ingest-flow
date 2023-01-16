@@ -419,7 +419,7 @@ public class DatasetUpdater extends DatasetEditor {
         var isVersionOf = deposit.getIsVersionOf();
         if (isVersionOf == null)
             throw new IllegalArgumentException("Update-deposit without Is-Version-Of");
-        return getDoi(String.format("dansBagId:%s", isVersionOf));
+        return getDoi(String.format("dansBagId:\"%s\"", isVersionOf));
     }
 
     String getDoi(String query) throws IOException, DataverseException {
