@@ -131,8 +131,8 @@ public class DatasetUpdater extends DatasetEditor {
                  * However, if a file is moved/renamed to a path that was also present in the latest version, then the old file at that path must first be deleted
                  * (and must therefore NOT be included in candidateRemainingFiles). Otherwise, we'll end up trying to use an existing (directoryLabel, label) pair.
                  */
-                var oldToNewPathMovedSet = new HashSet<>(oldToNewPathMovedFiles.values());
-                var candidateRemainingFiles = diff(pathToFileInfo.keySet(), oldToNewPathMovedSet);
+                var oldPathsOfMovedFiles = new HashSet<>(oldToNewPathMovedFiles.keySet());
+                var candidateRemainingFiles = diff(pathToFileInfo.keySet(), oldPathsOfMovedFiles);
 
 
                 /*
@@ -140,7 +140,7 @@ public class DatasetUpdater extends DatasetEditor {
                  * This may be a bit confusing, but the goals is to make sure that the underlying FILE remains present (after all, it is to be renamed/moved). The
                  * path itself WILL be "removed" from the latest version by the move. (It MAY be filled again by a file addition in the same update, though.)
                  */
-                var pathsToDelete = diff(diff(pathToFileMetaInLatestVersion.keySet(), candidateRemainingFiles), oldToNewPathMovedSet);
+                var pathsToDelete = diff(diff(pathToFileMetaInLatestVersion.keySet(), candidateRemainingFiles), oldPathsOfMovedFiles);
                 log.debug("pathsToDelete = {}", pathsToDelete);
 
                 var fileDeletions = getFileDeletions(pathsToDelete, pathToFileMetaInLatestVersion);
@@ -163,7 +163,7 @@ public class DatasetUpdater extends DatasetEditor {
                  * All paths in the deposit that are not occupied, are new files to be added.
                  */
 
-                var diffed = diff(diff(pathToFileMetaInLatestVersion.keySet(), oldToNewPathMovedSet), pathsToDelete);
+                var diffed = diff(diff(pathToFileMetaInLatestVersion.keySet(), oldPathsOfMovedFiles), pathsToDelete);
                 var occupiedPaths = union(diffed, oldToNewPathMovedFiles.values());
 
                 log.debug("occupiedPaths = {}", occupiedPaths);
