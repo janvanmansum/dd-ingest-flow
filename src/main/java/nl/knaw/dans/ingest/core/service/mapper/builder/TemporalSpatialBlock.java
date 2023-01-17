@@ -25,18 +25,18 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SPATIAL_
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SPATIAL_POINT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.TEMPORAL_COVERAGE;
 
-public class TemporalSpatialFieldBuilder extends FieldBuilder {
+public class TemporalSpatialBlock extends MetadataBlock {
 
     public void addTemporalCoverage(Stream<String> nodes) {
         addMultiplePrimitivesString(TEMPORAL_COVERAGE, nodes);
     }
 
     public void addSpatialPoint(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(SPATIAL_POINT, stream, generator);
+        addRepeatableCompoundValue(SPATIAL_POINT, stream, generator);
     }
 
     public void addSpatialBox(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(SPATIAL_BOX, stream, generator);
+        addRepeatableCompoundValue(SPATIAL_BOX, stream, generator);
     }
 
     public void addSpatialCoverageControlled(Stream<String> stream) {

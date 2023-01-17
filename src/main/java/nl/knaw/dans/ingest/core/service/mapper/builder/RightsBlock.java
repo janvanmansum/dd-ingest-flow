@@ -22,7 +22,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.LANGUAGE
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PERSONAL_DATA_PRESENT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RIGHTS_HOLDER;
 
-public class RightsFieldBuilder extends FieldBuilder {
+public class RightsBlock extends MetadataBlock {
 
     public void addRightsHolders(Stream<String> nodes) {
         addMultiplePrimitivesString(RIGHTS_HOLDER, nodes);

@@ -23,7 +23,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DANS_OTH
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NBN;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SWORD_TOKEN;
 
-public class DataVaultFieldBuilder extends FieldBuilder {
+public class DataVaultBlock extends MetadataBlock {
 
     public void addBagId(String value) {
         addSingleString(BAG_ID, Stream.ofNullable(value));

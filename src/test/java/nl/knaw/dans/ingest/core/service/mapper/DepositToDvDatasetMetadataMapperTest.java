@@ -19,10 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReader;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
-import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapper;
-import nl.knaw.dans.ingest.core.service.mapper.builder.ArchaeologyFieldBuilder;
+import nl.knaw.dans.ingest.core.service.mapper.builder.ArchaeologySpecificBlock;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -139,7 +137,7 @@ class DepositToDvDatasetMetadataMapperTest {
     void processMetadataBlock_should_deduplicate_items_for_PrimitiveFieldBuilder() throws Exception {
         var fields = new HashMap<String, MetadataBlock>();
         var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of());
-        var builder = new ArchaeologyFieldBuilder();
+        var builder = new ArchaeologySpecificBlock();
         builder.addArchisZaakId(Stream.of(
             "TEST",
             "TEST2",
@@ -159,7 +157,7 @@ class DepositToDvDatasetMetadataMapperTest {
     void processMetadataBlock_should_deduplicate_items_for_CompoundFieldBuilder() throws Exception {
         var fields = new HashMap<String, MetadataBlock>();
         var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of());
-        var builder = new ArchaeologyFieldBuilder();
+        var builder = new ArchaeologySpecificBlock();
         builder.addArchisZaakId(Stream.of(
             "TEST",
             "TEST2",

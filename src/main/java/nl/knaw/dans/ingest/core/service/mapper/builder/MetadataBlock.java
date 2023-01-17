@@ -27,11 +27,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class FieldBuilder {
+public abstract class MetadataBlock {
     private final Map<String, CompoundFieldBuilder> compoundFields;
     private final Map<String, PrimitiveFieldBuilder> primitiveFields;
 
-    public FieldBuilder() {
+    public MetadataBlock() {
         this.compoundFields = new HashMap<>();
         this.primitiveFields = new HashMap<>();
     }
@@ -107,21 +107,22 @@ public abstract class FieldBuilder {
         setPrimitiveFields(name, values);
     }
 
-    public void addMultiple(String name, Stream<Node> data, CompoundFieldGenerator<Node> generator) {
+    public void addRepeatableCompoundValue(String name, Stream<Node> data, CompoundFieldGenerator<Node> generator) {
         data.forEach(value -> {
             var builder = getCompoundBuilder(name, true);
             generator.build(builder, value);
         });
     }
 
-    public void addSingleCompound(String name, Stream<Node> data, CompoundFieldGenerator<Node> generator) {
+    public void addNonrepeatableValue(String name, Stream<Node> data, CompoundFieldGenerator<Node> generator) {
         data.forEach(value -> {
             var builder = getCompoundBuilder(name, false);
             generator.build(builder, value);
         });
+        // TODO: should produce an error if there are multiple value
     }
 
-    public void addMultipleString(String name, Stream<String> data, CompoundFieldGenerator<String> generator) {
+    public void addRepeatableStringValues(String name, Stream<String> data, CompoundFieldGenerator<String> generator) {
         data.forEach(value -> {
             var builder = getCompoundBuilder(name, true);
             generator.build(builder, value);

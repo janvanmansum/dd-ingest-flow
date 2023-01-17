@@ -23,7 +23,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUDIENCE
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.COLLECTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RELATION;
 
-public class RelationFieldBuilder extends FieldBuilder {
+public class RelationBlock extends MetadataBlock {
 
     public void addAudiences(Stream<String> nodes) {
         addMultiplePrimitivesString(AUDIENCE, nodes);
@@ -34,6 +34,6 @@ public class RelationFieldBuilder extends FieldBuilder {
     }
 
     public void addRelations(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(RELATION, stream, generator);
+        addRepeatableCompoundValue(RELATION, stream, generator);
     }
 }

@@ -28,14 +28,14 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ABR_VERW
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ARCHIS_NUMBER;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ARCHIS_ZAAK_ID;
 
-public class ArchaeologyFieldBuilder extends FieldBuilder {
+public class ArchaeologySpecificBlock extends MetadataBlock {
 
     public void addArchisZaakId(Stream<String> nodes) {
         addMultiplePrimitivesString(ARCHIS_ZAAK_ID, nodes);
     }
 
     public void addArchisNumber(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(ARCHIS_NUMBER, stream, generator);
+        addRepeatableCompoundValue(ARCHIS_NUMBER, stream, generator);
     }
 
     public void addRapportType(Stream<String> nodes) {

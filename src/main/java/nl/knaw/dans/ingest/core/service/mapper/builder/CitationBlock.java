@@ -42,26 +42,26 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.TITLE;
 
-public class CitationFieldBuilder extends FieldBuilder {
+public class CitationBlock extends MetadataBlock {
 
     public void addTitle(Stream<String> nodes) {
         addSingleString(TITLE, nodes);
     }
 
     public void addSeries(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addSingleCompound(SERIES, stream, generator);
+        addNonrepeatableValue(SERIES, stream, generator);
     }
 
     public void addOtherIds(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(OTHER_ID, stream, generator);
+        addRepeatableCompoundValue(OTHER_ID, stream, generator);
     }
 
     public void addOtherIdsStrings(Stream<String> stream, CompoundFieldGenerator<String> generator) {
-        addMultipleString(OTHER_ID, stream, generator);
+        addRepeatableStringValues(OTHER_ID, stream, generator);
     }
 
     public void addAuthors(Stream<Node> creators, CompoundFieldGenerator<Node> generator) {
-        addMultiple(AUTHOR, creators, generator);
+        addRepeatableCompoundValue(AUTHOR, creators, generator);
     }
 
     public void addAlternativeTitle(Stream<String> stream) {
@@ -69,7 +69,7 @@ public class CitationFieldBuilder extends FieldBuilder {
     }
 
     public void addDescription(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(DESCRIPTION, stream, generator);
+        addRepeatableCompoundValue(DESCRIPTION, stream, generator);
     }
 
     public void addSubject(Stream<String> stream, Function<String, String> mapper) {
@@ -77,11 +77,11 @@ public class CitationFieldBuilder extends FieldBuilder {
     }
 
     public void addKeywords(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(KEYWORD, stream, generator);
+        addRepeatableCompoundValue(KEYWORD, stream, generator);
     }
 
     public void addPublications(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(PUBLICATION, stream, generator);
+        addRepeatableCompoundValue(PUBLICATION, stream, generator);
     }
 
     public void addLanguages(Stream<Node> stream, Function<Node, String> mapper) {
@@ -93,15 +93,15 @@ public class CitationFieldBuilder extends FieldBuilder {
     }
 
     public void addContributors(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(CONTRIBUTOR, stream, generator);
+        addRepeatableCompoundValue(CONTRIBUTOR, stream, generator);
     }
 
     public void addGrantNumbers(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(GRANT_NUMBER, stream, generator);
+        addRepeatableCompoundValue(GRANT_NUMBER, stream, generator);
     }
 
     public void addDistributor(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(DISTRIBUTOR, stream, generator);
+        addRepeatableCompoundValue(DISTRIBUTOR, stream, generator);
     }
 
     public void addDistributionDate(Stream<String> stream) {
@@ -109,7 +109,7 @@ public class CitationFieldBuilder extends FieldBuilder {
     }
 
     public void addDateOfCollections(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addMultiple(DATE_OF_COLLECTION, stream, generator);
+        addRepeatableCompoundValue(DATE_OF_COLLECTION, stream, generator);
     }
 
     public void addDataSources(Stream<String> dataSources) {

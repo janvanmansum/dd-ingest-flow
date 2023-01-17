@@ -20,13 +20,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XPathEvaluator;
-import nl.knaw.dans.ingest.core.service.mapper.builder.ArchaeologyFieldBuilder;
-import nl.knaw.dans.ingest.core.service.mapper.builder.CitationFieldBuilder;
-import nl.knaw.dans.ingest.core.service.mapper.builder.DataVaultFieldBuilder;
-import nl.knaw.dans.ingest.core.service.mapper.builder.FieldBuilder;
-import nl.knaw.dans.ingest.core.service.mapper.builder.RelationFieldBuilder;
-import nl.knaw.dans.ingest.core.service.mapper.builder.RightsFieldBuilder;
-import nl.knaw.dans.ingest.core.service.mapper.builder.TemporalSpatialFieldBuilder;
+import nl.knaw.dans.ingest.core.service.mapper.builder.ArchaeologySpecificBlock;
+import nl.knaw.dans.ingest.core.service.mapper.builder.CitationBlock;
+import nl.knaw.dans.ingest.core.service.mapper.builder.DataVaultBlock;
+import nl.knaw.dans.ingest.core.service.mapper.builder.MetadataBlock;
+import nl.knaw.dans.ingest.core.service.mapper.builder.RelationBlock;
+import nl.knaw.dans.ingest.core.service.mapper.builder.RightsBlock;
+import nl.knaw.dans.ingest.core.service.mapper.builder.TemporalSpatialBlock;
 import nl.knaw.dans.ingest.core.service.exception.MissingRequiredFieldException;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.AbrAcquisitionMethod;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.AbrReportType;
@@ -57,7 +57,6 @@ import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
-import nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
@@ -76,6 +75,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RIGHTS_HOLDER;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SCHEME_ABR_VERWERVINGSWIJZE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SCHEME_URI_ABR_VERWERVINGSWIJZE;
@@ -87,12 +87,12 @@ public class DepositToDvDatasetMetadataMapper {
 
     private final Set<String> activeMetadataBlocks;
 
-    private final CitationFieldBuilder citationFields = new CitationFieldBuilder();
-    private final RightsFieldBuilder rightsFields = new RightsFieldBuilder();
-    private final RelationFieldBuilder relationFields = new RelationFieldBuilder();
-    private final ArchaeologyFieldBuilder archaeologyFields = new ArchaeologyFieldBuilder();
-    private final TemporalSpatialFieldBuilder temporalSpatialFields = new TemporalSpatialFieldBuilder();
-    private final DataVaultFieldBuilder dataVaultFieldBuilder = new DataVaultFieldBuilder();
+    private final CitationBlock citationFields = new CitationBlock();
+    private final RightsBlock rightsFields = new RightsBlock();
+    private final RelationBlock relationFields = new RelationBlock();
+    private final ArchaeologySpecificBlock archaeologyFields = new ArchaeologySpecificBlock();
+    private final TemporalSpatialBlock temporalSpatialFields = new TemporalSpatialBlock();
+    private final DataVaultBlock dataVaultBlock = new DataVaultBlock();
 
     private final Map<String, String> iso1ToDataverseLanguage;
     private final Map<String, String> iso2ToDataverseLanguage;
@@ -145,8 +145,9 @@ public class DepositToDvDatasetMetadataMapper {
 
             citationFields.addSubject(getAudiences(ddm), Audience::toCitationBlockSubject);
 
-            citationFields.addKeywords(getSubjects(ddm).filter(Subject::hasNoCvAttributes), Subject.toKeywordValue);
-            citationFields.addKeywords(getSubjects(ddm).filter(Subject::isPanTerm), Subject.toPanKeywordValue);
+            var subjects = getSubjects(ddm).collect(Collectors.toList());
+            citationFields.addRepeatableCompoundValue(KEYWORD, subjects.stream().filter(Subject::hasNoCvAttributes), Subject.toKeywordValue);
+            citationFields.addRepeatableCompoundValue(KEYWORD, subjects.stream().filter(Subject::isPanTerm), Subject.toPanKeywordValue);
             citationFields.addKeywords(getSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue);
             citationFields.addKeywords(getLanguages(ddm).filter(Language::isNotIsoLanguage), Language.toKeywordValue);
             citationFields.addPublications(getIdentifiers(ddm).filter(Identifier::isRelatedPublication), Identifier.toRelatedPublicationValue);
@@ -216,11 +217,11 @@ public class DepositToDvDatasetMetadataMapper {
         }
 
         if (activeMetadataBlocks.contains("dansDataVaultMetadata") && vaultMetadata != null) {
-            dataVaultFieldBuilder.addBagId(vaultMetadata.getBagId());
-            dataVaultFieldBuilder.addNbn(vaultMetadata.getNbn());
-            dataVaultFieldBuilder.addDansOtherId(vaultMetadata.getOtherId());
-            dataVaultFieldBuilder.addDansOtherIdVersion(vaultMetadata.getOtherIdVersion());
-            dataVaultFieldBuilder.addSwordToken(vaultMetadata.getSwordToken());
+            dataVaultBlock.addBagId(vaultMetadata.getBagId());
+            dataVaultBlock.addNbn(vaultMetadata.getNbn());
+            dataVaultBlock.addDansOtherId(vaultMetadata.getOtherId());
+            dataVaultBlock.addDansOtherIdVersion(vaultMetadata.getOtherIdVersion());
+            dataVaultBlock.addSwordToken(vaultMetadata.getSwordToken());
 
         }
 
@@ -235,7 +236,7 @@ public class DepositToDvDatasetMetadataMapper {
         return XPathEvaluator.nodes(agreements, "//agreements:personalDataStatement");
     }
 
-    void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder) {
+    void processMetadataBlock(boolean deduplicate, Map<String, nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock> fields, String title, String displayName, MetadataBlock builder) {
         // TODO figure out how to deduplicate compound fields (just on key, or also on value?)
         var compoundFields = builder.getCompoundFields().values()
             .stream()
@@ -256,7 +257,7 @@ public class DepositToDvDatasetMetadataMapper {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        var block = new MetadataBlock();
+        var block = new nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock();
         block.setDisplayName(displayName);
         block.setFields(result);
 
@@ -285,14 +286,14 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Dataset assembleDataverseDataset() {
-        var fields = new HashMap<String, MetadataBlock>();
+        var fields = new HashMap<String, nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock>();
 
         processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields);
         processMetadataBlock(deduplicate, fields, "dansRights", "Rights Metadata", rightsFields);
         processMetadataBlock(deduplicate, fields, "dansRelationMetadata", "Relation Metadata", relationFields);
         processMetadataBlock(deduplicate, fields, "dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologyFields);
         processMetadataBlock(deduplicate, fields, "dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields);
-        processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder);
+        processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultBlock);
 
         var version = new DatasetVersion();
         version.setTermsOfAccess("N/a"); // TODO: retrieve from input
@@ -415,7 +416,7 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getCreators(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "/ddm:DDM/ddm:profile/dcx-dai:creatorDetails | /ddm:DDM/ddm:profile/dcx-dai:creator | /ddm:DDM/ddm:profile/dc:creator");
+            "/ddm:DDM/ddm:profile/dcx-dai:creatorDetails", "/ddm:DDM/ddm:profile/dc:creator", "/ddm:DDM/ddm:profile/dcterms:creator");
     }
 
     Stream<Node> getOtherDescriptions(Document ddm) {
