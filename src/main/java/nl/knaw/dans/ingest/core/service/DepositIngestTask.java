@@ -338,7 +338,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         var contact = getDatasetContact();
         var deposit = getDeposit();
         var accessibleToValues = XPathEvaluator
-            .strings(deposit.getFilesXml(), "//files:file/ddm:accessibleToRights")
+            .strings(deposit.getFilesXml(), "//accessibleToRights")
             .collect(Collectors.toList());
         var hasRestrictedOrNoneFiles = accessibleToValues.contains("RESTRICTED_REQUEST") || accessibleToValues.contains("NONE");
 
