@@ -331,7 +331,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getTemporal(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:temporal");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:temporal");
     }
 
     Stream<Node> getSpatial(Document ddm) {
@@ -347,7 +347,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getLanguages(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:language");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:language");
     }
 
     Stream<Node> getAcquisitionMethods(Document ddm) {
