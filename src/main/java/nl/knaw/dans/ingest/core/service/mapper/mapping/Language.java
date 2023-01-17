@@ -21,6 +21,7 @@ import org.w3c.dom.Node;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY;
@@ -51,14 +52,16 @@ public class Language extends Base {
         return hasTypes || hasEncoding;
     }
 
-    public static String toCitationBlockLanguage(Node node, Map<String, String> iso1ToDataverseLanguage, Map<String, String> iso2ToDataverseLanguage) {
-        if (isIsoLanguage(node)) {
-            return getAttribute(node, "code")
-                .map(n -> isoToDataverse(n.getTextContent().trim(), iso1ToDataverseLanguage, iso2ToDataverseLanguage))
-                .orElse(null);
-        }
+    public static Function<Node, String> toCitationBlockLanguage(Map<String, String> iso1ToDataverseLanguage, Map<String, String> iso2ToDataverseLanguage) {
+        return (Node node) -> {
+            if (isIsoLanguage(node)) {
+                return getAttribute(node, "code")
+                    .map(n -> isoToDataverse(n.getTextContent().trim(), iso1ToDataverseLanguage, iso2ToDataverseLanguage))
+                    .orElse(null);
+            }
 
-        return null;
+            return null;
+        };
     }
 
     public static String isoToDataverse(String code, Map<String, String> iso1ToDataverseLanguage, Map<String, String> iso2ToDataverseLanguage) {

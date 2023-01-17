@@ -76,6 +76,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.LANGUAGE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RIGHTS_HOLDER;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SCHEME_ABR_VERWERVINGSWIJZE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SCHEME_URI_ABR_VERWERVINGSWIJZE;
@@ -148,10 +150,11 @@ public class DepositToDvDatasetMetadataMapper {
             var subjects = getSubjects(ddm).collect(Collectors.toList());
             citationFields.addRepeatableCompoundValue(KEYWORD, subjects.stream().filter(Subject::hasNoCvAttributes), Subject.toKeywordValue);
             citationFields.addRepeatableCompoundValue(KEYWORD, subjects.stream().filter(Subject::isPanTerm), Subject.toPanKeywordValue);
-            citationFields.addKeywords(getSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue);
-            citationFields.addKeywords(getLanguages(ddm).filter(Language::isNotIsoLanguage), Language.toKeywordValue);
-            citationFields.addPublications(getIdentifiers(ddm).filter(Identifier::isRelatedPublication), Identifier.toRelatedPublicationValue);
-            citationFields.addLanguages(getLanguages(ddm), node -> Language.toCitationBlockLanguage(node, iso1ToDataverseLanguage, iso2ToDataverseLanguage));
+            citationFields.addRepeatableCompoundValue(KEYWORD, subjects.stream().filter(Subject::isAatTerm), Subject.toAatKeywordValue);
+            citationFields.addRepeatableCompoundValue(KEYWORD, subjects.stream().filter(Language::isNotIsoLanguage), Language.toKeywordValue);
+
+            citationFields.addRepeatableCompoundValue(PUBLICATION, getIdentifiers(ddm).filter(Identifier::isRelatedPublication), Identifier.toRelatedPublicationValue);
+            citationFields.addMultipleControlledFields(LANGUAGE, getLanguages(ddm).map(Language.toCitationBlockLanguage(iso1ToDataverseLanguage, iso2ToDataverseLanguage)));
             citationFields.addProductionDate(getCreated(ddm).map(Base::toYearMonthDayFormat));
             citationFields.addContributors(getContributorDetails(ddm).filter(Contributor::isValidContributor), Contributor.toContributorValueObject);
             citationFields.addContributors(getDcmiDdmDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Author.toAuthorValueObject);

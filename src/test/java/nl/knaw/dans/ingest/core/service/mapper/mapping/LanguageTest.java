@@ -54,7 +54,7 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertEquals("English", Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertEquals("English", Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 
     @Test
@@ -69,7 +69,7 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertEquals("Dutch", Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertEquals("Dutch", Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 
     @Test
@@ -84,7 +84,7 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertEquals("French", Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertEquals("French", Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 
     @Test
@@ -99,7 +99,7 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertEquals("German", Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertEquals("German", Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 
     @Test
@@ -114,7 +114,7 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertNull(Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertNull(Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 
     @Test
@@ -129,7 +129,7 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertEquals("Sanskrit (Saṁskṛta)", Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertEquals("Sanskrit (Saṁskṛta)", Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 
     @Test
@@ -154,7 +154,7 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertEquals("German", Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertEquals("German", Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 
     @Test
@@ -169,6 +169,6 @@ class LanguageTest extends BaseTest {
         var iso1 = getIso1();
         var iso2 = getIso2();
 
-        assertEquals("Bulgarian", Language.toCitationBlockLanguage(doc.getDocumentElement(), iso1, iso2));
+        assertEquals("Bulgarian", Language.toCitationBlockLanguage(iso1, iso2).apply(doc.getDocumentElement()));
     }
 }

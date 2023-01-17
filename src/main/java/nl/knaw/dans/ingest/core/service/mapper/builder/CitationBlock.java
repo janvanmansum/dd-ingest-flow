@@ -32,12 +32,9 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPT
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DISTRIBUTION_DATE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DISTRIBUTOR;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.GRANT_NUMBER;
-import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD;
-import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.LANGUAGE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.OTHER_ID;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PRODUCTION_DATE;
-import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.TITLE;
@@ -74,18 +71,6 @@ public class CitationBlock extends MetadataBlock {
 
     public void addSubject(Stream<String> stream, Function<String, String> mapper) {
         addMultipleControlledFields(SUBJECT, stream.map(mapper));
-    }
-
-    public void addKeywords(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addRepeatableCompoundValue(KEYWORD, stream, generator);
-    }
-
-    public void addPublications(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
-        addRepeatableCompoundValue(PUBLICATION, stream, generator);
-    }
-
-    public void addLanguages(Stream<Node> stream, Function<Node, String> mapper) {
-        addMultipleControlledFields(LANGUAGE, stream.map(mapper));
     }
 
     public void addProductionDate(Stream<String> stream) {
