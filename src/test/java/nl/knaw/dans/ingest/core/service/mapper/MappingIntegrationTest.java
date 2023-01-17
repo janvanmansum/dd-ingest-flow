@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
@@ -110,7 +111,7 @@ class MappingIntegrationTest {
             .filter(f -> f.getTypeName().equals("contributor")).findFirst().orElseThrow();
         var expected = "Author from description other";
         assertThat(field.getValue())
-            .extracting(AUTHOR_NAME)
+            .extracting(CONTRIBUTOR_NAME)
             .extracting("value")
             .containsOnly(expected);
         // not as description and author
