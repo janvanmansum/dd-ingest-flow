@@ -16,6 +16,7 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.OTHER_ID_AGENCY;
@@ -29,9 +30,9 @@ class DepositPropertiesVaultMetadataTest extends BaseTest {
 
     @Test
     void toOtherIdValue_should_create_OtherId_Json_object_for_other_ID_if_specified_in_correct_format() {
-        var builder = new CompoundFieldBuilder("", false);
+        var builder = new CompoundFieldBuilder("", true);
         DepositPropertiesVaultMetadata.toOtherIdValue.build(builder, "PAN:123");
-        var field = builder.build();
+        var field = (CompoundField)builder.build();
 
         assertThat(field.getValue()).extracting(OTHER_ID_AGENCY).extracting("value")
             .containsOnly("PAN");
@@ -42,7 +43,7 @@ class DepositPropertiesVaultMetadataTest extends BaseTest {
 
     @Test
     void toOtherIdValue_should_throw_error_if_value_is_invalid() {
-        var builder = new CompoundFieldBuilder("", false);
+        var builder = new CompoundFieldBuilder("", true);
 
         assertThrows(IllegalArgumentException.class,
             () -> DepositPropertiesVaultMetadata.toOtherIdValue.build(builder, "in/valid"));
@@ -50,7 +51,7 @@ class DepositPropertiesVaultMetadataTest extends BaseTest {
 
     @Test
     void toOtherIdValue_should_throw_error_with_empty_values() {
-        var builder = new CompoundFieldBuilder("", false);
+        var builder = new CompoundFieldBuilder("", true);
 
         assertThrows(IllegalArgumentException.class,
             () -> DepositPropertiesVaultMetadata.toOtherIdValue.build(builder, ""));

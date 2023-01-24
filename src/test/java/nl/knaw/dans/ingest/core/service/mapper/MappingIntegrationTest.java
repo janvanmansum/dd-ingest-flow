@@ -21,7 +21,6 @@ import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
-import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -33,13 +32,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MappingIntegrationTest {
 

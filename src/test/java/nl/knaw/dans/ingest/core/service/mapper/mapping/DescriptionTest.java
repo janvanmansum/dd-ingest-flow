@@ -16,6 +16,7 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
@@ -32,9 +33,9 @@ class DescriptionTest extends BaseTest {
             + "    Lorem ipsum.\n"
             + "</dc:description>");
 
-        var builder = new CompoundFieldBuilder("", false);
+        var builder = new CompoundFieldBuilder("", true);
         Description.toDescription.build(builder, doc.getDocumentElement());
-        var field = builder.build();
+        var field = (CompoundField) builder.build();
 
         assertThat(field.getValue())
             .extracting(DESCRIPTION_VALUE)

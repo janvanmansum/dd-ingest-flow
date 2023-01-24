@@ -16,6 +16,7 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
@@ -59,7 +60,7 @@ class ContributorTest extends BaseTest {
         Contributor.toContributorValueObject.build(builder, doc.getDocumentElement());
         var field = builder.build();
 
-        assertThat(field.getValue())
+        assertThat(((CompoundField)field).getValue())
             .extracting(CONTRIBUTOR_NAME)
             .extracting("value")
             .containsOnly("I de Lastname (Example Org)");
