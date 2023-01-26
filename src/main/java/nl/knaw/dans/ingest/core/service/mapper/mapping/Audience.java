@@ -19,6 +19,7 @@ import com.google.common.collect.Comparators;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Audience {
     private static final Map<String, String> narcisToSubject = new HashMap<>();
@@ -28,17 +29,20 @@ public class Audience {
         narcisToSubject.put("D12", "Physics");
         narcisToSubject.put("D13", "Chemistry");
         narcisToSubject.put("D14", "Engineering");
+        narcisToSubject.put("D15", "Earth and Environmental Sciences");
         narcisToSubject.put("D16", "Computer and Information Science");
         narcisToSubject.put("D17", "Astronomy and Astrophysics");
         narcisToSubject.put("D18", "Agricultural Sciences");
         narcisToSubject.put("D2", "Medicine, Health and Life Sciences");
         narcisToSubject.put("D3", "Arts and Humanities");
+        narcisToSubject.put("D40", "Law");
         narcisToSubject.put("D41", "Law");
+        narcisToSubject.put("D42", "Social Sciences");
         narcisToSubject.put("D5", "Social Sciences");
         narcisToSubject.put("D6", "Social Sciences");
-        narcisToSubject.put("D42", "Social Sciences");
         narcisToSubject.put("D7", "Business and Management");
-        narcisToSubject.put("D15", "Earth and Environmental Sciences");
+        narcisToSubject.put("E13", "Social Sciences");
+        narcisToSubject.put("E14", "Social Sciences");
         narcisToSubject.put("E15", "Earth and Environmental Sciences");
     }
 

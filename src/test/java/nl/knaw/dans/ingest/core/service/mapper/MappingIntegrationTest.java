@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
+import nl.knaw.dans.lib.dataverse.model.dataset.ControlledMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
@@ -30,6 +31,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +40,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBU
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -89,15 +92,18 @@ class MappingIntegrationTest {
         + "        <ddm:audience>D24000</ddm:audience>\n"
         + "        <ddm:accessRights xml:lang=\"en\">OPEN_ACCESS</ddm:accessRights>\n"
         + "    </ddm:profile>\n";
+    private final String minimalDDM =
+        "<ddm:DDM " + rootAttributes + ">\n"
+        + ddmProfile
+        + "    <ddm:dcmiMetadata>\n"
+        + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
+        + "    </ddm:dcmiMetadata>\n"
+        + "</ddm:DDM>\n";
 
     @Test
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
-            + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-            + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-            + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-            + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
+            "<ddm:DDM " + rootAttributes + ">\n"
             + ddmProfile
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
@@ -192,5 +198,33 @@ class MappingIntegrationTest {
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(NOTES_TEXT)).findFirst().orElseThrow();
         assertThat(field.getValue()).isEqualTo("copied xml to csv");
+    }
+
+    @Test
+    void DD_1265_subject_omits_other() throws Exception {
+        var doc = readDocumentFromString(minimalDDM.replace("<ddm:audience>D24000</ddm:audience>",
+            "<ddm:audience>D19200</ddm:audience><ddm:audience>D11200</ddm:audience><ddm:audience>D88200</ddm:audience><ddm:audience>D40200</ddm:audience><ddm:audience>D17200</ddm:audience>"
+        ));
+
+        var result = mapDdmToDataset(doc);
+        assertThat(getCitationSubject(result)).isEqualTo(List.of("Astronomy and Astrophysics","Law", "Mathematical Sciences"));
+    }
+
+    @Test
+    void DD_1265_subject_is_other() throws Exception {
+        var doc = readDocumentFromString(minimalDDM.replace("<ddm:audience>D24000</ddm:audience>",
+            "<ddm:audience>D19200</ddm:audience><ddm:audience>D88200</ddm:audience>"
+        ));
+
+        var result = mapDdmToDataset(doc);
+        assertThat(getCitationSubject(result)).isEqualTo(List.of("Other"));
+    }
+
+    private List<String> getCitationSubject(Dataset result) {
+        return result.getDatasetVersion().getMetadataBlocks()
+            .get("citation").getFields().stream()
+            .filter(f -> f.getTypeName().equals(SUBJECT))
+            .map(t -> ((ControlledMultiValueField)t).getValue())
+            .findFirst().orElseThrow();
     }
 }

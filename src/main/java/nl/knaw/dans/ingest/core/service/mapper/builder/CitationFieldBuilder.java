@@ -19,6 +19,7 @@ import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
 import org.w3c.dom.Node;
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ALTERNATIVE_TITLE;
@@ -73,7 +74,11 @@ public class CitationFieldBuilder extends FieldBuilder {
     }
 
     public void addSubject(Stream<String> stream, Function<String, String> mapper) {
-        addMultipleControlledFields(SUBJECT, stream.map(mapper));
+        var values = stream.map(mapper)
+            .collect(Collectors.toSet());
+        if (values.size()>1)
+            values.remove("Other");
+        addMultipleControlledFields(SUBJECT, values.stream().sorted());
     }
 
     public void addKeywords(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
