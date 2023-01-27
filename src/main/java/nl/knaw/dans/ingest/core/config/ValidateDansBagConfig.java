@@ -32,12 +32,10 @@ public class ValidateDansBagConfig {
     @NotNull
     private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
 
-    @JsonProperty("httpClient")
     public JerseyClientConfiguration getHttpClient() {
         return httpClient;
     }
 
-    @JsonProperty("httpClient")
     public void setHttpClient(JerseyClientConfiguration jerseyClient) {
         this.httpClient = jerseyClient;
     }
