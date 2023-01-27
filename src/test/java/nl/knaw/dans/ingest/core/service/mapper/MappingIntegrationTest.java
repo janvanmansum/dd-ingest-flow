@@ -19,7 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
+import nl.knaw.dans.lib.dataverse.model.dataset.ControlledMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
 import org.junit.jupiter.api.Test;
@@ -28,16 +29,20 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MappingIntegrationTest {
 
@@ -77,26 +82,31 @@ class MappingIntegrationTest {
         + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
         + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
         + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n";
-    private final String ddmProfile = ""
-        + "    <ddm:profile>\n"
-        + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
-        + "        <dc:description xml:lang=\"la\">Lorem ipsum.</dc:description>\n"
-        + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
-        + "        <ddm:created>2012-12</ddm:created>\n"
-        + "        <ddm:available>2013-05-01</ddm:available>\n"
-        + "        <ddm:audience>D24000</ddm:audience>\n"
-        + "        <ddm:accessRights xml:lang=\"en\">OPEN_ACCESS</ddm:accessRights>\n"
-        + "    </ddm:profile>\n";
+
+    private String ddmProfileWithAudiences(String... audience) {
+        return ""
+            + "    <ddm:profile>\n"
+            + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
+            + "        <dc:description xml:lang=\"la\">Lorem ipsum.</dc:description>\n"
+            + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
+            + "        <ddm:created>2012-12</ddm:created>\n"
+            + Arrays.stream(audience).map(s -> "<ddm:audience>"+s+"</ddm:audience>")
+                .collect(Collectors.joining("\n        ", "        ","\n"))
+            + "        <ddm:accessRights xml:lang=\"en\">OPEN_ACCESS</ddm:accessRights>\n"
+            + "    </ddm:profile>\n";
+    }
+
+    private final String minimalDCMI = ""
+        + "    <ddm:dcmiMetadata>\n"
+        + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
+        + "        <ddm:description descriptionType=\"Other\">Author from description other</ddm:description>\n"
+        + "    </ddm:dcmiMetadata>\n";
 
     @Test
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\"\n"
-            + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-            + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
-            + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n"
-            + "         xsi:schemaLocation=\"http://easy.dans.knaw.nl/schemas/md/ddm/ http://easy.dans.knaw.nl/schemas/md/2017/09/ddm.xsd\">\n"
-            + ddmProfile
+            "<ddm:DDM " + rootAttributes + ">\n"
+            + ddmProfileWithAudiences("D24000")
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
             + "        <ddm:description descriptionType=\"Other\">Author from description other</ddm:description>\n"
@@ -104,12 +114,12 @@ class MappingIntegrationTest {
             + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false);
-        var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
+        var field = (CompoundMultiValueField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals("contributor")).findFirst().orElseThrow();
         var expected = "Author from description other";
         assertThat(field.getValue())
-            .extracting(AUTHOR_NAME)
+            .extracting(CONTRIBUTOR_NAME)
             .extracting("value")
             .containsOnly(expected);
         // not as description and author
@@ -120,7 +130,7 @@ class MappingIntegrationTest {
     void DD_1216_description_type_technical_info_maps_once_to_description() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:description>plain description</dct:description>\n"
@@ -134,7 +144,7 @@ class MappingIntegrationTest {
         assertThat(str).containsOnlyOnce("not known description type");
         assertThat(str).containsOnlyOnce("technical description");
         assertThat(str).containsOnlyOnce("Lorem ipsum");
-        var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
+        var field = (CompoundMultiValueField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(DESCRIPTION)).findFirst().orElseThrow();
         assertThat(field.getValue())
@@ -147,7 +157,7 @@ class MappingIntegrationTest {
     void DD_1216_description_type_series_information_maps_only_to_series() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <ddm:description descriptionType=\"SeriesInformation\">series 123</ddm:description>\n"
@@ -173,7 +183,7 @@ class MappingIntegrationTest {
     void DD_1216_provenance_maps_to_notes() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:provenance>copied xml to csv</dct:provenance>\n"
@@ -193,10 +203,42 @@ class MappingIntegrationTest {
     }
 
     @Test
+    void DD_1265_subject_omits_other() throws Exception {
+        var doc = readDocumentFromString(""
+            +"<ddm:DDM " + rootAttributes + ">\n"
+            + ddmProfileWithAudiences("D19200", "D11200", "D88200", "D40200", "D17200")
+            + minimalDCMI
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false);
+        assertThat(getCitationSubject(result)).isEqualTo(List.of("Astronomy and Astrophysics","Law", "Mathematical Sciences"));
+    }
+
+    @Test
+    void DD_1265_subject_is_other() throws Exception {
+        var doc = readDocumentFromString(""
+            +"<ddm:DDM " + rootAttributes + ">\n"
+            + ddmProfileWithAudiences("D19200", "D88200")
+            + minimalDCMI
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false);
+        assertThat(getCitationSubject(result)).isEqualTo(List.of("Other"));
+    }
+
+    private List<String> getCitationSubject(Dataset result) {
+        return result.getDatasetVersion().getMetadataBlocks()
+            .get("citation").getFields().stream()
+            .filter(f -> f.getTypeName().equals(SUBJECT))
+            .map(t -> ((ControlledMultiValueField)t).getValue())
+            .findFirst().orElseThrow();
+    }
+
+    @Test
     void DD_1216_DctAccesRights_maps_to_description() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D10000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:accessRights>Some story</dct:accessRights>\n"
@@ -208,21 +250,21 @@ class MappingIntegrationTest {
 
         assertThat(str).containsOnlyOnce("<p>Some story</p>");
 
-        var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
+        var field = (CompoundMultiValueField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(DESCRIPTION)).findFirst().orElseThrow();
         assertThat(field.getValue())
             .extracting(DESCRIPTION_VALUE)
             .extracting("value")
             .containsOnly("<p>Some story</p>", "<p>Lorem ipsum.</p>");
-        assertEquals("N/a",result.getDatasetVersion().getTermsOfAccess());
+        assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("N/a");
     }
 
     @Test
     void DD_1216_DctAccesRights_maps_to_termsofaccess() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D10000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:accessRights>Some story</dct:accessRights>\n"
@@ -230,6 +272,6 @@ class MappingIntegrationTest {
                 + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, true);
-        assertEquals("Some story", result.getDatasetVersion().getTermsOfAccess());
+        assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("Some story");
     }
 }

@@ -16,7 +16,13 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
+
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
+import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_END;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_START;
@@ -32,7 +38,7 @@ class DatesOfCollectionTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         DatesOfCollection.toDistributorValueObject.build(builder, doc.getDocumentElement());
-        var field = builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue())
             .extracting(DATE_OF_COLLECTION_START)
@@ -53,7 +59,7 @@ class DatesOfCollectionTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         DatesOfCollection.toDistributorValueObject.build(builder, doc.getDocumentElement());
-        var field = builder.build();
+        var field = (CompoundMultiValueField)builder.build();
 
         assertThat(field.getValue())
             .extracting(DATE_OF_COLLECTION_START)
@@ -74,7 +80,7 @@ class DatesOfCollectionTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         DatesOfCollection.toDistributorValueObject.build(builder, doc.getDocumentElement());
-        var field = builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue())
             .extracting(DATE_OF_COLLECTION_START)

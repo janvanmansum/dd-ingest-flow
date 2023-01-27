@@ -19,7 +19,7 @@ public class MissingRequiredFieldException extends RuntimeException {
     private final String title;
 
     public MissingRequiredFieldException(String title) {
-        super();
+        super(String.format("Required metadata field '%s' is missing", title));
         this.title = title;
     }
 }

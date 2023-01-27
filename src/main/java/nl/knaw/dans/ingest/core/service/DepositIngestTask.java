@@ -16,7 +16,6 @@
 package nl.knaw.dans.ingest.core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.knaw.dans.validatedansbag.api.ValidateCommand;
 import nl.knaw.dans.ingest.core.DepositState;
 import nl.knaw.dans.ingest.core.TaskEvent;
 import nl.knaw.dans.ingest.core.sequencing.TargetedTask;
@@ -30,6 +29,7 @@ import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.UpdateType;
 import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
+import nl.knaw.dans.validatedansbag.api.ValidateCommand;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,9 +210,17 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
         if (dansBagValidator != null) {
             var result = dansBagValidator.validateBag(
-                deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1);
+                deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1, ValidateCommand.LevelEnum.WITH_DATA_STATION_CONTEXT);
 
-            if (!result.getIsCompliant()) {
+            if (result.getIsCompliant()) {
+                try {
+                    ManifestHelper.ensureSha1ManifestPresent(deposit.getBag());
+                } catch (Exception e){
+                    log.error("could not add SHA1 manifest", e);
+                    throw new FailedDepositException(deposit, e.getMessage());
+                }
+            }
+            else {
                 var violations = result.getRuleViolations().stream()
                     .map(r -> String.format("- [%s] %s", r.getRule(), r.getViolation()))
                     .collect(Collectors.joining("\n"));

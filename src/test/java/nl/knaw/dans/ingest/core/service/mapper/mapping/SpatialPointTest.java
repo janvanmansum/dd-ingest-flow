@@ -17,6 +17,8 @@ package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
+
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SPATIAL_POINT_SCHEME;
@@ -37,9 +39,9 @@ class SpatialPointTest extends BaseTest {
                 + "        <Point>52.08113 4.34510</Point>\n"
                 + "      </spatial>");
 
-        var builder = new CompoundFieldBuilder("", false);
+        var builder = new CompoundFieldBuilder("", true);
         SpatialPoint.toEasyTsmSpatialPointValueObject.build(builder, doc.getDocumentElement());
-        var result = builder.build();
+        var result = (CompoundMultiValueField) builder.build();
 
         assertThat(result.getValue())
             .extracting(SPATIAL_POINT_SCHEME)
@@ -64,9 +66,9 @@ class SpatialPointTest extends BaseTest {
                 + "        <Point>469470 209942</Point>\n"
                 + "      </spatial>", RD_SRS_NAME));
 
-        var builder = new CompoundFieldBuilder("", false);
+        var builder = new CompoundFieldBuilder("", true);
         SpatialPoint.toEasyTsmSpatialPointValueObject.build(builder, doc.getDocumentElement());
-        var result = builder.build();
+        var result = (CompoundMultiValueField) builder.build();
 
         assertThat(result.getValue())
             .extracting(SPATIAL_POINT_SCHEME)
