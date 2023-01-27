@@ -29,10 +29,12 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
@@ -79,29 +81,31 @@ class MappingIntegrationTest {
         + "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
         + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
         + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n";
-    private final String ddmProfile = ""
-        + "    <ddm:profile>\n"
-        + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
-        + "        <dc:description xml:lang=\"la\">Lorem ipsum.</dc:description>\n"
-        + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
-        + "        <ddm:created>2012-12</ddm:created>\n"
-        + "        <ddm:available>2013-05-01</ddm:available>\n"
-        + "        <ddm:audience>D24000</ddm:audience>\n"
-        + "        <ddm:accessRights xml:lang=\"en\">OPEN_ACCESS</ddm:accessRights>\n"
-        + "    </ddm:profile>\n";
-    private final String minimalDDM =
-        "<ddm:DDM " + rootAttributes + ">\n"
-        + ddmProfile
+
+    private String ddmProfileWithAudiences(String... audience) {
+        return ""
+            + "    <ddm:profile>\n"
+            + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
+            + "        <dc:description xml:lang=\"la\">Lorem ipsum.</dc:description>\n"
+            + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
+            + "        <ddm:created>2012-12</ddm:created>\n"
+            + Arrays.stream(audience).map(s -> "<ddm:audience>"+s+"</ddm:audience>")
+                .collect(Collectors.joining("\n        ", "        ","\n"))
+            + "        <ddm:accessRights xml:lang=\"en\">OPEN_ACCESS</ddm:accessRights>\n"
+            + "    </ddm:profile>\n";
+    }
+
+    private final String minimalDCMI = ""
         + "    <ddm:dcmiMetadata>\n"
         + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
-        + "    </ddm:dcmiMetadata>\n"
-        + "</ddm:DDM>\n";
+        + "        <ddm:description descriptionType=\"Other\">Author from description other</ddm:description>\n"
+        + "    </ddm:dcmiMetadata>\n";
 
     @Test
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-            + ddmProfile
+            + ddmProfileWithAudiences("D24000")
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
             + "        <ddm:description descriptionType=\"Other\">Author from description other</ddm:description>\n"
@@ -125,7 +129,7 @@ class MappingIntegrationTest {
     void DD_1216_description_type_technical_info_maps_once_to_description() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:description>plain description</dct:description>\n"
@@ -152,7 +156,7 @@ class MappingIntegrationTest {
     void DD_1216_description_type_series_information_maps_only_to_series() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <ddm:description descriptionType=\"SeriesInformation\">series 123</ddm:description>\n"
@@ -178,7 +182,7 @@ class MappingIntegrationTest {
     void DD_1216_provenance_maps_to_notes() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:provenance>copied xml to csv</dct:provenance>\n"
@@ -199,9 +203,11 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1265_subject_omits_other() throws Exception {
-        var doc = readDocumentFromString(minimalDDM.replace("<ddm:audience>D24000</ddm:audience>",
-            "<ddm:audience>D19200</ddm:audience><ddm:audience>D11200</ddm:audience><ddm:audience>D88200</ddm:audience><ddm:audience>D40200</ddm:audience><ddm:audience>D17200</ddm:audience>"
-        ));
+        var doc = readDocumentFromString(""
+            +"<ddm:DDM " + rootAttributes + ">\n"
+            + ddmProfileWithAudiences("D19200", "D11200", "D88200", "D40200", "D17200")
+            + minimalDCMI
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc);
         assertThat(getCitationSubject(result)).isEqualTo(List.of("Astronomy and Astrophysics","Law", "Mathematical Sciences"));
@@ -209,9 +215,11 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1265_subject_is_other() throws Exception {
-        var doc = readDocumentFromString(minimalDDM.replace("<ddm:audience>D24000</ddm:audience>",
-            "<ddm:audience>D19200</ddm:audience><ddm:audience>D88200</ddm:audience>"
-        ));
+        var doc = readDocumentFromString(""
+            +"<ddm:DDM " + rootAttributes + ">\n"
+            + ddmProfileWithAudiences("D19200", "D88200")
+            + minimalDCMI
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc);
         assertThat(getCitationSubject(result)).isEqualTo(List.of("Other"));
