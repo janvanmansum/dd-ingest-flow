@@ -82,7 +82,7 @@ class MappingIntegrationTest {
         + "         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
         + "         xmlns:dct=\"http://purl.org/dc/terms/\"\n";
 
-    private String ddmProfile(String... audience) {
+    private String ddmProfileWithAudiences(String... audience) {
         return ""
             + "    <ddm:profile>\n"
             + "        <dc:title xml:lang=\"en\">Title of the dataset</dc:title>\n"
@@ -105,7 +105,7 @@ class MappingIntegrationTest {
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-            + ddmProfile("D24000")
+            + ddmProfileWithAudiences("D24000")
             + "    <ddm:dcmiMetadata>\n"
             + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
             + "        <ddm:description descriptionType=\"Other\">Author from description other</ddm:description>\n"
@@ -129,7 +129,7 @@ class MappingIntegrationTest {
     void DD_1216_description_type_technical_info_maps_once_to_description() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile("D24000")
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:description>plain description</dct:description>\n"
@@ -156,7 +156,7 @@ class MappingIntegrationTest {
     void DD_1216_description_type_series_information_maps_only_to_series() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile("D24000")
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <ddm:description descriptionType=\"SeriesInformation\">series 123</ddm:description>\n"
@@ -182,7 +182,7 @@ class MappingIntegrationTest {
     void DD_1216_provenance_maps_to_notes() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfile("D24000")
+                + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
                 + "        <dct:provenance>copied xml to csv</dct:provenance>\n"
@@ -205,7 +205,7 @@ class MappingIntegrationTest {
     void DD_1265_subject_omits_other() throws Exception {
         var doc = readDocumentFromString(""
             +"<ddm:DDM " + rootAttributes + ">\n"
-            + ddmProfile("D19200", "D11200", "D88200", "D40200", "D17200")
+            + ddmProfileWithAudiences("D19200", "D11200", "D88200", "D40200", "D17200")
             + minimalDCMI
             + "</ddm:DDM>");
 
@@ -217,7 +217,7 @@ class MappingIntegrationTest {
     void DD_1265_subject_is_other() throws Exception {
         var doc = readDocumentFromString(""
             +"<ddm:DDM " + rootAttributes + ">\n"
-            + ddmProfile("D19200", "D88200")
+            + ddmProfileWithAudiences("D19200", "D88200")
             + minimalDCMI
             + "</ddm:DDM>");
 
