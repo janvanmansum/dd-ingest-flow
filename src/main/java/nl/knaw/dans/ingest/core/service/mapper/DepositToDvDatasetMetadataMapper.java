@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XPathEvaluator;
+import nl.knaw.dans.ingest.core.service.exception.MissingRequiredFieldException;
 import nl.knaw.dans.ingest.core.service.mapper.builder.ArchaeologyFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.CitationFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.DataVaultFieldBuilder;
@@ -27,7 +28,6 @@ import nl.knaw.dans.ingest.core.service.mapper.builder.FieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.RelationFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.RightsFieldBuilder;
 import nl.knaw.dans.ingest.core.service.mapper.builder.TemporalSpatialFieldBuilder;
-import nl.knaw.dans.ingest.core.service.exception.MissingRequiredFieldException;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.AbrAcquisitionMethod;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.AbrReportType;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Audience;
@@ -54,12 +54,10 @@ import nl.knaw.dans.ingest.core.service.mapper.mapping.Subject;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.SubjectAbr;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.TemporalAbr;
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlock;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
-import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -239,7 +237,7 @@ public class DepositToDvDatasetMetadataMapper {
         // TODO figure out how to deduplicate compound fields (just on key, or also on value?)
         var compoundFields = builder.getCompoundFields().values()
             .stream()
-            .map(this::compoundBuild);
+            .map(CompoundFieldBuilder::build);
 
         var primitiveFields = builder.getPrimitiveFields()
             .values()
@@ -251,7 +249,7 @@ public class DepositToDvDatasetMetadataMapper {
             primitiveFields = primitiveFields.distinct();
         }
 
-        var result = Stream.of(compoundFields, primitiveFields)
+        List<MetadataField> result = Stream.of(compoundFields, primitiveFields)
             .flatMap(i -> i)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
@@ -261,27 +259,6 @@ public class DepositToDvDatasetMetadataMapper {
         block.setFields(result);
 
         fields.put(title, block);
-    }
-
-    private MetadataField compoundBuild(CompoundFieldBuilder compoundFieldBuilder) {
-        // TODO rewrite in the dataverse library
-        CompoundField compoundField = compoundFieldBuilder.build();
-        if (compoundField.isMultiple()) {
-            return compoundField;
-        }
-        else {
-            return new MetadataField(compoundField.getTypeClass(), compoundField.getTypeName(), false) {
-
-                public Map<String, SingleValueField> getValue() {
-                    List<Map<String, SingleValueField>> value = compoundField.getValue();
-                    if (value != null && !value.isEmpty()) {
-                        return value.get(0);
-                    }
-                    else
-                        return null;
-                }
-            };
-        }
     }
 
     Dataset assembleDataverseDataset() {
