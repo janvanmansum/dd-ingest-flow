@@ -345,6 +345,10 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         var date = getDateOfDeposit();
         var contact = getDatasetContact();
         var deposit = getDeposit();
+        var accessibleToValues = XPathEvaluator
+            .strings(deposit.getFilesXml(), "/files:files/files:file/files:accessibleToRights")
+            .collect(Collectors.toList());
+        var hasRestrictedOrNoneFiles = accessibleToValues.contains("RESTRICTED_REQUEST") || accessibleToValues.contains("NONE");
 
         // TODO think about putting assertions inside a getter method
         checkPersonalDataPresent(deposit.getAgreements());
@@ -357,8 +361,8 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             deposit.getAgreements(),
             date.orElse(null),
             contact.orElse(null),
-            deposit.getVaultMetadata()
-        );
+            deposit.getVaultMetadata(),
+            hasRestrictedOrNoneFiles);
     }
 
     void checkPersonalDataPresent(Document agreements) {

@@ -110,8 +110,9 @@ public class DepositToDvDatasetMetadataMapper {
         @Nullable Document agreements,
         @Nullable String dateOfDeposit,
         @Nullable AuthenticatedUser contactData,
-        @Nullable VaultMetadata vaultMetadata
-    ) throws MissingRequiredFieldException {
+        @Nullable VaultMetadata vaultMetadata,
+        boolean hasRestrictedOrNoneFiles) throws MissingRequiredFieldException {
+        var termsOfAccess = "N/a";
 
         if (activeMetadataBlocks.contains("citation")) {
             checkRequiredField(TITLE, getTitles(ddm));
@@ -140,6 +141,13 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDescription(getDcmiDdmDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription);
 
             citationFields.addDescription(getOtherDescriptions(ddm).filter(Description::isNotBlank), Description.toPrefixedDescription);
+
+            if (hasRestrictedOrNoneFiles) {
+                // stick to initial value if nothing is found
+                termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse(termsOfAccess);
+            }else {
+                citationFields.addDescription(getDctAccessRights(ddm), Description.toDescription);
+            }
 
             citationFields.addSubject(getAudiences(ddm), Audience::toCitationBlockSubject);
 
@@ -222,7 +230,7 @@ public class DepositToDvDatasetMetadataMapper {
 
         }
 
-        return assembleDataverseDataset();
+        return assembleDataverseDataset(termsOfAccess);
     }
 
     private Stream<Node> getPersonalDataPresent(Document agreements) {
@@ -261,7 +269,7 @@ public class DepositToDvDatasetMetadataMapper {
         fields.put(title, block);
     }
 
-    Dataset assembleDataverseDataset() {
+    Dataset assembleDataverseDataset(String termsOfAccess) {
         var fields = new HashMap<String, MetadataBlock>();
 
         processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields);
@@ -272,7 +280,7 @@ public class DepositToDvDatasetMetadataMapper {
         processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder);
 
         var version = new DatasetVersion();
-        version.setTermsOfAccess("N/a"); // TODO: retrieve from input
+        version.setTermsOfAccess(termsOfAccess);
         version.setMetadataBlocks(fields);
         version.setFiles(new ArrayList<>());
 
@@ -404,6 +412,10 @@ public class DepositToDvDatasetMetadataMapper {
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:issued",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:valid",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage");
+    }
+
+    Stream<Node> getDctAccessRights(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:accessRights");
     }
 
     Stream<Node> getPublishers(Document ddm) {
