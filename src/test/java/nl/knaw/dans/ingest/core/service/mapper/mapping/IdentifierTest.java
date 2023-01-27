@@ -16,8 +16,8 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
-import nl.knaw.dans.lib.dataverse.model.dataset.SingleCompoundField;
+
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ARCHIS_NUMBER_ID;
@@ -48,7 +48,7 @@ class IdentifierTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         Identifier.toOtherIdValue.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(OTHER_ID_AGENCY).extracting("value")
             .containsOnly("");
@@ -69,7 +69,7 @@ class IdentifierTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         Identifier.toOtherIdValue.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(OTHER_ID_AGENCY).extracting("value")
             .containsOnly("DANS-KNAW");
@@ -223,7 +223,7 @@ class IdentifierTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         Identifier.toNwoGrantNumber.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(GRANT_NUMBER_AGENCY).extracting("value")
             .containsOnly("NWO");
@@ -245,7 +245,7 @@ class IdentifierTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         Identifier.toRelatedPublicationValue.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(PUBLICATION_CITATION).extracting("value")
             .containsOnly("");
@@ -271,7 +271,7 @@ class IdentifierTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         Identifier.toArchisNumberValue.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue())
             .extracting(ARCHIS_NUMBER_TYPE)

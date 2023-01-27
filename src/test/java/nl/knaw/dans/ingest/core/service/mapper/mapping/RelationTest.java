@@ -17,7 +17,8 @@ package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.ingest.core.service.XPathEvaluator;
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
+
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ class RelationTest extends BaseTest {
                 builder.nextValue();
             });
 
-        var result = (CompoundField) builder.build();
+        var result = (CompoundMultiValueField) builder.build();
         // the last call to nextValue creates an empty record, filter it out
         var list = result.getValue()
             .stream()

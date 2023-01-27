@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.knaw.dans.ingest.core.service.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.ControlledMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
@@ -109,7 +109,7 @@ class MappingIntegrationTest {
             + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc);
-        var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
+        var field = (CompoundMultiValueField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals("contributor")).findFirst().orElseThrow();
         var expected = "Author from description other";
@@ -139,7 +139,7 @@ class MappingIntegrationTest {
         assertThat(str).containsOnlyOnce("not known description type");
         assertThat(str).containsOnlyOnce("technical description");
         assertThat(str).containsOnlyOnce("Lorem ipsum");
-        var field = (CompoundField) result.getDatasetVersion().getMetadataBlocks()
+        var field = (CompoundMultiValueField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(DESCRIPTION)).findFirst().orElseThrow();
         assertThat(field.getValue())

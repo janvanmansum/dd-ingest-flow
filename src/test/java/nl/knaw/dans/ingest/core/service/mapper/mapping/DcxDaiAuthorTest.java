@@ -16,7 +16,8 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
+
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_AFFILIATION;
@@ -48,7 +49,7 @@ class DcxDaiAuthorTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         DcxDaiAuthor.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(AUTHOR_NAME).extracting("value")
             .containsOnly("D.N. van den Aarden");
@@ -80,7 +81,7 @@ class DcxDaiAuthorTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         DcxDaiAuthor.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(AUTHOR_NAME).extracting("value")
             .containsOnly("D.N. van den Aarden");
@@ -112,7 +113,7 @@ class DcxDaiAuthorTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         DcxDaiAuthor.toContributorValueObject.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(CONTRIBUTOR_NAME).extracting("value")
             .containsOnly("D.N. van den Aarden (Utrecht University)");
@@ -132,7 +133,7 @@ class DcxDaiAuthorTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         DcxDaiAuthor.toContributorValueObject.build(builder, doc.getDocumentElement());
-        var field = (CompoundField) builder.build();
+        var field = (CompoundMultiValueField) builder.build();
 
         assertThat(field.getValue()).extracting(CONTRIBUTOR_NAME).extracting("value")
             .containsOnly("Utrecht University");

@@ -16,7 +16,8 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
+
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
@@ -30,7 +31,7 @@ class AuthorTest extends BaseTest {
         var doc = readDocumentFromString("<dc:creator xmlns:dc=\"http://purl.org/dc/elements/1.1/\">Author Name</dc:creator>");
         var builder = new CompoundFieldBuilder("", true);
         Author.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        assertThat(((CompoundField)builder.build()).getValue())
+        assertThat(((CompoundMultiValueField)builder.build()).getValue())
             .extracting(AUTHOR_NAME)
             .extracting("value")
             .containsOnly("Author Name");
@@ -55,7 +56,7 @@ class AuthorTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         Author.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        assertThat(((CompoundField)builder.build()).getValue())
+        assertThat(((CompoundMultiValueField)builder.build()).getValue())
             .extracting(AUTHOR_NAME)
             .extracting("value")
             .containsOnly("I D Lastname");
@@ -75,7 +76,7 @@ class AuthorTest extends BaseTest {
 
         var builder = new CompoundFieldBuilder("", true);
         Author.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        assertThat(((CompoundField)builder.build()).getValue())
+        assertThat(((CompoundMultiValueField)builder.build()).getValue())
             .extracting(AUTHOR_NAME)
             .extracting("value")
             .containsOnly("Anti-Vampire League");

@@ -16,7 +16,8 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
-import nl.knaw.dans.lib.dataverse.model.dataset.CompoundField;
+
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import org.junit.jupiter.api.Test;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.OTHER_ID_AGENCY;
@@ -32,7 +33,7 @@ class DepositPropertiesVaultMetadataTest extends BaseTest {
     void toOtherIdValue_should_create_OtherId_Json_object_for_other_ID_if_specified_in_correct_format() {
         var builder = new CompoundFieldBuilder("", true);
         DepositPropertiesVaultMetadata.toOtherIdValue.build(builder, "PAN:123");
-        var field = (CompoundField)builder.build();
+        var field = (CompoundMultiValueField)builder.build();
 
         assertThat(field.getValue()).extracting(OTHER_ID_AGENCY).extracting("value")
             .containsOnly("PAN");
