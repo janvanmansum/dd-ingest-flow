@@ -27,13 +27,13 @@ import nl.knaw.dans.lib.dataverse.DataverseException;
 import nl.knaw.dans.lib.dataverse.Version;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.Embargo;
-import nl.knaw.dans.lib.dataverse.model.file.Checksum;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.w3c.dom.Node;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -126,12 +126,18 @@ public abstract class DatasetEditor {
         }
         if (!isMigration) {
             var path = zipFileHandler.zipOriginalMetadata(deposit.getDdmPath(), deposit.getFilesXmlPath());
-            var checksum = "1234"; // TODO calculate checksum
+            var checksum = DigestUtils.sha1Hex(new FileInputStream(path.toFile()));
             var fileMeta = new FileMeta();
             fileMeta.setLabel("original-metadata.zip");
             var fileInfo = new FileInfo(path, checksum, fileMeta);
             var id = addFile(persistentId,fileInfo);
             result.put(id, fileInfo);
+            try {
+                Files.deleteIfExists(path);
+            }
+            catch (IOException e) {
+                log.error("Unable to delete zipfile {}", path, e);
+            }
         }
 
         return result;
