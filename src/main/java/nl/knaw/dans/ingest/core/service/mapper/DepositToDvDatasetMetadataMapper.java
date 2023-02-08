@@ -44,6 +44,7 @@ import nl.knaw.dans.ingest.core.service.mapper.mapping.Description;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Identifier;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.InCollection;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Language;
+import nl.knaw.dans.ingest.core.service.mapper.mapping.PersonalData;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.PersonalStatement;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Publisher;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Relation;
@@ -182,8 +183,7 @@ public class DepositToDvDatasetMetadataMapper {
         if (activeMetadataBlocks.contains("dansRights")) {
             checkRequiredField(RIGHTS_HOLDER, getRightsHolders(ddm));
             rightsFields.addRightsHolders(getRightsHolders(ddm));
-
-            rightsFields.addPersonalDataPresent(getPersonalDataPresent(agreements).map(PersonalStatement::toHasPersonalDataValue));
+            rightsFields.addPersonalDataPresent(getPersonalData(ddm).map(PersonalData::toPersonalDataPresent));
             rightsFields.addRightsHolders(getContributorDetailsAuthors(ddm).filter(DcxDaiAuthor::isRightsHolder).map(DcxDaiAuthor::toRightsHolder));
             rightsFields.addRightsHolders(getContributorDetailsOrganizations(ddm).filter(DcxDaiOrganization::isRightsHolder).map(DcxDaiOrganization::toRightsHolder));
             rightsFields.addLanguageOfMetadata(getLanguageAttributes(ddm)
@@ -232,6 +232,10 @@ public class DepositToDvDatasetMetadataMapper {
         }
 
         return assembleDataverseDataset(termsOfAccess);
+    }
+
+    private Stream<Node> getPersonalData(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:personalData");
     }
 
     private Stream<Node> getPersonalDataPresent(Document agreements) {
