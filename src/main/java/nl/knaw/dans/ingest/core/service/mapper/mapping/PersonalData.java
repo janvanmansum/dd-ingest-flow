@@ -16,20 +16,18 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import lombok.extern.slf4j.Slf4j;
+import nl.knaw.dans.ingest.core.service.XmlReader;
 import org.w3c.dom.Node;
 
 @Slf4j
-public class PersonalStatement extends Base {
-    public static String toHasPersonalDataValue(Node node) {
-        if (hasChildNode(node, "agreements:notAvailable")) {
-            return "Unknown";
-        }
-
-        return getChildNode(node, "agreements:containsPrivacySensitiveData")
+public class PersonalData extends Base {
+    public static String toPersonalDataPresent(Node node) {
+        return getAttribute(node, "present")
             .map(Node::getTextContent)
-            .map(Boolean::parseBoolean)
-            .map(n -> n ? "Yes" : "No")
-            .orElse(null);
+            .orElseGet(() -> {
+                log.error("Missing 'present' attribute on ddm:personalData element");
+                return null;
+            });
     }
 
 }
