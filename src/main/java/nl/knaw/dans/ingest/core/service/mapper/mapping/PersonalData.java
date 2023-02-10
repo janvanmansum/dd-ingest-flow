@@ -22,7 +22,7 @@ import org.w3c.dom.Node;
 @Slf4j
 public class PersonalData extends Base {
     public static String toPersonalDataPresent(Node node) {
-        return getAttribute(node, XmlReader.NAMESPACE_DDM, "present")
+        return getAttribute(node, "present")
             .map(Node::getTextContent)
             .orElseGet(() -> {
                 log.error("Missing 'present' attribute on ddm:personalData element");

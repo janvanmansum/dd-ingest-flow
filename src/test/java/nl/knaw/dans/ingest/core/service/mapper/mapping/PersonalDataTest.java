@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PersonalDataTest extends BaseTest {
     @Test
     void getPersonalData_should_return_Yes_from_present_attribute() throws Exception {
-        var doc = readDocumentFromString("<ddm:personalData ddm:present=\"Yes\" \n"
+        var doc = readDocumentFromString("<ddm:personalData present=\"Yes\" \n"
             + "            xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "            </ddm:personalData>");
 
@@ -32,7 +32,7 @@ public class PersonalDataTest extends BaseTest {
 
     @Test
     void getPersonalData_should_return_No_from_present_attribute() throws Exception {
-        var doc = readDocumentFromString("<ddm:personalData ddm:present=\"No\" \n"
+        var doc = readDocumentFromString("<ddm:personalData present=\"No\" \n"
             + "            xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "            </ddm:personalData>");
 
@@ -41,7 +41,7 @@ public class PersonalDataTest extends BaseTest {
 
     @Test
     void getPersonalData_should_ignore_element_text() throws Exception {
-        var doc = readDocumentFromString("<ddm:personalData ddm:present=\"No\" \n"
+        var doc = readDocumentFromString("<ddm:personalData present=\"No\" \n"
             + "            xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\">\n"
             + "            SOME ELEMENT TEXT"
             + "            </ddm:personalData>");
