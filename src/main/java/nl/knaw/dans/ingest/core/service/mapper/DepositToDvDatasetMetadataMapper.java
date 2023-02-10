@@ -45,7 +45,6 @@ import nl.knaw.dans.ingest.core.service.mapper.mapping.Identifier;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.InCollection;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Language;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.PersonalData;
-import nl.knaw.dans.ingest.core.service.mapper.mapping.PersonalStatement;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Publisher;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Relation;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.SpatialBox;
