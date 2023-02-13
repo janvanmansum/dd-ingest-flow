@@ -136,7 +136,7 @@ public abstract class DatasetEditor {
                 Files.deleteIfExists(path);
             }
             catch (IOException e) {
-                log.error("Unable to delete zipfile {}", path, e);
+                log.warn("Unable to delete zipfile {}", path, e);
             }
         }
 
