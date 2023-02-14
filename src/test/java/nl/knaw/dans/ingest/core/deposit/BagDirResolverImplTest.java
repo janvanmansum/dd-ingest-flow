@@ -39,7 +39,7 @@ class BagDirResolverImplTest {
         Mockito.doReturn(true).when(fileService).isDirectory(Mockito.any());
         Mockito.doReturn(Stream.of(subdir)).when(fileService).listDirectories(Mockito.any());
 
-        var result = resolver.getValidBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c"));
+        var result = resolver.getBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c"));
         assertEquals(subdir, result);
     }
 
@@ -55,7 +55,7 @@ class BagDirResolverImplTest {
         Mockito.doReturn(Stream.of(subdir)).when(fileService).listDirectories(Mockito.any());
 
         var exception = assertThrows(InvalidDepositException.class,
-            () -> resolver.getValidBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
+            () -> resolver.getBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
 
         assertTrue(exception.getMessage().contains("is not a directory"));
     }
@@ -73,7 +73,7 @@ class BagDirResolverImplTest {
         Mockito.doReturn(Stream.of(subdir, subdir2)).when(fileService).listDirectories(Mockito.any());
 
         var exception = assertThrows(InvalidDepositException.class,
-            () -> resolver.getValidBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
+            () -> resolver.getBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
 
         assertTrue(exception.getMessage().contains("has more or fewer than one subdirectory"));
     }
@@ -89,7 +89,7 @@ class BagDirResolverImplTest {
         Mockito.doThrow(IOException.class).when(fileService).listDirectories(Mockito.any());
 
         assertThrows(IOException.class,
-            () -> resolver.getValidBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
+            () -> resolver.getBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
     }
 
     @Test
@@ -103,7 +103,7 @@ class BagDirResolverImplTest {
         Mockito.doReturn(Stream.empty()).when(fileService).listDirectories(Mockito.any());
 
         var exception = assertThrows(InvalidDepositException.class,
-            () -> resolver.getValidBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
+            () -> resolver.getBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
 
         assertTrue(exception.getMessage().contains("has more or fewer than one subdirectory"));
     }
@@ -119,7 +119,7 @@ class BagDirResolverImplTest {
         Mockito.doReturn(Stream.of(subdir)).when(fileService).listDirectories(Mockito.any());
 
         var exception = assertThrows(InvalidDepositException.class,
-            () -> resolver.getValidBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
+            () -> resolver.getBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
 
         assertTrue(exception.getMessage().contains("deposit.properties"));
     }
@@ -136,7 +136,7 @@ class BagDirResolverImplTest {
         Mockito.doReturn(Stream.of(subdir)).when(fileService).listDirectories(Mockito.any());
 
         var exception = assertThrows(InvalidDepositException.class,
-            () -> resolver.getValidBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
+            () -> resolver.getBagDir(Path.of("/path/to/deposit/a5378287-eab9-4dfd-885f-98d61c0a4c4c")));
 
         assertTrue(exception.getMessage().contains("does not contain a bag"));
     }

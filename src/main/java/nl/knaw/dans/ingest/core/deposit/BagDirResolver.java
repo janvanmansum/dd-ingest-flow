@@ -23,19 +23,19 @@ import java.nio.file.Path;
 public interface BagDirResolver {
 
     /**
-     * Returns the first subdirectory of the provided path. Will throw an exception if
-     * <pre>
-     *  - The path is not a directory
-     *  - There is no deposit.properties file inside the path
-     *  - There are no subdirectories in the path
-     *  - There are more than 1 subdirectories in the path
-     *  - The subdirectory does not contain a bagit.txt file
-     * </pre>
+     * Returns the first subdirectory of the provided path if it looks like a bag. It will not check if the bag is valid and only do a very superficial check. It will throw an exception if
+     * <ul>
+     *  <li>The path is not a directory</li>
+     *  <li>There is no deposit.properties file inside the path</li>
+     *  <li>There are no subdirectories in the path</li>
+     *  <li>There are more than 1 subdirectories in the path</li>
+     *  <li>The subdirectory does not contain a bagit.txt file</li>
+     * </ul>
      *
      * @param depositDir The deposit directory
      * @return The path to the first subdirectory
      * @throws InvalidDepositException If any of the checks above fail
      * @throws IOException             Propagated from underlying systems to indicate an IO error
      */
-    Path getValidBagDir(Path depositDir) throws InvalidDepositException, IOException;
+    Path getBagDir(Path depositDir) throws InvalidDepositException, IOException;
 }

@@ -34,7 +34,7 @@ class DepositLocationReaderImplTest {
         var basePath = Path.of("/some/path/to/4e97185d-b38c-4ed9-bdf6-64339acfb6e8");
         var bagDirResolver = Mockito.mock(BagDirResolver.class);
         Mockito.doReturn(basePath.resolve("bagdir"))
-            .when(bagDirResolver).getValidBagDir(Mockito.any());
+            .when(bagDirResolver).getBagDir(Mockito.any());
 
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
@@ -62,7 +62,7 @@ class DepositLocationReaderImplTest {
     void getTarget_should_return_sword_token() throws Throwable {
         var bagDirResolver = Mockito.mock(BagDirResolver.class);
         Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getValidBagDir(Mockito.any());
+            .when(bagDirResolver).getBagDir(Mockito.any());
 
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
@@ -79,7 +79,7 @@ class DepositLocationReaderImplTest {
     void getTarget_should_return_doi_if_sword_token_is_null() throws Throwable {
         var bagDirResolver = Mockito.mock(BagDirResolver.class);
         Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getValidBagDir(Mockito.any());
+            .when(bagDirResolver).getBagDir(Mockito.any());
 
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
@@ -96,7 +96,7 @@ class DepositLocationReaderImplTest {
     void getTarget_should_return_doi_if_sword_token_is_blank() throws Throwable {
         var bagDirResolver = Mockito.mock(BagDirResolver.class);
         Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getValidBagDir(Mockito.any());
+            .when(bagDirResolver).getBagDir(Mockito.any());
 
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
@@ -113,7 +113,7 @@ class DepositLocationReaderImplTest {
     void getTarget_should_throw_MissingTargetException_when_targets_are_missing() throws Throwable {
         var bagDirResolver = Mockito.mock(BagDirResolver.class);
         Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getValidBagDir(Mockito.any());
+            .when(bagDirResolver).getBagDir(Mockito.any());
 
         var config = new BaseConfiguration();
         config.setProperty("dataverse.sword-token", " ");

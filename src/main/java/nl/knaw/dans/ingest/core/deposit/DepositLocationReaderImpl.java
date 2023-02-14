@@ -44,7 +44,7 @@ public class DepositLocationReaderImpl implements DepositLocationReader {
 
     @Override
     public DepositLocation readDepositLocation(Path depositDir) throws InvalidDepositException, IOException {
-        var bagDir = bagDirResolver.getValidBagDir(depositDir);
+        var bagDir = bagDirResolver.getBagDir(depositDir);
 
         try {
             var properties = bagDataManager.readDepositProperties(depositDir);

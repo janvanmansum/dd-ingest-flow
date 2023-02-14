@@ -40,7 +40,7 @@ class DepositReaderImplTest {
 
         var bagDirResolver = Mockito.mock(BagDirResolver.class);
         Mockito.doReturn(basePath.resolve("bagdir"))
-            .when(bagDirResolver).getValidBagDir(Mockito.any());
+            .when(bagDirResolver).getBagDir(Mockito.any());
 
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();

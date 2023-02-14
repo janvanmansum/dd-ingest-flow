@@ -23,8 +23,8 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 
 /**
- * This class depicts the location of a deposit that was done in one of the inboxes.
- * TODO: think of a good name for this, I do not believe this is the best one.
+ * This class represents the location of a deposit that was done in one of the inboxes. It is intended to be a lightweight pointer to the deposit to be used for enqueuing a large number of deposits
+ * without incurring the overhead of loading all the deposit metadata into memory.
  */
 @Data
 @NoArgsConstructor

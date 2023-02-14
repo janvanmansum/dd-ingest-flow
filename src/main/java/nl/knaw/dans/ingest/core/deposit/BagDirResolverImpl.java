@@ -30,7 +30,7 @@ public class BagDirResolverImpl implements BagDirResolver {
     }
 
     @Override
-    public Path getValidBagDir(Path depositDir) throws InvalidDepositException, IOException {
+    public Path getBagDir(Path depositDir) throws InvalidDepositException, IOException {
         if (!fileService.isDirectory(depositDir)) {
             throw new InvalidDepositException(String.format("%s is not a directory", depositDir));
         }
