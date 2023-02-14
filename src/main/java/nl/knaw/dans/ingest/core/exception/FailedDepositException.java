@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core;
+package nl.knaw.dans.ingest.core.exception;
 
-public enum DepositState {
-    ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED
+import nl.knaw.dans.ingest.core.domain.Deposit;
+
+public class FailedDepositException extends RuntimeException {
+    public FailedDepositException(Deposit deposit, String message) {
+        super(String.format("Failed %s: %s", deposit.getDir(), message));
+    }
+
+    public FailedDepositException(Deposit deposit, String message, Throwable e) {
+        super(String.format("Failed %s: %s", deposit.getDir(), message), e);
+    }
 }

@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.service;
+package nl.knaw.dans.ingest.core.deposit;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
-import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
+import nl.knaw.dans.ingest.core.domain.Deposit;
+import nl.knaw.dans.ingest.core.exception.InvalidDepositException;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
-@Data
-@ToString
-@AllArgsConstructor
-public class FileInfo {
+public interface DepositWriter {
 
-    private Path path;
-    private String checksum;
-    private FileMeta metadata;
+    void saveDeposit(Deposit deposit) throws InvalidDepositException;
 
+    void moveDeposit(Deposit deposit, Path outbox) throws IOException;
+
+    void moveDeposit(Path source, Path outbox) throws IOException;
 }

@@ -16,12 +16,17 @@
 package nl.knaw.dans.ingest.core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.knaw.dans.ingest.core.DepositState;
 import nl.knaw.dans.ingest.core.TaskEvent;
+import nl.knaw.dans.ingest.core.TaskEvent.Result;
+import nl.knaw.dans.ingest.core.deposit.DepositManager;
+import nl.knaw.dans.ingest.core.domain.Deposit;
+import nl.knaw.dans.ingest.core.domain.DepositLocation;
+import nl.knaw.dans.ingest.core.domain.DepositState;
+import nl.knaw.dans.ingest.core.domain.OutboxSubDir;
+import nl.knaw.dans.ingest.core.exception.FailedDepositException;
+import nl.knaw.dans.ingest.core.exception.InvalidDepositException;
+import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.sequencing.TargetedTask;
-import nl.knaw.dans.ingest.core.service.exception.FailedDepositException;
-import nl.knaw.dans.ingest.core.service.exception.InvalidDepositException;
-import nl.knaw.dans.ingest.core.service.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapperFactory;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.DataverseException;
@@ -37,9 +42,8 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,15 +65,14 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     protected final int publishAwaitUnlockMillisecondsBetweenRetries;
     protected final int publishAwaitUnlockMaxNumberOfRetries;
     protected final Path outboxDir;
-    private final Deposit deposit;
-
+    protected final DepositLocation depositLocation;
     private final EventWriter eventWriter;
-
     private final DepositManager depositManager;
+    protected Deposit deposit;
 
     public DepositIngestTask(
         DepositToDvDatasetMetadataMapperFactory datasetMetadataMapperFactory,
-        Deposit deposit,
+        DepositLocation depositLocation,
         DataverseClient dataverseClient,
         String depositorRole,
         Pattern fileExclusionPattern,
@@ -84,7 +87,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         DepositManager depositManager
     ) {
         this.datasetMetadataMapperFactory = datasetMetadataMapperFactory;
-        this.deposit = deposit;
         this.dataverseClient = dataverseClient;
 
         this.depositorRole = depositorRole;
@@ -99,15 +101,28 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         this.outboxDir = outboxDir;
         this.eventWriter = eventWriter;
         this.depositManager = depositManager;
-    }
-
-    public Deposit getDeposit() {
-        return this.deposit;
+        this.depositLocation = depositLocation;
     }
 
     @Override
     public void run() {
         writeEvent(TaskEvent.EventType.START_PROCESSING, TaskEvent.Result.OK, null);
+
+        // TODO this is really ugly, fix it at some point
+        try {
+            this.deposit = depositManager.readDeposit(depositLocation);
+        }
+        catch (InvalidDepositException e) {
+            try {
+                moveDepositToOutbox(depositLocation.getDir(), OutboxSubDir.FAILED);
+            }
+            catch (IOException ex) {
+                log.error("Unable to move deposit directory to 'failed' outbox", ex);
+            }
+
+            writeEvent(TaskEvent.EventType.END_PROCESSING, Result.FAILED, e.getMessage());
+            return;
+        }
 
         try {
             doRun();
@@ -126,12 +141,9 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         }
     }
 
-    void moveDepositToOutbox(OutboxSubDir subDir) throws IOException {
-        var deposit = getDeposit();
-        var target = this.outboxDir.resolve(subDir.getValue())
-            .resolve(deposit.getDir().getFileName());
-
-        Files.move(deposit.getDir(), target);
+    void moveDepositToOutbox(Path path, OutboxSubDir subDir) throws IOException {
+        var target = this.outboxDir.resolve(subDir.getValue());
+        depositManager.moveDeposit(path, target);
     }
 
     void updateDepositFromResult(DepositState depositState, String message) {
@@ -139,19 +151,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         deposit.setStateDescription(message);
 
         try {
-            depositManager.saveDeposit(deposit);
-
-            switch (depositState) {
-                case PUBLISHED:
-                    moveDepositToOutbox(OutboxSubDir.PROCESSED);
-                    break;
-                case REJECTED:
-                    moveDepositToOutbox(OutboxSubDir.REJECTED);
-                    break;
-                case FAILED:
-                    moveDepositToOutbox(OutboxSubDir.FAILED);
-                    break;
-            }
+            depositManager.updateAndMoveDeposit(deposit, getTargetPath(depositState));
         }
         catch (IOException e) {
             log.error("Unable to move directory for deposit {}", deposit.getDir(), e);
@@ -161,9 +161,31 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         }
     }
 
+    Path getTargetPath(DepositState depositState) {
+        switch (depositState) {
+            case PUBLISHED:
+                return this.outboxDir.resolve(OutboxSubDir.PROCESSED.getValue());
+            case REJECTED:
+                return this.outboxDir.resolve(OutboxSubDir.REJECTED.getValue());
+            case FAILED:
+                return this.outboxDir.resolve(OutboxSubDir.FAILED.getValue());
+            default:
+                throw new IllegalArgumentException(String.format(
+                    "Unexpected deposit state '%s' found; not sure where to move it",
+                    depositState
+                ));
+
+        }
+    }
+
     @Override
     public String getTarget() {
-        return Optional.ofNullable(getDeposit().getDoi()).orElse("");
+        return depositLocation.getTarget();
+    }
+
+    @Override
+    public Path getDepositPath() {
+        return depositLocation.getDir();
     }
 
     @Override
@@ -172,7 +194,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     private UUID getDepositId() {
-        return UUID.fromString(deposit.getDepositId());
+        return UUID.fromString(depositLocation.getDepositId());
     }
 
     void doRun() throws Exception {
@@ -180,7 +202,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         checkDepositType();
         validateDeposit();
 
-        var deposit = getDeposit();
         // get metadata
         var dataverseDataset = getMetadata();
         var isUpdate = deposit.isUpdate();
@@ -196,7 +217,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     void checkDepositType() {
-        var deposit = getDeposit();
         var hasDoi = StringUtils.isNotBlank(deposit.getDoi());
 
         if (hasDoi) {
@@ -205,9 +225,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     void validateDeposit() {
-
-        var deposit = getDeposit();
-
         if (dansBagValidator != null) {
             var result = dansBagValidator.validateBag(
                 deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1, ValidateCommand.LevelEnum.WITH_DATA_STATION_CONTEXT);
@@ -215,7 +232,8 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             if (result.getIsCompliant()) {
                 try {
                     ManifestHelper.ensureSha1ManifestPresent(deposit.getBag());
-                } catch (Exception e){
+                }
+                catch (Exception e) {
                     log.error("could not add SHA1 manifest", e);
                     throw new FailedDepositException(deposit, e.getMessage());
                 }
@@ -240,7 +258,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
     void savePersistentIdentifiersInDepositProperties(String persistentId) throws IOException, DataverseException {
         var dataset = dataverseClient.dataset(persistentId);
-        var deposit = getDeposit();
         dataset.awaitUnlock(publishAwaitUnlockMaxNumberOfRetries, publishAwaitUnlockMillisecondsBetweenRetries);
 
         deposit.setDoi(persistentId);
@@ -267,7 +284,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     void waitForReleasedState(String persistentId) throws InterruptedException, IOException, DataverseException {
         var numberOfTimesTried = 0;
         var state = getDatasetState(persistentId);
-        var deposit = getDeposit();
 
         while (!"RELEASED".equals(state) && numberOfTimesTried < publishAwaitUnlockMaxNumberOfRetries) {
             Thread.sleep(publishAwaitUnlockMillisecondsBetweenRetries);
@@ -295,7 +311,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     DatasetEditor newDatasetUpdater(Dataset dataset, boolean isMigration) {
-        var deposit = getDeposit();
         var blocks = dataset.getDatasetVersion().getMetadataBlocks();
 
         return new DatasetUpdater(
@@ -319,8 +334,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     DatasetEditor newDatasetCreator(Dataset dataset, String depositorRole, boolean isMigration) {
-        var deposit = getDeposit();
-
         return new DatasetCreator(
             dataverseClient,
             isMigration,
@@ -344,7 +357,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     Dataset getMetadata() {
         var date = getDateOfDeposit();
         var contact = getDatasetContact();
-        var deposit = getDeposit();
         var accessibleToValues = XPathEvaluator
             .strings(deposit.getFilesXml(), "/files:files/files:file/files:accessibleToRights")
             .collect(Collectors.toList());
@@ -374,7 +386,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     Optional<AuthenticatedUser> getDatasetContact() {
-        var deposit = getDeposit();
         return Optional.ofNullable(deposit.getDepositorUserId())
             .filter(StringUtils::isNotBlank)
             .map(userId -> {
@@ -393,7 +404,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         return getCreatedInstant().compareTo(depositIngestTask.getCreatedInstant());
     }
 
-    protected Instant getCreatedInstant() {
-        return getDeposit().getBagCreated();
+    public OffsetDateTime getCreatedInstant() {
+        return depositLocation.getCreated();
     }
 }

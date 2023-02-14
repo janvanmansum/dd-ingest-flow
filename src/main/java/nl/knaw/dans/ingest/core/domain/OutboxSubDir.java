@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.service.exception;
+package nl.knaw.dans.ingest.core.domain;
 
-import nl.knaw.dans.ingest.core.service.Deposit;
+public enum OutboxSubDir {
+    PROCESSED("processed"),
+    REJECTED("rejected"),
+    FAILED("failed");
 
-public class CannotUpdateDraftDatasetException extends RuntimeException {
+    private final String value;
 
-    public CannotUpdateDraftDatasetException(Deposit deposit) {
-        super("Latest version must be published before update-deposit can be processed");
+    OutboxSubDir(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 }

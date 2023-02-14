@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.service;
+package nl.knaw.dans.ingest.core.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import nl.knaw.dans.ingest.core.service.exception.InvalidDepositException;
-
-import java.io.IOException;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 
-public interface DepositManager {
-
-    Deposit loadDeposit(Path path) throws InvalidDepositException, IOException;
-
-    void saveDeposit(Deposit deposit) throws InvalidDepositException;
-
+/**
+ * This class depicts the location of a deposit that was done in one of the inboxes.
+ * TODO: think of a good name for this, I do not believe this is the best one.
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class DepositLocation {
+    private Path dir;
+    private String target;
+    private String depositId;
+    private OffsetDateTime created;
 }

@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.service.exception;
+package nl.knaw.dans.ingest.core.domain;
 
-public class MissingRequiredFieldException extends RuntimeException {
-    private final String title;
+import lombok.Builder;
+import lombok.Data;
+import lombok.ToString;
 
-    public MissingRequiredFieldException(String title) {
-        super(String.format("Required metadata field '%s' is missing", title));
-        this.title = title;
-    }
+@Data
+@Builder
+@ToString
+public class DatasetOrganization {
+    private String name;
+    private String role;
+    private String isni;
+    private String viaf;
 }

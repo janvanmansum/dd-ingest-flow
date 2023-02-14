@@ -13,20 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.service;
+package nl.knaw.dans.ingest.core.domain;
 
-public enum OutboxSubDir {
-    PROCESSED("processed"),
-    REJECTED("rejected"),
-    FAILED("failed");
-
-    private final String value;
-
-    OutboxSubDir(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
+public enum DepositState {
+    ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED
 }

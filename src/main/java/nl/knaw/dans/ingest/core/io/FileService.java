@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.service;
+package nl.knaw.dans.ingest.core.io;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
-public class BoundedDepositImportTaskIterator extends AbstractDepositsImportTaskIterator {
-    public BoundedDepositImportTaskIterator(Path inboxDir, Path outBox, DepositIngestTaskFactory taskFactory,
-        EventWriter eventWriter) {
-        super(inboxDir, outBox, taskFactory, eventWriter);
-        createDepositIngestTasks(getAllDepositPathsFromInbox()).forEach(this::addTask);
-    }
+public interface FileService {
 
+    boolean isDirectory(Path path);
+
+    Stream<Path> listDirectories(Path path) throws IOException;
+
+    boolean fileExists(Path path);
 }

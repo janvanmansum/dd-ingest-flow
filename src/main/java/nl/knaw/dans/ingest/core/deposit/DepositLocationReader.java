@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core;
+package nl.knaw.dans.ingest.core.deposit;
 
-import lombok.Builder;
-import lombok.Data;
+import nl.knaw.dans.ingest.core.domain.DepositLocation;
+import nl.knaw.dans.ingest.core.exception.InvalidDepositException;
 
-@Data
-@Builder
-public class DatasetAuthor {
-    private String titles;
-    private String initials;
-    private String insertions;
-    private String surname;
-    private String dai;
-    private String isni;
-    private String orcid;
-    private String role;
-    private String organization;
+import java.io.IOException;
+import java.nio.file.Path;
+
+public interface DepositLocationReader {
+
+    DepositLocation readDepositLocation(Path depositDir) throws InvalidDepositException, IOException;
 }
