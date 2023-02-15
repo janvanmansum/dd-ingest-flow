@@ -225,29 +225,34 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     void validateDeposit() {
-        if (dansBagValidator != null) {
-            var result = dansBagValidator.validateBag(
-                deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1, ValidateCommand.LevelEnum.WITH_DATA_STATION_CONTEXT);
+        try {
+            deposit.addOrUpdateBagInfoElement("Data-Station-User-Account", deposit.getDepositorUserId());
+            depositManager.saveBagInfo(deposit);
+        }
+        catch (IOException e) {
+            throw new FailedDepositException(deposit, "Could not add 'Data-Station-User-Account' element to bag-info.txt");
+        }
+        var result = dansBagValidator.validateBag(
+            deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1, ValidateCommand.LevelEnum.WITH_DATA_STATION_CONTEXT);
 
-            if (result.getIsCompliant()) {
-                try {
-                    ManifestHelper.ensureSha1ManifestPresent(deposit.getBag());
-                }
-                catch (Exception e) {
-                    log.error("could not add SHA1 manifest", e);
-                    throw new FailedDepositException(deposit, e.getMessage());
-                }
+        if (result.getIsCompliant()) {
+            try {
+                ManifestHelper.ensureSha1ManifestPresent(deposit.getBag());
             }
-            else {
-                var violations = result.getRuleViolations().stream()
-                    .map(r -> String.format("- [%s] %s", r.getRule(), r.getViolation()))
-                    .collect(Collectors.joining("\n"));
+            catch (Exception e) {
+                log.error("could not add SHA1 manifest", e);
+                throw new FailedDepositException(deposit, e.getMessage());
+            }
+        }
+        else {
+            var violations = result.getRuleViolations().stream()
+                .map(r -> String.format("- [%s] %s", r.getRule(), r.getViolation()))
+                .collect(Collectors.joining("\n"));
 
-                throw new RejectedDepositException(deposit, String.format(
-                    "Bag was not valid according to Profile Version %s. Violations: %s",
-                    result.getProfileVersion(), violations)
-                );
-            }
+            throw new RejectedDepositException(deposit, String.format(
+                "Bag was not valid according to Profile Version %s. Violations: %s",
+                result.getProfileVersion(), violations)
+            );
         }
     }
 

@@ -143,20 +143,18 @@ public class DepositMigrationTask extends DepositIngestTask {
     }
 
     void validateDeposit() {
-        if (dansBagValidator != null) {
-            var result = dansBagValidator.validateBag(
-                deposit.getBagDir(), ValidateCommand.PackageTypeEnum.MIGRATION, 1, ValidateCommand.LevelEnum.STAND_ALONE);
+        var result = dansBagValidator.validateBag(
+            deposit.getBagDir(), ValidateCommand.PackageTypeEnum.MIGRATION, 1, ValidateCommand.LevelEnum.STAND_ALONE);
 
-            if (!result.getIsCompliant()) {
-                var violations = result.getRuleViolations().stream()
-                    .map(r -> String.format("- [%s] %s", r.getRule(), r.getViolation()))
-                    .collect(Collectors.joining("\n"));
+        if (!result.getIsCompliant()) {
+            var violations = result.getRuleViolations().stream()
+                .map(r -> String.format("- [%s] %s", r.getRule(), r.getViolation()))
+                .collect(Collectors.joining("\n"));
 
-                throw new RejectedDepositException(deposit, String.format(
-                    "Bag was not valid according to Profile Version %s. Violations: %s",
-                    result.getProfileVersion(), violations)
-                );
-            }
+            throw new RejectedDepositException(deposit, String.format(
+                "Bag was not valid according to Profile Version %s. Violations: %s",
+                result.getProfileVersion(), violations)
+            );
         }
     }
 
