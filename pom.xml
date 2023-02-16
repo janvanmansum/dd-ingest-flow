@@ -47,6 +47,7 @@
         <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dd-validate-dans-bag-api</artifactId>
+            <version>0.18.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>nl.knaw.dans</groupId>
