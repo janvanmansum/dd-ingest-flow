@@ -64,9 +64,8 @@ public class DansBagValidatorImpl implements DansBagValidator {
     }
 
     @Override
-    public ValidateOk validateBag(Path bagDir, PackageTypeEnum informationPackageType, int profileVersion, ValidateCommand.LevelEnum level) {
+    public ValidateOk validateBag(Path bagDir, PackageTypeEnum informationPackageType, int profileVersion) {
         var command = new ValidateCommand()
-            .level(level)
             .bagLocation(bagDir.toString())
             .packageType(informationPackageType);
 

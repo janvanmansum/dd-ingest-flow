@@ -233,7 +233,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             throw new FailedDepositException(deposit, "Could not add 'Data-Station-User-Account' element to bag-info.txt");
         }
         var result = dansBagValidator.validateBag(
-            deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1, ValidateCommand.LevelEnum.WITH_DATA_STATION_CONTEXT);
+            deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1);
 
         if (result.getIsCompliant()) {
             try {
