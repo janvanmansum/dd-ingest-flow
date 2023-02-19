@@ -111,7 +111,7 @@ public class DepositToDvDatasetMetadataMapper {
         @Nullable String dateOfDeposit,
         @Nullable AuthenticatedUser contactData,
         @Nullable VaultMetadata vaultMetadata,
-        boolean hasRestrictedOrNoneFiles) throws MissingRequiredFieldException {
+        boolean accessibleToNoneFilesPresent) throws MissingRequiredFieldException {
         var termsOfAccess = "N/a";
 
         if (activeMetadataBlocks.contains("citation")) {
@@ -144,10 +144,8 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDescription(getDcmiDdmDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription); // CIT012
 
 
-            if (hasRestrictedOrNoneFiles) {
-                // TODO: FIX: access request enabled -> always fill in, otherwise: only if accessRights found.
+            if (accessibleToNoneFilesPresent) {
                 // TRM004, TRM005
-                // stick to initial value if nothing is found
                 termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse(termsOfAccess);
             }
             else {
@@ -227,7 +225,7 @@ public class DepositToDvDatasetMetadataMapper {
 
         }
 
-        return assembleDataverseDataset(termsOfAccess);
+        return assembleDataverseDataset(termsOfAccess, !accessibleToNoneFilesPresent);
     }
 
     private Stream<Node> getPersonalData(Document ddm) {
@@ -270,7 +268,7 @@ public class DepositToDvDatasetMetadataMapper {
         fields.put(title, block);
     }
 
-    Dataset assembleDataverseDataset(String termsOfAccess) {
+    Dataset assembleDataverseDataset(String termsOfAccess, boolean enableFileAccessRequest) {
         var fields = new HashMap<String, MetadataBlock>();
 
         processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields);
@@ -282,6 +280,7 @@ public class DepositToDvDatasetMetadataMapper {
 
         var version = new DatasetVersion();
         version.setTermsOfAccess(termsOfAccess);
+        version.setFileAccessRequest(enableFileAccessRequest);
         version.setMetadataBlocks(fields);
         version.setFiles(new ArrayList<>());
 
