@@ -227,20 +227,14 @@ public class DepositToDvDatasetMetadataMapper {
             dataVaultFieldBuilder.addSwordToken(vaultMetadata.getSwordToken());
 
         }
-
-        return assembleDataverseDataset(termsOfAccess, !filesThatAreAccessibleToNonePresentInDeposit);
+        var accessCategory = getDdmAccessRights(ddm).collect(Collectors.toList());
+        // TRM003, TRM004
+        var enableFileAccessRequest = !filesThatAreAccessibleToNonePresentInDeposit && !"NONE".equals(accessCategory.get(0).getTextContent());
+        return assembleDataverseDataset(termsOfAccess, enableFileAccessRequest);
     }
 
     private Stream<Node> getPersonalData(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:personalData");
-    }
-
-    private Stream<Node> getPersonalDataPresent(Document agreements) {
-        if (agreements == null) {
-            return Stream.empty();
-        }
-
-        return XPathEvaluator.nodes(agreements, "//agreements:personalDataStatement");
     }
 
     void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder) {
@@ -419,6 +413,10 @@ public class DepositToDvDatasetMetadataMapper {
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:issued",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:valid",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage");
+    }
+
+    Stream<Node> getDdmAccessRights(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:accessRights");
     }
 
     Stream<Node> getDctAccessRights(Document ddm) {
