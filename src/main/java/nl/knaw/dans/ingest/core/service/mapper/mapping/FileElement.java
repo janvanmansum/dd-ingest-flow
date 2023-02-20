@@ -54,11 +54,14 @@ public class FileElement extends Base {
         }
 
         var pathInDataset = Path.of(filepathAttribute.substring("data/".length()));
+        // FIL001
         var filename = pathInDataset.getFileName().toString();
         var sanitizedFilename = replaceForbiddenCharactersInFilename(filename);
         var dirPath = Optional.ofNullable(pathInDataset.getParent()).map(Path::toString).orElse(null);
+        // FIL002
         var sanitizedDirLabel = replaceForbiddenCharactersInPath(dirPath);
 
+        // FIL005
         var restricted = getChildNode(node, "files:accessibleToRights")
             .map(Node::getTextContent)
             .map(accessibilityToRestrict::get)
@@ -84,6 +87,7 @@ public class FileElement extends Base {
     static String getDescription(Map<String, List<String>> kv) {
         if (!kv.isEmpty()) {
             if (kv.keySet().size() == 1 && kv.containsKey("description")) {
+                // FIL004
                 return kv.get("description").stream().findFirst().orElse(null);
             }
             else {
@@ -102,6 +106,7 @@ public class FileElement extends Base {
             .collect(Collectors.joining("; "));
     }
 
+    // FIL002AB, FIL003
     static Map<String, List<String>> getKeyValuePairs(Node node, String filename, String originalFilePath) {
         var fixedKeys = List.of(
             "hardware",
@@ -179,6 +184,7 @@ public class FileElement extends Base {
     }
 
     public static Map<Path, FileInfo> pathToFileInfo(Deposit deposit) {
+        // FIL006
         var defaultRestrict = XPathEvaluator.nodes(deposit.getDdm(), "/ddm:DDM/ddm:profile/ddm:accessRights")
             .map(AccessRights::toDefaultRestrict)
             .findFirst()

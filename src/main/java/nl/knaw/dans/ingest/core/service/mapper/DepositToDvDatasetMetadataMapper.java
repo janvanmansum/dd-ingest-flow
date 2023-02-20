@@ -110,16 +110,17 @@ public class DepositToDvDatasetMetadataMapper {
         @Nullable String dateOfDeposit,
         @Nullable AuthenticatedUser contactData,
         @Nullable VaultMetadata vaultMetadata,
-        boolean filesThatAreAccessibleToNonePresentInDeposit) throws MissingRequiredFieldException {
+        boolean filesThatAreAccessibleToNonePresentInDeposit,
+        boolean filesThatAreRestrictedRequestPresentInDeposit) throws MissingRequiredFieldException {
         var termsOfAccess = "N/a";
 
         if (activeMetadataBlocks.contains("citation")) {
             checkRequiredField(TITLE, getTitles(ddm));
             checkRequiredField(SUBJECT, getAudiences(ddm));
 
-            var alternativeTitles = getAlternativeTitles(ddm).collect(Collectors.toList());
+            var otherTitlesAndAlternativeTitles = getOtherTitles(ddm).collect(Collectors.toList());
             citationFields.addTitle(getTitles(ddm)); // CIT001
-            citationFields.addAlternativeTitle(alternativeTitles.stream().map(Node::getTextContent)); // CIT002
+            citationFields.addAlternativeTitle(otherTitlesAndAlternativeTitles.stream().map(Node::getTextContent)); // CIT002
 
             if (vaultMetadata != null) {
                 citationFields.addOtherIdsStrings(Stream.ofNullable(vaultMetadata.getOtherId()) // CIT002A
@@ -134,18 +135,21 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDescription(getProfileDescriptions(ddm), Description.toDescription); // CIT009
 
             // CIT010
-            if (alternativeTitles.size() > 1) {
-                citationFields.addDescription(alternativeTitles.stream().skip(1), Description.toDescription);
+            if (otherTitlesAndAlternativeTitles.size() > 1) { // First element is put in alternativeTitle field. See CIT002
+                citationFields.addDescription(otherTitlesAndAlternativeTitles.stream().skip(1), Description.toDescription);
             }
 
             citationFields.addDescription(getOtherDescriptions(ddm).filter(Description::isNotBlank), Description.toPrefixedDescription); // CIT011
             citationFields.addDescription(getDcmiDctermsDescriptions(ddm), Description.toDescription); // CIT012
             citationFields.addDescription(getDcmiDdmDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription); // CIT012
 
-
             if (filesThatAreAccessibleToNonePresentInDeposit) {
-                // TRM004, TRM005
+                // TRM005
                 termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse(termsOfAccess);
+            }
+            else if (filesThatAreRestrictedRequestPresentInDeposit) {
+                // TRM006
+                termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse("");
             }
             else {
                 // CIT012A
@@ -396,7 +400,7 @@ public class DepositToDvDatasetMetadataMapper {
         return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:profile/dc:title");
     }
 
-    Stream<Node> getAlternativeTitles(Document ddm) {
+    Stream<Node> getOtherTitles(Document ddm) {
         return XPathEvaluator.nodes(ddm,
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:title", "/ddm:DDM/ddm:dcmiMetadata/dcterms:alternative");
     }
