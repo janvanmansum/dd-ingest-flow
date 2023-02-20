@@ -94,14 +94,16 @@ public class DepositToDvDatasetMetadataMapper {
 
     private final Map<String, String> iso1ToDataverseLanguage;
     private final Map<String, String> iso2ToDataverseLanguage;
+    private List<String> spatialCoverageCountryTerms;
     private final boolean deduplicate;
 
     DepositToDvDatasetMetadataMapper(boolean deduplicate, Set<String> activeMetadataBlocks, Map<String, String> iso1ToDataverseLanguage,
-        Map<String, String> iso2ToDataverseLanguage) {
+        Map<String, String> iso2ToDataverseLanguage, List<String> spatialCoverageCountryTerms) {
         this.deduplicate = deduplicate;
         this.activeMetadataBlocks = activeMetadataBlocks;
         this.iso1ToDataverseLanguage = iso1ToDataverseLanguage;
         this.iso2ToDataverseLanguage = iso2ToDataverseLanguage;
+        this.spatialCoverageCountryTerms = spatialCoverageCountryTerms;
     }
 
     public Dataset toDataverseDataset(
@@ -211,8 +213,10 @@ public class DepositToDvDatasetMetadataMapper {
             temporalSpatialFields.addSpatialPoint(getDcxGmlSpatial(ddm)
                 .filter(node -> SpatialPoint.hasChildNode(node, "/Point")), SpatialPoint.toEasyTsmSpatialPointValueObject); // TS002, TS003
             temporalSpatialFields.addSpatialBox(getBoundedBy(ddm), SpatialBox.toEasyTsmSpatialBoxValueObject); // TS004, TS005
-            temporalSpatialFields.addSpatialCoverageControlled(getSpatial(ddm).map(SpatialCoverage::toControlledSpatialValue)); // TS006
-            temporalSpatialFields.addSpatialCoverageUncontrolled(getSpatial(ddm).map(SpatialCoverage::toUncontrolledSpatialValue)); // TS007
+            temporalSpatialFields.addSpatialCoverageControlled(getSpatial(ddm)
+                .map(node -> SpatialCoverage.toControlledSpatialValue(node, spatialCoverageCountryTerms))); // TS006
+            temporalSpatialFields.addSpatialCoverageUncontrolled(getSpatial(ddm)
+                .map((Node node) -> SpatialCoverage.toUncontrolledSpatialValue(node, spatialCoverageCountryTerms))); // TS007
         }
 
         if (activeMetadataBlocks.contains("dansDataVaultMetadata") && vaultMetadata != null) {

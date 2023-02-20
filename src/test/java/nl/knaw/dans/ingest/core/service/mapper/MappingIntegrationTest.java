@@ -60,7 +60,7 @@ class MappingIntegrationTest {
         iso2ToDataverseLanguage.put("dut", "Dutch");
         iso2ToDataverseLanguage.put("ger", "German");
         return new DepositToDvDatasetMetadataMapper(
-            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage
+            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, List.of("Netherlands", "United Kingdom", "Belgium", "Germany")
         ).toDataverseDataset(ddm, null, null, null, vaultMetadata, hasRestrictedOrNoneFiles);
     }
 
