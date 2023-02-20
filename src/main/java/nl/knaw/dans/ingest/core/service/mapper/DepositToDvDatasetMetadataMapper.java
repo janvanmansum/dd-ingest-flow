@@ -107,11 +107,10 @@ public class DepositToDvDatasetMetadataMapper {
     public Dataset toDataverseDataset(
         @NonNull Document ddm,
         @Nullable String otherDoiId,
-        @Nullable Document agreements,
         @Nullable String dateOfDeposit,
         @Nullable AuthenticatedUser contactData,
         @Nullable VaultMetadata vaultMetadata,
-        boolean accessibleToNoneFilesPresent) throws MissingRequiredFieldException {
+        boolean filesThatAreAccessibleToNonePresentInDeposit) throws MissingRequiredFieldException {
         var termsOfAccess = "N/a";
 
         if (activeMetadataBlocks.contains("citation")) {
@@ -144,7 +143,7 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDescription(getDcmiDdmDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription); // CIT012
 
 
-            if (accessibleToNoneFilesPresent) {
+            if (filesThatAreAccessibleToNonePresentInDeposit) {
                 // TRM004, TRM005
                 termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse(termsOfAccess);
             }
@@ -225,7 +224,7 @@ public class DepositToDvDatasetMetadataMapper {
 
         }
 
-        return assembleDataverseDataset(termsOfAccess, !accessibleToNoneFilesPresent);
+        return assembleDataverseDataset(termsOfAccess, !filesThatAreAccessibleToNonePresentInDeposit);
     }
 
     private Stream<Node> getPersonalData(Document ddm) {

@@ -65,7 +65,6 @@ public class DepositReaderImpl implements DepositReader {
             deposit.setBag(bagInfo);
             deposit.setDdm(readOptionalXmlFile(deposit.getDdmPath()));
             deposit.setFilesXml(readOptionalXmlFile(deposit.getFilesXmlPath()));
-            deposit.setAgreements(readOptionalXmlFile(deposit.getAgreementsXmlPath()));
             deposit.setAmd(readOptionalXmlFile(deposit.getAmdPath()));
 
             return deposit;

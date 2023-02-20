@@ -60,8 +60,6 @@ public class Deposit {
     private Document ddm;
     private Document filesXml;
     private Document amd;
-    private Document agreements;
-
     private Bag bag;
 
     public VaultMetadata getVaultMetadata() {

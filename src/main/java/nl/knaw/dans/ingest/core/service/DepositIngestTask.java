@@ -365,18 +365,15 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         var accessibleToValues = XPathEvaluator
             .strings(deposit.getFilesXml(), "/files:files/files:file/files:accessibleToRights")
             .collect(Collectors.toList());
-        var accessibleToNonePresent = accessibleToValues.contains("NONE");
 
         var mapper = datasetMetadataMapperFactory.createMapper(false); // TODO: WHY IS THIS ALWAYS FALSE?
-        // TODO: SET ACCESS REQUEST DISABLED IF NONE FILES PRESENT
         return mapper.toDataverseDataset(
             deposit.getDdm(),
             deposit.getOtherDoiId(),
-            deposit.getAgreements(),
             date.orElse(null),
             contact.orElse(null),
             deposit.getVaultMetadata(),
-            accessibleToNonePresent);
+            accessibleToValues.contains("NONE"));
     }
 
     Optional<String> getDateOfDeposit() {
