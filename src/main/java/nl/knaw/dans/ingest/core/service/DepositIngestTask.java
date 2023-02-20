@@ -365,25 +365,15 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         var accessibleToValues = XPathEvaluator
             .strings(deposit.getFilesXml(), "/files:files/files:file/files:accessibleToRights")
             .collect(Collectors.toList());
-        var hasRestrictedOrNoneFiles = accessibleToValues.contains("RESTRICTED_REQUEST") || accessibleToValues.contains("NONE");
 
-        // TODO think about putting assertions inside a getter method
-        checkPersonalDataPresent(deposit.getAgreements());
-
-        var mapper = datasetMetadataMapperFactory.createMapper(false);
-
+        var mapper = datasetMetadataMapperFactory.createMapper(false); // TODO: WHY IS THIS ALWAYS FALSE?
         return mapper.toDataverseDataset(
             deposit.getDdm(),
             deposit.getOtherDoiId(),
-            deposit.getAgreements(),
             date.orElse(null),
             contact.orElse(null),
             deposit.getVaultMetadata(),
-            hasRestrictedOrNoneFiles);
-    }
-
-    void checkPersonalDataPresent(Document agreements) {
-        // do nothing
+            accessibleToValues.contains("NONE"));
     }
 
     Optional<String> getDateOfDeposit() {

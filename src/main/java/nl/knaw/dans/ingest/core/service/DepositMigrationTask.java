@@ -101,13 +101,6 @@ public class DepositMigrationTask extends DepositIngestTask {
     }
 
     @Override
-    void checkPersonalDataPresent(Document document) {
-        if (document == null) {
-            throw new RejectedDepositException(deposit, "Migration deposit MUST have an agreements.xml");
-        }
-    }
-
-    @Override
     Optional<String> getDateOfDeposit() {
         return Optional.ofNullable(deposit.getAmd())
             .map(Amd::toDateOfDeposit)
