@@ -227,10 +227,10 @@ public class DepositToDvDatasetMetadataMapper {
             dataVaultFieldBuilder.addSwordToken(vaultMetadata.getSwordToken());
 
         }
-        var accessCategory = getDdmAccessRights(ddm).collect(Collectors.toList());
-        // TRM003, TRM004
-        var enableFileAccessRequest = !filesThatAreAccessibleToNonePresentInDeposit && !"NONE".equals(accessCategory.get(0).getTextContent());
-        return assembleDataverseDataset(termsOfAccess, enableFileAccessRequest);
+//        var accessCategory = getDdmAccessRights(ddm).collect(Collectors.toList());
+//        // TRM003, TRM004
+//        var enableFileAccessRequest = !filesThatAreAccessibleToNonePresentInDeposit && !"NONE".equals(accessCategory.get(0).getTextContent());
+        return assembleDataverseDataset(termsOfAccess);
     }
 
     private Stream<Node> getPersonalData(Document ddm) {
@@ -265,7 +265,7 @@ public class DepositToDvDatasetMetadataMapper {
         fields.put(title, block);
     }
 
-    Dataset assembleDataverseDataset(String termsOfAccess, boolean enableFileAccessRequest) {
+    Dataset assembleDataverseDataset(String termsOfAccess) {
         var fields = new HashMap<String, MetadataBlock>();
 
         processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields);
@@ -277,7 +277,6 @@ public class DepositToDvDatasetMetadataMapper {
 
         var version = new DatasetVersion();
         version.setTermsOfAccess(termsOfAccess);
-        version.setFileAccessRequest(enableFileAccessRequest);
         version.setMetadataBlocks(fields);
         version.setFiles(new ArrayList<>());
 
