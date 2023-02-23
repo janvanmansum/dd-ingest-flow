@@ -182,7 +182,7 @@ public class DepositToDvDatasetMetadataMapper {
         }
 
         if (activeMetadataBlocks.contains("dansRights")) {
-            checkRequiredField(RIGHTS_HOLDER, getRightsHolders(ddm));
+            checkForAnyRightsHolder(ddm);
             rightsFields.addRightsHolders(getContributorDetailsAuthors(ddm).filter(DcxDaiAuthor::isRightsHolder).map(DcxDaiAuthor::toRightsHolder)); // RIG000A
             rightsFields.addRightsHolders(getContributorDetailsOrganizations(ddm).filter(DcxDaiOrganization::isRightsHolder).map(DcxDaiOrganization::toRightsHolder)); // RIG000B
             rightsFields.addRightsHolders(getRightsHolders(ddm)); // RIG001
@@ -440,6 +440,14 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<String> getRightsHolders(Document ddm) {
         return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:rightsHolder");
+    }
+
+    void checkForAnyRightsHolder(Document ddm) {
+        if (XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata//dcx-dai:role")
+            .filter(s -> s.contains("RightsHolder")).findFirst().isEmpty()
+        ) { // parsing the other way around might be more efficient
+            checkRequiredField(RIGHTS_HOLDER, getRightsHolders(ddm));
+        }
     }
 
     void checkRequiredField(String fieldName, Stream<String> nodes) {
