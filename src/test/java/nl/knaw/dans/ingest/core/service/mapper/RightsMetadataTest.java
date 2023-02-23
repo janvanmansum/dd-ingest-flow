@@ -24,14 +24,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RIGHTS_HOLDER;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.dcmi;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.ddmProfileWithAudiences;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.getControlledMultiValueField;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.getControlledSingleValueField;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.getPrimitiveMultipleValueField;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.mapDdmToDataset;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.readDocumentFromString;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.rootAttributes;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmProfileWithAudiences;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledSingleValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveMultipleValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocumentFromString;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RightsMetadataTest {

@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class MappingIntegrationTestHelper {
+class MappingTestHelper {
 
     static Document readDocumentFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
         return new XmlReaderImpl().readXmlString(xml);

@@ -24,16 +24,16 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPT
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.dcmi;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.ddmProfileWithAudiences;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.getCompoundMultiValueField;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.getControlledMultiValueField;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.getPrimitiveSingleValueField;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.mapDdmToDataset;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.readDocumentFromString;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.rootAttributes;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.toCompactJsonString;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingIntegrationTestHelper.toPrettyJsonString;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmProfileWithAudiences;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveSingleValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocumentFromString;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.toCompactJsonString;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.toPrettyJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MappingIntegrationTest {
