@@ -165,7 +165,7 @@ class RightsMetadataTest {
     }
 
     @Test
-    void RIG002_should_map_default_personal_data() throws ParserConfigurationException, IOException, SAXException {
+    void RIG002_should_apply_default_personal_data() throws ParserConfigurationException, IOException, SAXException {
         // required in DDM, validated by v2-schema
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
@@ -176,6 +176,24 @@ class RightsMetadataTest {
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getControlledSingleValueField("dansRights", "dansPersonalDataPresent", result))
             .isEqualTo("Unknown");
-        // TODO test yes/no when the profile builder pattern emerges for CITnnn-profile tests
+    }
+
+    @Test
+    void RIG002_should_map_personal_data() throws ParserConfigurationException, IOException, SAXException {
+        // required in DDM, validated by v2-schema
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <ddm:audience>D19200</ddm:audience>\n"
+            + "        <ddm:personalData present='Yes'></ddm:personalData>\n"
+            + "    </ddm:profile>\n"
+            + dcmi("")
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false, false);
+        assertThat(getControlledSingleValueField("dansRights", "dansPersonalDataPresent", result))
+            .isEqualTo("Yes");
+        // "No" is tested in the PersonalDataTest class
     }
 }
