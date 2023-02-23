@@ -71,6 +71,7 @@ class MappingTestHelper {
             + "        <dc:description xml:lang='la'>Lorem ipsum.</dc:description>\n"
             + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
             + "        <ddm:created>2012-12</ddm:created>\n"
+            + "        <ddm:available>2014-12</ddm:available>\n"
             + Arrays.stream(audience).map(s -> "<ddm:audience>"+s+"</ddm:audience>")
                 .collect(Collectors.joining("\n        ", "        ","\n"))
             + "        <ddm:accessRights xml:lang='en'>OPEN_ACCESS</ddm:accessRights>\n"
@@ -102,7 +103,7 @@ class MappingTestHelper {
             .get(block).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
             .map(t -> ((ControlledMultiValueField)t).getValue())
-            .findFirst().orElseThrow();
+            .findFirst().orElse(null);
     }
 
     static List<Map<String, SingleValueField>> getCompoundMultiValueField(String block, String fieldId, Dataset result) {
@@ -110,7 +111,7 @@ class MappingTestHelper {
             .get(block).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
             .map(t -> ((CompoundMultiValueField)t).getValue())
-            .findFirst().orElseThrow();
+            .findFirst().orElse(null);
     }
 
     static String getControlledSingleValueField(String block, String fieldId, Dataset result) {
@@ -118,7 +119,7 @@ class MappingTestHelper {
             .get(block).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
             .map(t -> ((ControlledSingleValueField)t).getValue())
-            .findFirst().orElseThrow();
+            .findFirst().orElse(null);
     }
 
 
@@ -127,7 +128,7 @@ class MappingTestHelper {
             .get(blockId).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
             .map(f -> (((PrimitiveMultiValueField)f).getValue()))
-            .findFirst().orElseThrow();
+            .findFirst().orElse(null);
     }
 
     static String getPrimitiveSingleValueField(String blockId, String fieldId, Dataset result) {
@@ -135,6 +136,6 @@ class MappingTestHelper {
             .get(blockId).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
             .map(f -> (((PrimitiveSingleValueField)f).getValue()))
-            .findFirst().orElseThrow();
+            .findFirst().orElse(null);
     }
 }

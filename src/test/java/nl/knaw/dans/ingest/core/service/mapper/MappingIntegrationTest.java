@@ -49,9 +49,7 @@ class MappingIntegrationTest {
         var result = mapDdmToDataset(doc, false, false);
         var field = getCompoundMultiValueField("citation", "contributor", result);
         var expected = "Author from description other";
-        assertThat(field)
-            .extracting(CONTRIBUTOR_NAME)
-            .extracting("value")
+        assertThat(field).extracting(CONTRIBUTOR_NAME).extracting("value")
             .containsOnly(expected);
         // not as description and author
         assertThat(toPrettyJsonString(result)).containsOnlyOnce(expected);
@@ -74,9 +72,7 @@ class MappingIntegrationTest {
         assertThat(str).containsOnlyOnce("technical description");
         assertThat(str).containsOnlyOnce("Lorem ipsum");
         var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
-        assertThat(field)
-            .extracting(DESCRIPTION_VALUE)
-            .extracting("value")
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
             .containsOnly("<p>plain description</p>", "<p>Lorem ipsum.</p>", "<p>technical description</p>", "<p>not known description type</p>");
     }
 
@@ -161,9 +157,7 @@ class MappingIntegrationTest {
         assertThat(str).containsOnlyOnce("<p>Some story</p>");
 
         var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
-        assertThat(field)
-            .extracting(DESCRIPTION_VALUE)
-            .extracting("value")
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
             .containsOnly("<p>Some story</p>", "<p>Lorem ipsum.</p>");
         assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("N/a");
     }
