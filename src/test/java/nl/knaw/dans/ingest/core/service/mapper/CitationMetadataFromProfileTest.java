@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CitationMetadataFromProfileTest {
 
-    private String ddmWithProfileContent(String content) {
+    private String ddmWithCustomProfileContent(String content) {
         return "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>\n"
             + "    <ddm:profile>\n"
             + "        <dc:title>Title of the dataset</dc:title>\n"
@@ -49,9 +49,9 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT005_should_map_dc_creators() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(ddmWithProfileContent(
-            "        <dc:creator>J. Bond</dc:creator>\n"
-                + "        <dc:creator>D. O'Seven</dc:creator>\n"));
+        var doc = readDocumentFromString(ddmWithCustomProfileContent(""
+            + "        <dc:creator>J. Bond</dc:creator>\n"
+            + "        <dc:creator>D. O'Seven</dc:creator>\n"));
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
@@ -61,13 +61,13 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT006_should_map_authors() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(ddmWithProfileContent(
-            "        <dcx-dai:creatorDetails>\n"
-                + "            <dcx-dai:author>\n"
-                + "                <dcx-dai:initials>I</dcx-dai:initials>\n"
-                + "                <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
-                + "            </dcx-dai:author>\n"
-                + "        </dcx-dai:creatorDetails>\n"));
+        var doc = readDocumentFromString(ddmWithCustomProfileContent(""
+            + "        <dcx-dai:creatorDetails>\n"
+            + "            <dcx-dai:author>\n"
+            + "                <dcx-dai:initials>I</dcx-dai:initials>\n"
+            + "                <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
+            + "            </dcx-dai:author>\n"
+            + "        </dcx-dai:creatorDetails>\n"));
         // TODO affiliation, ORCID, ISNI, DAI in AuthorTest
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
@@ -77,16 +77,16 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT007_should_map_organizations() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(ddmWithProfileContent(
-            "        <dcx-dai:creatorDetails>\n"
-                + "            <dcx-dai:author>\n"
-                + "                <dcx-dai:initials>I</dcx-dai:initials>\n"
-                + "                <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
-                + "                <dcx-dai:organization>\n"
-                + "                    <dcx-dai:name xml:lang='en'>Example Org</dcx-dai:name>\n"
-                + "                </dcx-dai:organization>\n"
-                + "            </dcx-dai:author>\n"
-                + "        </dcx-dai:creatorDetails>\n"));
+        var doc = readDocumentFromString(ddmWithCustomProfileContent(""
+            + "        <dcx-dai:creatorDetails>\n"
+            + "            <dcx-dai:author>\n"
+            + "                <dcx-dai:initials>I</dcx-dai:initials>\n"
+            + "                <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
+            + "                <dcx-dai:organization>\n"
+            + "                    <dcx-dai:name xml:lang='en'>Example Org</dcx-dai:name>\n"
+            + "                </dcx-dai:organization>\n"
+            + "            </dcx-dai:author>\n"
+            + "        </dcx-dai:creatorDetails>\n"));
         // TODO affiliation, ISNI, VIAF in AuthorTest
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
