@@ -16,10 +16,17 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import nl.knaw.dans.lib.dataverse.CompoundFieldBuilder;
-
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
+import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
 
+import java.util.List;
+import java.util.Map;
+
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_AFFILIATION;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_IDENTIFIER;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_IDENTIFIER_SCHEME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,11 +36,8 @@ class AuthorTest extends BaseTest {
     void toAuthorValueObject_should_map_creator() throws Exception {
 
         var doc = readDocumentFromString("<dc:creator xmlns:dc=\"http://purl.org/dc/elements/1.1/\">Author Name</dc:creator>");
-        var builder = new CompoundFieldBuilder("", true);
-        Author.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        assertThat(((CompoundMultiValueField)builder.build()).getValue())
-            .extracting(AUTHOR_NAME)
-            .extracting("value")
+        var value = mapToDV(doc);
+        assertThat(value).extracting(AUTHOR_NAME).extracting("value")
             .containsOnly("Author Name");
     }
 
@@ -51,15 +55,109 @@ class AuthorTest extends BaseTest {
                 + "        <dcx-dai:organization>\n"
                 + "            <dcx-dai:name xml:lang=\"en\">Example Org</dcx-dai:name>\n"
                 + "        </dcx-dai:organization>\n"
+                + "        <dcx-dai:ORCID>https://orcid.org/0000-0002-1825-0097</dcx-dai:ORCID>\n"
+                + "        <dcx-dai:ISNI>http://isni.org/isni/000000012281955X</dcx-dai:ISNI>\n"
+                + "        <dcx-dai:DAI>info:eu-repo/dai/nl/358163587</dcx-dai:DAI>\n"
                 + "    </dcx-dai:author>\n"
                 + "</dcx-dai:creatorDetails>");
 
-        var builder = new CompoundFieldBuilder("", true);
-        Author.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        assertThat(((CompoundMultiValueField)builder.build()).getValue())
-            .extracting(AUTHOR_NAME)
-            .extracting("value")
+        var value = mapToDV(doc);
+        assertThat(value).extracting(AUTHOR_NAME).extracting("value")
             .containsOnly("I D Lastname");
+        assertThat(value).extracting(AUTHOR_AFFILIATION).extracting("value")
+            .containsOnly("Example Org");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER_SCHEME).extracting("value")
+            .containsOnly("ORCID");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER).extracting("value")
+            .containsOnly("0000-0002-1825-0097");
+        assertThat(value.get(0)).hasSize(4);
+    }
+
+    @Test
+    void toAuthorValueObject_should_map_creatorDetails_for_organisation_node() throws Exception {
+
+        var doc = readDocumentFromString(
+            "<dcx-dai:creatorDetails\n"
+                + "    xmlns:dcx-dai=\"http://easy.dans.knaw.nl/schemas/dcx/dai/\">\n"
+                + "    <dcx-dai:organization>\n"
+                + "        <dcx-dai:organization>\n"
+                + "            <dcx-dai:name xml:lang=\"en\">Example Org</dcx-dai:name>\n"
+                + "        </dcx-dai:organization>\n"
+                + "        <dcx-dai:VIAF>viaf</dcx-dai:VIAF>\n"
+                + "        <dcx-dai:ISNI>http://isni.org/isni/000000012281955X</dcx-dai:ISNI>\n"
+                + "    </dcx-dai:organization>\n"
+                + "</dcx-dai:creatorDetails>");
+
+        var value = mapToDV(doc);
+        assertThat(value).extracting(AUTHOR_IDENTIFIER_SCHEME).extracting("value")
+            .containsOnly("ISNI");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER).extracting("value")
+            .containsOnly("000000012281955X");
+        assertThat(value.get(0)).hasSize(2);
+    }
+
+    @Test
+    void toAuthorValueObject_should_map_ISNI() throws Exception {
+
+        var doc = readDocumentFromString(
+            "<dcx-dai:creatorDetails\n"
+                + "    xmlns:dcx-dai=\"http://easy.dans.knaw.nl/schemas/dcx/dai/\">\n"
+                + "    <dcx-dai:author>\n"
+                + "        <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
+                + "        <dcx-dai:ISNI>http://isni.org/isni/000000012281955X</dcx-dai:ISNI>\n"
+                + "        <dcx-dai:DAI>info:eu-repo/dai/nl/358163587</dcx-dai:DAI>\n"
+                + "    </dcx-dai:author>\n"
+                + "</dcx-dai:creatorDetails>");
+
+        var value = mapToDV(doc);
+        assertThat(value).extracting(AUTHOR_NAME).extracting("value")
+            .containsOnly("Lastname");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER_SCHEME).extracting("value")
+            .containsOnly("ISNI");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER).extracting("value")
+            .containsOnly("000000012281955X");
+        assertThat(value.get(0)).hasSize(3);
+    }
+
+    @Test
+    void toAuthorValueObject_should_map_DAI() throws Exception {
+
+        var doc = readDocumentFromString(
+            "<dcx-dai:creatorDetails\n"
+                + "    xmlns:dcx-dai=\"http://easy.dans.knaw.nl/schemas/dcx/dai/\">\n"
+                + "    <dcx-dai:author>\n"
+                + "        <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
+                + "        <dcx-dai:DAI>info:eu-repo/dai/nl/358163587</dcx-dai:DAI>\n"
+                + "    </dcx-dai:author>\n"
+                + "</dcx-dai:creatorDetails>");
+
+        var value = mapToDV(doc);
+        assertThat(value).extracting(AUTHOR_NAME).extracting("value")
+            .containsOnly("Lastname");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER_SCHEME).extracting("value")
+            .containsOnly("DAI");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER).extracting("value")
+            .containsOnly("info:eu-repo/dai/nl/358163587");
+        assertThat(value.get(0)).hasSize(3);
+    }
+
+    @Test
+    void toAuthorValueObject_is_happy_without_name() throws Exception {
+
+        var doc = readDocumentFromString(
+            "<dcx-dai:creatorDetails\n"
+                + "    xmlns:dcx-dai=\"http://easy.dans.knaw.nl/schemas/dcx/dai/\">\n"
+                + "    <dcx-dai:author>\n"
+                + "        <dcx-dai:DAI>info:eu-repo/dai/nl/358163587</dcx-dai:DAI>\n"
+                + "    </dcx-dai:author>\n"
+                + "</dcx-dai:creatorDetails>");
+
+        var value = mapToDV(doc);
+        assertThat(value).extracting(AUTHOR_IDENTIFIER_SCHEME).extracting("value")
+            .containsOnly("DAI");
+        assertThat(value).extracting(AUTHOR_IDENTIFIER).extracting("value")
+            .containsOnly("info:eu-repo/dai/nl/358163587");
+        assertThat(value.get(0)).hasSize(2);
     }
 
     @Test
@@ -74,12 +172,16 @@ class AuthorTest extends BaseTest {
                 + "    </dcx-dai:organization>\n"
                 + "</dcx-dai:creatorDetails>");
 
+        var value = mapToDV(doc);
+        assertThat(value).extracting(AUTHOR_NAME).extracting("value")
+            .containsOnly("Anti-Vampire League");
+        assertThat(value.get(0)).hasSize(1); // no other subfields like affiliation nor role
+    }
+
+    private List<Map<String, SingleValueField>> mapToDV(Document doc) {
         var builder = new CompoundFieldBuilder("", true);
         Author.toAuthorValueObject.build(builder, doc.getDocumentElement());
-        assertThat(((CompoundMultiValueField)builder.build()).getValue())
-            .extracting(AUTHOR_NAME)
-            .extracting("value")
-            .containsOnly("Anti-Vampire League");
+        return ((CompoundMultiValueField) builder.build()).getValue();
     }
 
 }
