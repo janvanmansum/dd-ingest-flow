@@ -162,10 +162,10 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addKeywords(getSubjects(ddm).filter(Subject::hasNoCvAttributes), Subject.toKeywordValue); // CIT014
             citationFields.addKeywords(getDdmSubjects(ddm).filter(Subject::isPanTerm), Subject.toPanKeywordValue); // CIT015
             citationFields.addKeywords(getDdmSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue); // CIT015
-            citationFields.addKeywords(getLanguages(ddm).filter(Language::isNotIsoLanguage), Language.toKeywordValue); // CIT016
+            citationFields.addKeywords(getLanguages(ddm), Language.toKeywordValue); // CIT016
             citationFields.addPublications(getIdentifiers(ddm).filter(Identifier::isRelatedPublication), Identifier.toRelatedPublicationValue); // CIT017
             citationFields.addNotesText(getProvenance(ddm)); // CIT017A
-            citationFields.addLanguages(getLanguages(ddm), node -> Language.toCitationBlockLanguage(node, iso1ToDataverseLanguage, iso2ToDataverseLanguage)); // CIT018
+            citationFields.addLanguages(getDdmLanguages(ddm), node -> Language.toCitationBlockLanguage(node, iso1ToDataverseLanguage, iso2ToDataverseLanguage)); // CIT018
             citationFields.addProductionDate(getCreated(ddm).map(Base::toYearMonthDayFormat)); // CIT019
             citationFields.addContributors(getContributorDetails(ddm).filter(Contributor::isValidContributor), Contributor.toContributorValueObject); // CIT020, CIT021
             citationFields.addContributors(getDcmiDdmDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Contributor.toContributorValueObject); // TODO: REMOVE AFTER MIGRATION
@@ -337,6 +337,10 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getLanguages(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:language");
+    }
+
+    Stream<Node> getDdmLanguages(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:language");
     }
 
@@ -440,7 +444,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<String> getDataSources(Document ddm) {
-        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dc:source");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dc:source","/ddm:DDM/ddm:dcmiMetadata/dcterms:source");
     }
 
     Stream<String> getRightsHolders(Document ddm) {
