@@ -49,7 +49,7 @@ class MappingIntegrationTest {
         return new XmlReaderImpl().readXmlString(xml);
     }
 
-    private Dataset mapDdmToDataset(Document ddm, boolean hasRestrictedOrNoneFiles) {
+    private Dataset mapDdmToDataset(Document ddm, boolean filesThatAreAccessibleToNonePresentInDeposit, boolean filesThatAreRestrictedRequestPresentInDeposit) {
         final Set<String> activeMetadataBlocks = Set.of("citation", "dansRights", "dansRelationalMetadata", "dansArchaeologyMetadata", "dansTemporalSpatial", "dansDataVaultMetadata");
         final VaultMetadata vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "otherIdVersion", "swordToken");
         final Map<String, String> iso1ToDataverseLanguage = new HashMap<>();
@@ -61,7 +61,7 @@ class MappingIntegrationTest {
         iso2ToDataverseLanguage.put("ger", "German");
         return new DepositToDvDatasetMetadataMapper(
             true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, List.of("Netherlands", "United Kingdom", "Belgium", "Germany")
-        ).toDataverseDataset(ddm, null, null, null, vaultMetadata, hasRestrictedOrNoneFiles);
+        ).toDataverseDataset(ddm, null, null, null, vaultMetadata, filesThatAreAccessibleToNonePresentInDeposit, filesThatAreRestrictedRequestPresentInDeposit);
     }
 
     private String toPrettyJsonString(Dataset result) throws JsonProcessingException {
@@ -112,7 +112,7 @@ class MappingIntegrationTest {
             + "    </ddm:dcmiMetadata>\n"
             + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc, false);
+        var result = mapDdmToDataset(doc, false, false);
         var field = (CompoundMultiValueField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals("contributor")).findFirst().orElseThrow();
@@ -138,7 +138,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc, false);
+        var result = mapDdmToDataset(doc, false, false);
         var str = toPrettyJsonString(result);
         assertThat(str).containsOnlyOnce("not known description type");
         assertThat(str).containsOnlyOnce("technical description");
@@ -163,7 +163,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc, false);
+        var result = mapDdmToDataset(doc, false, false);
 
         // TODO improve assertions after DD-1237 (note that the single compound field is an anonymous class)
         //  {"typeClass" : "compound", "typeName" : "series", "multiple" : false, "value" :
@@ -189,7 +189,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc, false);
+        var result = mapDdmToDataset(doc, false, false);
         var str = toPrettyJsonString(result);
 
         assertThat(str).containsOnlyOnce("copied xml to csv");
@@ -209,7 +209,7 @@ class MappingIntegrationTest {
             + minimalDCMI
             + "</ddm:DDM>");
 
-        var result = mapDdmToDataset(doc, false);
+        var result = mapDdmToDataset(doc, false, false);
         assertThat(getCitationSubject(result)).isEqualTo(List.of("Astronomy and Astrophysics","Law", "Mathematical Sciences"));
     }
 
@@ -221,7 +221,7 @@ class MappingIntegrationTest {
             + minimalDCMI
             + "</ddm:DDM>");
 
-        var result = mapDdmToDataset(doc, false);
+        var result = mapDdmToDataset(doc, false, false);
         assertThat(getCitationSubject(result)).isEqualTo(List.of("Other"));
     }
 
@@ -244,7 +244,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc, false);
+        var result = mapDdmToDataset(doc, false, false);
         var str = toPrettyJsonString(result);
 
         assertThat(str).containsOnlyOnce("<p>Some story</p>");
@@ -270,7 +270,7 @@ class MappingIntegrationTest {
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
-        var result = mapDdmToDataset(doc, true);
+        var result = mapDdmToDataset(doc, true, true);
         assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("Some story");
     }
 }

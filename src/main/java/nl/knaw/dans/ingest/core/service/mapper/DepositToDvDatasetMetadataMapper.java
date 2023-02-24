@@ -112,16 +112,17 @@ public class DepositToDvDatasetMetadataMapper {
         @Nullable String dateOfDeposit,
         @Nullable AuthenticatedUser contactData,
         @Nullable VaultMetadata vaultMetadata,
-        boolean filesThatAreAccessibleToNonePresentInDeposit) throws MissingRequiredFieldException {
+        boolean filesThatAreAccessibleToNonePresentInDeposit,
+        boolean filesThatAreRestrictedRequestPresentInDeposit) throws MissingRequiredFieldException {
         var termsOfAccess = "N/a";
 
         if (activeMetadataBlocks.contains("citation")) {
             checkRequiredField(TITLE, getTitles(ddm));
             checkRequiredField(SUBJECT, getAudiences(ddm));
 
-            var alternativeTitles = getAlternativeTitles(ddm).collect(Collectors.toList());
+            var otherTitlesAndAlternativeTitles = getOtherTitles(ddm).collect(Collectors.toList());
             citationFields.addTitle(getTitles(ddm)); // CIT001
-            citationFields.addAlternativeTitle(alternativeTitles.stream().map(Node::getTextContent)); // CIT002
+            citationFields.addAlternativeTitle(otherTitlesAndAlternativeTitles.stream().map(Node::getTextContent)); // CIT002
 
             if (vaultMetadata != null) {
                 citationFields.addOtherIdsStrings(Stream.ofNullable(vaultMetadata.getOtherId()) // CIT002A
@@ -136,18 +137,21 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDescription(getProfileDescriptions(ddm), Description.toDescription); // CIT009
 
             // CIT010
-            if (alternativeTitles.size() > 1) {
-                citationFields.addDescription(alternativeTitles.stream().skip(1), Description.toDescription);
+            if (otherTitlesAndAlternativeTitles.size() > 1) { // First element is put in alternativeTitle field. See CIT002
+                citationFields.addDescription(otherTitlesAndAlternativeTitles.stream().skip(1), Description.toDescription);
             }
 
             citationFields.addDescription(getOtherDescriptions(ddm).filter(Description::isNotBlank), Description.toPrefixedDescription); // CIT011
             citationFields.addDescription(getDcmiDctermsDescriptions(ddm), Description.toDescription); // CIT012
             citationFields.addDescription(getDcmiDdmDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription); // CIT012
 
-
             if (filesThatAreAccessibleToNonePresentInDeposit) {
-                // TRM004, TRM005
+                // TRM005
                 termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse(termsOfAccess);
+            }
+            else if (filesThatAreRestrictedRequestPresentInDeposit) {
+                // TRM006
+                termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse("");
             }
             else {
                 // CIT012A
@@ -227,20 +231,14 @@ public class DepositToDvDatasetMetadataMapper {
             dataVaultFieldBuilder.addSwordToken(vaultMetadata.getSwordToken());
 
         }
-
-        return assembleDataverseDataset(termsOfAccess, !filesThatAreAccessibleToNonePresentInDeposit);
+//        var accessCategory = getDdmAccessRights(ddm).collect(Collectors.toList());
+//        // TRM003, TRM004
+//        var enableFileAccessRequest = !filesThatAreAccessibleToNonePresentInDeposit && !"NONE".equals(accessCategory.get(0).getTextContent());
+        return assembleDataverseDataset(termsOfAccess);
     }
 
     private Stream<Node> getPersonalData(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:personalData");
-    }
-
-    private Stream<Node> getPersonalDataPresent(Document agreements) {
-        if (agreements == null) {
-            return Stream.empty();
-        }
-
-        return XPathEvaluator.nodes(agreements, "//agreements:personalDataStatement");
     }
 
     void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder) {
@@ -271,7 +269,7 @@ public class DepositToDvDatasetMetadataMapper {
         fields.put(title, block);
     }
 
-    Dataset assembleDataverseDataset(String termsOfAccess, boolean enableFileAccessRequest) {
+    Dataset assembleDataverseDataset(String termsOfAccess) {
         var fields = new HashMap<String, MetadataBlock>();
 
         processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields);
@@ -283,7 +281,6 @@ public class DepositToDvDatasetMetadataMapper {
 
         var version = new DatasetVersion();
         version.setTermsOfAccess(termsOfAccess);
-        version.setFileAccessRequest(enableFileAccessRequest);
         version.setMetadataBlocks(fields);
         version.setFiles(new ArrayList<>());
 
@@ -400,7 +397,7 @@ public class DepositToDvDatasetMetadataMapper {
         return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:profile/dc:title");
     }
 
-    Stream<Node> getAlternativeTitles(Document ddm) {
+    Stream<Node> getOtherTitles(Document ddm) {
         return XPathEvaluator.nodes(ddm,
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:title", "/ddm:DDM/ddm:dcmiMetadata/dcterms:alternative");
     }
@@ -419,6 +416,10 @@ public class DepositToDvDatasetMetadataMapper {
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:issued",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:valid",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage");
+    }
+
+    Stream<Node> getDdmAccessRights(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:accessRights");
     }
 
     Stream<Node> getDctAccessRights(Document ddm) {
