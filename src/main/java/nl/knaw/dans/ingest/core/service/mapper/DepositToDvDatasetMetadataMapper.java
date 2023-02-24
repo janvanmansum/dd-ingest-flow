@@ -160,8 +160,8 @@ public class DepositToDvDatasetMetadataMapper {
 
             citationFields.addSubject(getAudiences(ddm), Audience::toCitationBlockSubject);  // CIT013
             citationFields.addKeywords(getSubjects(ddm).filter(Subject::hasNoCvAttributes), Subject.toKeywordValue); // CIT014
-            citationFields.addKeywords(getSubjects(ddm).filter(Subject::isPanTerm), Subject.toPanKeywordValue); // CIT015
-            citationFields.addKeywords(getSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue); // CIT015
+            citationFields.addKeywords(getDdmSubjects(ddm).filter(Subject::isPanTerm), Subject.toPanKeywordValue); // CIT015
+            citationFields.addKeywords(getDdmSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue); // CIT015
             citationFields.addKeywords(getLanguages(ddm).filter(Language::isNotIsoLanguage), Language.toKeywordValue); // CIT016
             citationFields.addPublications(getIdentifiers(ddm).filter(Identifier::isRelatedPublication), Identifier.toRelatedPublicationValue); // CIT017
             citationFields.addNotesText(getProvenance(ddm)); // CIT017A
@@ -206,9 +206,9 @@ public class DepositToDvDatasetMetadataMapper {
             archaeologyFields.addRapportType(getReportNumbers(ddm).filter(AbrReportType::isAbrReportType).map(AbrReportType::toAbrRapportType)); // AR003
             archaeologyFields.addRapportNummer(getReportNumbers(ddm).map(Base::asText)); // AR004
             archaeologyFields.addVerwervingswijze(getAcquisitionMethods(ddm).map(AbrAcquisitionMethod::toVerwervingswijze)); // AR005
-            archaeologyFields.addComplex(getSubjects(ddm).filter(SubjectAbr::isAbrComplex).map(SubjectAbr::toAbrComplex)); // AR006
-            archaeologyFields.addArtifact(getSubjects(ddm).filter(SubjectAbr::isOldAbr).map(SubjectAbr::fromAbrOldToAbrArtifact)); // TODO: REMOVE AFTER MIGRATION
-            archaeologyFields.addArtifact(getSubjects(ddm).filter(SubjectAbr::isAbrArtifact).map(SubjectAbr::toAbrArtifact)); // AR007
+            archaeologyFields.addComplex(getDdmSubjects(ddm).filter(SubjectAbr::isAbrComplex).map(SubjectAbr::toAbrComplex)); // AR006
+            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isOldAbr).map(SubjectAbr::fromAbrOldToAbrArtifact)); // TODO: REMOVE AFTER MIGRATION
+            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isAbrArtifact).map(SubjectAbr::toAbrArtifact)); // AR007
             archaeologyFields.addPeriod(getSubjects(ddm).filter(TemporalAbr::isAbrPeriod).map(TemporalAbr::toAbrPeriod)); // TODO: FIX: USE ddm:temporal AR008
         }
 
@@ -231,9 +231,6 @@ public class DepositToDvDatasetMetadataMapper {
             dataVaultFieldBuilder.addSwordToken(vaultMetadata.getSwordToken());
 
         }
-//        var accessCategory = getDdmAccessRights(ddm).collect(Collectors.toList());
-//        // TRM003, TRM004
-//        var enableFileAccessRequest = !filesThatAreAccessibleToNonePresentInDeposit && !"NONE".equals(accessCategory.get(0).getTextContent());
         return assembleDataverseDataset(termsOfAccess);
     }
 
@@ -333,6 +330,10 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getSubjects(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:subject");
+    }
+
+    Stream<Node> getDdmSubjects(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:subject");
     }
 
     Stream<Node> getLanguages(Document ddm) {
