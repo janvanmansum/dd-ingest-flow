@@ -445,7 +445,7 @@ public class DepositToDvDatasetMetadataMapper {
     void checkForAnyRightsHolder(Document ddm) {
         if (XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata//dcx-dai:role")
             .filter(s -> s.contains("RightsHolder")).findFirst().isEmpty()
-        ) { // parsing the other way around might be more efficient
+        ) { // parsing the other way around might be more efficient, but this way we can reuse
             checkRequiredField(RIGHTS_HOLDER, getRightsHolders(ddm));
         }
     }

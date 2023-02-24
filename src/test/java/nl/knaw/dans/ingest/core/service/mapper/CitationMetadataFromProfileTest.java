@@ -13,6 +13,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPT
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmProfileWithAudiences;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmWithCustomProfileContent;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveSingleValueField;
@@ -23,24 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CitationMetadataFromProfileTest {
 
-    private String ddmWithCustomProfileContent(String content) {
-        return "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>\n"
-            + "    <ddm:profile>\n"
-            + "        <dc:title>Title of the dataset</dc:title>\n"
-            + "        <ddm:audience>D19200</ddm:audience>\n"
-            + content
-            + "    </ddm:profile>\n"
-            + dcmi("")
-            + "</ddm:DDM>\n";
-    }
-
     @Test
     void CIT001_should_map_title() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + dcmi("")
-                + "</ddm:DDM>\n");
+        var doc = ddmWithCustomProfileContent("");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getPrimitiveSingleValueField("citation", "title", result))
@@ -49,9 +35,9 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT005_should_map_dc_creators() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(ddmWithCustomProfileContent(""
-            + "        <dc:creator>J. Bond</dc:creator>\n"
-            + "        <dc:creator>D. O'Seven</dc:creator>\n"));
+        var doc = ddmWithCustomProfileContent(""
+            + "<dc:creator>J. Bond</dc:creator>\n"
+            + "<dc:creator>D. O'Seven</dc:creator>\n");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
@@ -61,13 +47,13 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT006_should_map_authors() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(ddmWithCustomProfileContent(""
-            + "        <dcx-dai:creatorDetails>\n"
-            + "            <dcx-dai:author>\n"
-            + "                <dcx-dai:initials>I</dcx-dai:initials>\n"
-            + "                <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
-            + "            </dcx-dai:author>\n"
-            + "        </dcx-dai:creatorDetails>\n"));
+        var doc = ddmWithCustomProfileContent(""
+            + "<dcx-dai:creatorDetails>\n"
+            + "    <dcx-dai:author>\n"
+            + "        <dcx-dai:initials>I</dcx-dai:initials>\n"
+            + "        <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
+            + "    </dcx-dai:author>\n"
+            + "</dcx-dai:creatorDetails>\n");
         // TODO affiliation, ORCID, ISNI, DAI in AuthorTest
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
@@ -77,16 +63,16 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT007_should_map_organizations() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(ddmWithCustomProfileContent(""
-            + "        <dcx-dai:creatorDetails>\n"
-            + "            <dcx-dai:author>\n"
-            + "                <dcx-dai:initials>I</dcx-dai:initials>\n"
-            + "                <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
-            + "                <dcx-dai:organization>\n"
-            + "                    <dcx-dai:name xml:lang='en'>Example Org</dcx-dai:name>\n"
-            + "                </dcx-dai:organization>\n"
-            + "            </dcx-dai:author>\n"
-            + "        </dcx-dai:creatorDetails>\n"));
+        var doc = ddmWithCustomProfileContent(""
+            + "<dcx-dai:creatorDetails>\n"
+            + "    <dcx-dai:author>\n"
+            + "        <dcx-dai:initials>I</dcx-dai:initials>\n"
+            + "        <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
+            + "        <dcx-dai:organization>\n"
+            + "            <dcx-dai:name xml:lang='en'>Example Org</dcx-dai:name>\n"
+            + "        </dcx-dai:organization>\n"
+            + "    </dcx-dai:author>\n"
+            + "</dcx-dai:creatorDetails>\n");
         // TODO affiliation, ISNI, VIAF in AuthorTest
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
@@ -96,17 +82,16 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT009_should_map_description() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + dcmi("")
-                + "</ddm:DDM>\n");
+        var doc = ddmWithCustomProfileContent(""
+            + "<dc:description xml:lang='nl'>Lorem ipsum.</dc:description>\n"
+            + "<dc:description xml:lang='dut'>dolor</dc:description>\n"
+            + "<dc:description xml:lang='de'>sit amet</dc:description>\n"
+        );
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", DESCRIPTION, result))
             .extracting(DESCRIPTION_VALUE).extracting("value")
-            .isEqualTo(List.of("<p>Lorem ipsum.</p>"));
-        // TODO multiple descriptions
+            .isEqualTo(List.of("<p>Lorem ipsum.</p>", "<p>dolor</p>", "<p>sit amet</p>"));
     }
 
     @Test
@@ -124,11 +109,7 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT019_should_map_creation_date() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D19200")
-                + dcmi("")
-                + "</ddm:DDM>\n");
+        var doc = ddmWithCustomProfileContent("<ddm:created>2012-12</ddm:created>");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getPrimitiveSingleValueField("citation", "productionDate", result))
@@ -137,11 +118,7 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT025_map_date_available() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D19200")
-                + dcmi("")
-                + "</ddm:DDM>\n");
+        var doc = ddmWithCustomProfileContent("<ddm:available>2014-12</ddm:available>");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getPrimitiveSingleValueField("citation", "distributionDate", result))

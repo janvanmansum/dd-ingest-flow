@@ -64,6 +64,18 @@ class MappingTestHelper {
         + "         xmlns:dc='http://purl.org/dc/elements/1.1/'\n"
         + "         xmlns:dct='http://purl.org/dc/terms/'\n";
 
+    static Document ddmWithCustomProfileContent(String content) throws ParserConfigurationException, IOException, SAXException {
+        return readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <ddm:audience>D19200</ddm:audience>\n"
+            + content
+            + "    </ddm:profile>\n"
+            + "    <ddm:dcmiMetadata><dct:rightsHolder>A. Mandatory</dct:rightsHolder></ddm:dcmiMetadata>\n"
+            + "</ddm:DDM>\n");
+    }
+
     static String ddmProfileWithAudiences(String... audience) {
         return ""
             + "    <ddm:profile>\n"
