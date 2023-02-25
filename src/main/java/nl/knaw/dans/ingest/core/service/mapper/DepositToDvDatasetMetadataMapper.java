@@ -215,7 +215,7 @@ public class DepositToDvDatasetMetadataMapper {
         if (activeMetadataBlocks.contains("dansTemporalSpatial")) {
             temporalSpatialFields.addTemporalCoverage(getDctermsTemporal(ddm).map(TemporalAbr::asText)); // TS001
             temporalSpatialFields.addSpatialPoint(getDcxGmlSpatial(ddm)
-                .filter(node -> SpatialPoint.hasChildNode(node, "/Point")), SpatialPoint.toEasyTsmSpatialPointValueObject); // TS002, TS003
+                .filter(node -> SpatialPoint.hasChildNode(node, "gml:Point/gml:pos")), SpatialPoint.toEasyTsmSpatialPointValueObject); // TS002, TS003
             temporalSpatialFields.addSpatialBox(getBoundedBy(ddm), SpatialBox.toEasyTsmSpatialBoxValueObject); // TS004, TS005
             temporalSpatialFields.addSpatialCoverageControlled(getSpatial(ddm)
                 .map(node -> SpatialCoverage.toControlledSpatialValue(node, spatialCoverageCountryTerms))); // TS006
@@ -325,11 +325,11 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getDcxGmlSpatial(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/gml:spatial");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcx-gml:spatial");
     }
 
     Stream<Node> getBoundedBy(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/gml:spatial//gml:boundedBy");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcx-gml:spatial//gml:boundedBy");
     }
 
     Stream<Node> getSubjects(Document ddm) {
