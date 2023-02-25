@@ -209,7 +209,7 @@ public class DepositToDvDatasetMetadataMapper {
             archaeologyFields.addComplex(getDdmSubjects(ddm).filter(SubjectAbr::isAbrComplex).map(SubjectAbr::toAbrComplex)); // AR006
             archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isOldAbr).map(SubjectAbr::fromAbrOldToAbrArtifact)); // TODO: REMOVE AFTER MIGRATION
             archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isAbrArtifact).map(SubjectAbr::toAbrArtifact)); // AR007
-            archaeologyFields.addPeriod(getSubjects(ddm).filter(TemporalAbr::isAbrPeriod).map(TemporalAbr::toAbrPeriod)); // TODO: FIX: USE ddm:temporal AR008
+            archaeologyFields.addPeriod(getDdmTemporal(ddm).filter(TemporalAbr::isAbrPeriod).map(TemporalAbr::toAbrPeriod));
         }
 
         if (activeMetadataBlocks.contains("dansTemporalSpatial")) {
@@ -314,6 +314,10 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getDctermsTemporal(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:temporal");
+    }
+
+    Stream<Node> getDdmTemporal(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:temporal");
     }
 
     Stream<Node> getSpatial(Document ddm) {
