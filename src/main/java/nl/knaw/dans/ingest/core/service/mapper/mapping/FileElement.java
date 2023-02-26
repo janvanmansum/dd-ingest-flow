@@ -193,7 +193,7 @@ public class FileElement extends Base {
         var filePathToSha1 = ManifestHelper.getFilePathToSha1(deposit.getBag());
         var result = new HashMap<Path, FileInfo>();
 
-        XPathEvaluator.nodes(deposit.getFilesXml(), "//files:file").forEach(node -> {
+        XPathEvaluator.nodes(deposit.getFilesXml(), "/files:files/files:file").forEach(node -> {
             var path = getAttribute(node, "filepath")
                 .map(Node::getTextContent)
                 .map(Path::of)
