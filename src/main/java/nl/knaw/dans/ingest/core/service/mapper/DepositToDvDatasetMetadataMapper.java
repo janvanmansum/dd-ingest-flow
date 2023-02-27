@@ -160,12 +160,12 @@ public class DepositToDvDatasetMetadataMapper {
 
             citationFields.addSubject(getAudiences(ddm), Audience::toCitationBlockSubject);  // CIT013
             citationFields.addKeywords(getSubjects(ddm).filter(Subject::hasNoCvAttributes), Subject.toKeywordValue); // CIT014
-            citationFields.addKeywords(getSubjects(ddm).filter(Subject::isPanTerm), Subject.toPanKeywordValue); // CIT015
-            citationFields.addKeywords(getSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue); // CIT015
-            citationFields.addKeywords(getLanguages(ddm).filter(Language::isNotIsoLanguage), Language.toKeywordValue); // CIT016
+            citationFields.addKeywords(getDdmSubjects(ddm).filter(Subject::isPanTerm), Subject.toPanKeywordValue); // CIT015
+            citationFields.addKeywords(getDdmSubjects(ddm).filter(Subject::isAatTerm), Subject.toAatKeywordValue); // CIT015
+            citationFields.addKeywords(getLanguages(ddm), Language.toKeywordValue); // CIT016
             citationFields.addPublications(getIdentifiers(ddm).filter(Identifier::isRelatedPublication), Identifier.toRelatedPublicationValue); // CIT017
             citationFields.addNotesText(getProvenance(ddm)); // CIT017A
-            citationFields.addLanguages(getLanguages(ddm), node -> Language.toCitationBlockLanguage(node, iso1ToDataverseLanguage, iso2ToDataverseLanguage)); // CIT018
+            citationFields.addLanguages(getDdmLanguages(ddm), node -> Language.toCitationBlockLanguage(node, iso1ToDataverseLanguage, iso2ToDataverseLanguage)); // CIT018
             citationFields.addProductionDate(getCreated(ddm).map(Base::toYearMonthDayFormat)); // CIT019
             citationFields.addContributors(getContributorDetails(ddm).filter(Contributor::isValidContributor), Contributor.toContributorValueObject); // CIT020, CIT021
             citationFields.addContributors(getDcmiDdmDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Contributor.toContributorValueObject); // TODO: REMOVE AFTER MIGRATION
@@ -206,16 +206,16 @@ public class DepositToDvDatasetMetadataMapper {
             archaeologyFields.addRapportType(getReportNumbers(ddm).filter(AbrReportType::isAbrReportType).map(AbrReportType::toAbrRapportType)); // AR003
             archaeologyFields.addRapportNummer(getReportNumbers(ddm).map(Base::asText)); // AR004
             archaeologyFields.addVerwervingswijze(getAcquisitionMethods(ddm).map(AbrAcquisitionMethod::toVerwervingswijze)); // AR005
-            archaeologyFields.addComplex(getSubjects(ddm).filter(SubjectAbr::isAbrComplex).map(SubjectAbr::toAbrComplex)); // AR006
-            archaeologyFields.addArtifact(getSubjects(ddm).filter(SubjectAbr::isOldAbr).map(SubjectAbr::fromAbrOldToAbrArtifact)); // TODO: REMOVE AFTER MIGRATION
-            archaeologyFields.addArtifact(getSubjects(ddm).filter(SubjectAbr::isAbrArtifact).map(SubjectAbr::toAbrArtifact)); // AR007
-            archaeologyFields.addPeriod(getSubjects(ddm).filter(TemporalAbr::isAbrPeriod).map(TemporalAbr::toAbrPeriod)); // TODO: FIX: USE ddm:temporal AR008
+            archaeologyFields.addComplex(getDdmSubjects(ddm).filter(SubjectAbr::isAbrComplex).map(SubjectAbr::toAbrComplex)); // AR006
+            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isOldAbr).map(SubjectAbr::fromAbrOldToAbrArtifact)); // TODO: REMOVE AFTER MIGRATION
+            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isAbrArtifact).map(SubjectAbr::toAbrArtifact)); // AR007
+            archaeologyFields.addPeriod(getDdmTemporal(ddm).filter(TemporalAbr::isAbrPeriod).map(TemporalAbr::toAbrPeriod));
         }
 
         if (activeMetadataBlocks.contains("dansTemporalSpatial")) {
             temporalSpatialFields.addTemporalCoverage(getDctermsTemporal(ddm).map(TemporalAbr::asText)); // TS001
             temporalSpatialFields.addSpatialPoint(getDcxGmlSpatial(ddm)
-                .filter(node -> SpatialPoint.hasChildNode(node, "/Point")), SpatialPoint.toEasyTsmSpatialPointValueObject); // TS002, TS003
+                .filter(node -> SpatialPoint.hasChildNode(node, "gml:Point/gml:pos")), SpatialPoint.toEasyTsmSpatialPointValueObject); // TS002, TS003
             temporalSpatialFields.addSpatialBox(getBoundedBy(ddm), SpatialBox.toEasyTsmSpatialBoxValueObject); // TS004, TS005
             temporalSpatialFields.addSpatialCoverageControlled(getSpatial(ddm)
                 .map(node -> SpatialCoverage.toControlledSpatialValue(node, spatialCoverageCountryTerms))); // TS006
@@ -231,9 +231,6 @@ public class DepositToDvDatasetMetadataMapper {
             dataVaultFieldBuilder.addSwordToken(vaultMetadata.getSwordToken());
 
         }
-//        var accessCategory = getDdmAccessRights(ddm).collect(Collectors.toList());
-//        // TRM003, TRM004
-//        var enableFileAccessRequest = !filesThatAreAccessibleToNonePresentInDeposit && !"NONE".equals(accessCategory.get(0).getTextContent());
         return assembleDataverseDataset(termsOfAccess);
     }
 
@@ -319,23 +316,35 @@ public class DepositToDvDatasetMetadataMapper {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:temporal");
     }
 
+    Stream<Node> getDdmTemporal(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:temporal");
+    }
+
     Stream<Node> getSpatial(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:spatial");
     }
 
     Stream<Node> getDcxGmlSpatial(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/gml:spatial");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcx-gml:spatial");
     }
 
     Stream<Node> getBoundedBy(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/gml:spatial//gml:boundedBy");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcx-gml:spatial//gml:boundedBy");
     }
 
     Stream<Node> getSubjects(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:subject");
     }
 
+    Stream<Node> getDdmSubjects(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:subject");
+    }
+
     Stream<Node> getLanguages(Document ddm) {
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:language");
+    }
+
+    Stream<Node> getDdmLanguages(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/ddm:language");
     }
 
@@ -439,7 +448,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<String> getDataSources(Document ddm) {
-        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dc:source");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:dcmiMetadata/dc:source","/ddm:DDM/ddm:dcmiMetadata/dcterms:source");
     }
 
     Stream<String> getRightsHolders(Document ddm) {
