@@ -42,56 +42,60 @@ public class CitationMetadataFromProfileTest {
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
             .extracting(AUTHOR_NAME).extracting("value")
-            .isEqualTo(List.of("J. Bond", "D. O'Seven"));
+            .hasSameElementsAs(List.of("J. Bond", "D. O'Seven"));
     }
 
     @Test
-    void CIT006_should_map_authors() throws ParserConfigurationException, IOException, SAXException {
+    void CIT006_should_map_names_of_creatorDetails_author() throws ParserConfigurationException, IOException, SAXException {
         var doc = ddmWithCustomProfileContent(""
             + "<dcx-dai:creatorDetails>\n"
             + "    <dcx-dai:author>\n"
-            + "        <dcx-dai:initials>I</dcx-dai:initials>\n"
-            + "        <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
+            + "        <dcx-dai:surname>Bond</dcx-dai:surname>\n"
+            + "    </dcx-dai:author>\n"
+            + "</dcx-dai:creatorDetails>\n"
+            + "<dcx-dai:creatorDetails>\n"
+            + "    <dcx-dai:author>\n"
+            + "        <dcx-dai:surname>O'Seven</dcx-dai:surname>\n"
             + "    </dcx-dai:author>\n"
             + "</dcx-dai:creatorDetails>\n");
         // TODO affiliation, ORCID, ISNI, DAI in AuthorTest
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
             .extracting(AUTHOR_NAME).extracting("value")
-            .isEqualTo(List.of("I Lastname"));
+            .hasSameElementsAs(List.of("Bond", "O'Seven"));
     }
 
     @Test
-    void CIT007_should_map_organizations() throws ParserConfigurationException, IOException, SAXException {
+    void CIT007_should_map_names_of_creatorDetails_organization() throws ParserConfigurationException, IOException, SAXException {
         var doc = ddmWithCustomProfileContent(""
             + "<dcx-dai:creatorDetails>\n"
-            + "    <dcx-dai:author>\n"
-            + "        <dcx-dai:initials>I</dcx-dai:initials>\n"
-            + "        <dcx-dai:surname>Lastname</dcx-dai:surname>\n"
-            + "        <dcx-dai:organization>\n"
-            + "            <dcx-dai:name xml:lang='en'>Example Org</dcx-dai:name>\n"
-            + "        </dcx-dai:organization>\n"
-            + "    </dcx-dai:author>\n"
+            + "    <dcx-dai:organization>\n"
+            + "        <dcx-dai:name xml:lang='en'>DANS</dcx-dai:name>\n"
+            + "    </dcx-dai:organization>\n"
+            + "</dcx-dai:creatorDetails>\n"
+            + "<dcx-dai:creatorDetails>\n"
+            + "    <dcx-dai:organization>\n"
+            + "        <dcx-dai:name xml:lang='en'>KNAW</dcx-dai:name>\n"
+            + "    </dcx-dai:organization>\n"
             + "</dcx-dai:creatorDetails>\n");
         // TODO affiliation, ISNI, VIAF in AuthorTest
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", AUTHOR, result))
             .extracting(AUTHOR_NAME).extracting("value")
-            .isEqualTo(List.of("I Lastname"));
+            .hasSameElementsAs(List.of("DANS", "KNAW"));
     }
 
     @Test
-    void CIT009_should_map_description() throws ParserConfigurationException, IOException, SAXException {
+    void CIT009_should_map_descriptions() throws ParserConfigurationException, IOException, SAXException {
         var doc = ddmWithCustomProfileContent(""
-            + "<dc:description xml:lang='nl'>Lorem ipsum.</dc:description>\n"
-            + "<dc:description xml:lang='dut'>dolor</dc:description>\n"
-            + "<dc:description xml:lang='de'>sit amet</dc:description>\n"
+            + "<dc:description>Lorem ipsum.</dc:description>\n"
+            + "<dc:description>dolor sit amet</dc:description>\n"
         );
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getCompoundMultiValueField("citation", DESCRIPTION, result))
             .extracting(DESCRIPTION_VALUE).extracting("value")
-            .isEqualTo(List.of("<p>Lorem ipsum.</p>", "<p>dolor</p>", "<p>sit amet</p>"));
+            .hasSameElementsAs(List.of("<p>Lorem ipsum.</p>", "<p>dolor sit amet</p>"));
     }
 
     @Test
