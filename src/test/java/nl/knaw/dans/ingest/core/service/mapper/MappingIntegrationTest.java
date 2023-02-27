@@ -25,11 +25,11 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPT
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmProfileWithAudiences;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveSingleValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.minimalDdmProfile;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocumentFromString;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.toCompactJsonString;
@@ -40,9 +40,9 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1216_description_type_other_maps_only_to_author_name() throws Exception {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-            + ddmProfileWithAudiences("D24000")
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
             + dcmi("<ddm:description descriptionType=\"Other\">Author from description other</ddm:description>\n")
             + "</ddm:DDM>\n");
 
@@ -57,14 +57,19 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1216_description_type_technical_info_maps_once_to_description() throws Exception {
-        String dcmiContent = "<dct:description>plain description</dct:description>\n"
+        String dcmiContent = ""
+            + "<dct:description>plain description</dct:description>\n"
             + "<ddm:description descriptionType=\"TechnicalInfo\">technical description</ddm:description>\n"
             + "<ddm:description descriptionType=\"NotKnown\">not known description type</ddm:description>\n";
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + dcmi(dcmiContent)
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <dc:description>Lorem ipsum.</dc:description>\n"
+            + "        <ddm:audience>D24000</ddm:audience>"
+            + "    </ddm:profile>\n"
+            + dcmi(dcmiContent)
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
         var str = toPrettyJsonString(result);
@@ -78,11 +83,11 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1216_description_type_series_information_maps_only_to_series() throws Exception {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + dcmi("<ddm:description descriptionType=\"SeriesInformation\">series 123</ddm:description>\n")
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + dcmi("<ddm:description descriptionType=\"SeriesInformation\">series 123</ddm:description>\n")
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
 
@@ -101,11 +106,11 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1216_provenance_maps_to_notes() throws Exception {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + dcmi("<dct:provenance>copied xml to csv</dct:provenance>\n")
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + dcmi("<dct:provenance>copied xml to csv</dct:provenance>\n")
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
         var str = toPrettyJsonString(result);
@@ -120,21 +125,32 @@ class MappingIntegrationTest {
     @Test
     void DD_1265_subject_omits_other() throws Exception {
         var doc = readDocumentFromString(""
-            +"<ddm:DDM " + rootAttributes + ">\n"
-            + ddmProfileWithAudiences("D19200", "D11200", "D88200", "D40200", "D17200")
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <ddm:audience>D19200</ddm:audience>"
+            + "        <ddm:audience>D11200</ddm:audience>"
+            + "        <ddm:audience>D88200</ddm:audience>"
+            + "        <ddm:audience>D40200</ddm:audience>"
+            + "        <ddm:audience>D17200</ddm:audience>"
+            + "    </ddm:profile>\n"
             + dcmi("")
             + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getControlledMultiValueField("citation", SUBJECT, result))
-            .isEqualTo(List.of("Astronomy and Astrophysics","Law", "Mathematical Sciences"));
+            .isEqualTo(List.of("Astronomy and Astrophysics", "Law", "Mathematical Sciences"));
     }
 
     @Test
     void DD_1265_subject_is_other() throws Exception {
         var doc = readDocumentFromString(""
-            +"<ddm:DDM " + rootAttributes + ">\n"
-            + ddmProfileWithAudiences("D19200", "D88200")
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title xml:lang='en'>Title of the dataset</dc:title>\n"
+            + "        <ddm:audience>D19200</ddm:audience>"
+            + "        <ddm:audience>D88200</ddm:audience>"
+            + "    </ddm:profile>\n"
             + dcmi("")
             + "</ddm:DDM>");
 
@@ -145,11 +161,15 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1216_DctAccesRights_maps_to_description() throws Exception {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D10000")
-                + dcmi("<dct:accessRights>Some story</dct:accessRights>\n")
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <dc:description>Lorem ipsum.</dc:description>\n"
+            + "        <ddm:audience>D24000</ddm:audience>"
+            + "    </ddm:profile>\n"
+            + dcmi("<dct:accessRights>Some story</dct:accessRights>\n")
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
         var str = toPrettyJsonString(result);
@@ -164,11 +184,11 @@ class MappingIntegrationTest {
 
     @Test
     void DD_1216_DctAccesRights_maps_to_termsofaccess() throws Exception {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D10000")
-                + dcmi("<dct:accessRights>Some story</dct:accessRights>\n")
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + dcmi("<dct:accessRights>Some story</dct:accessRights>\n")
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, true, true);
         assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("Some story");

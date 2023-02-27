@@ -25,11 +25,11 @@ import java.io.IOException;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RIGHTS_HOLDER;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmProfileWithAudiences;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledSingleValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveMultipleValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.minimalDdmProfile;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocumentFromString;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,29 +39,29 @@ class RightsMetadataTest {
     RightsMetadataTest() throws ParserConfigurationException, IOException, SAXException {
     }
 
-    private final Document ddmWithOrganizations = readDocumentFromString(
-        "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>\n"
-            + ddmProfileWithAudiences("D24000")
-            + "    <ddm:dcmiMetadata>\n"
-            + "        <dcx-dai:contributorDetails>\n"
-            + "            <dcx-dai:organization>\n"
-            + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
-            + "                <dcx-dai:name>Some org</dcx-dai:name>\n"
-            + "            </dcx-dai:organization>\n"
-            + "        </dcx-dai:contributorDetails>\n\n"
-            + "        <dcx-dai:contributorDetails>\n"
-            + "            <dcx-dai:organization>\n"
-            + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
-            + "                <dcx-dai:name xml:lang='de'>Some other org</dcx-dai:name>\n"
-            + "            </dcx-dai:organization>\n"
-            + "        </dcx-dai:contributorDetails>\n\n"
-            + "        <dcx-dai:contributorDetails>\n"
-            + "            <dcx-dai:organization xml:lang='dut'>\n"
-            + "                <dcx-dai:name>Something different</dcx-dai:name>\n"
-            + "            </dcx-dai:organization>\n"
-            + "        </dcx-dai:contributorDetails>\n\n"
-            + "    </ddm:dcmiMetadata>\n"
-            + "</ddm:DDM>\n");
+    private final Document ddmWithOrganizations = readDocumentFromString(""
+        + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>\n"
+        + minimalDdmProfile()
+        + "    <ddm:dcmiMetadata>\n"
+        + "        <dcx-dai:contributorDetails>\n"
+        + "            <dcx-dai:organization>\n"
+        + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
+        + "                <dcx-dai:name>Some org</dcx-dai:name>\n"
+        + "            </dcx-dai:organization>\n"
+        + "        </dcx-dai:contributorDetails>\n\n"
+        + "        <dcx-dai:contributorDetails>\n"
+        + "            <dcx-dai:organization>\n"
+        + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
+        + "                <dcx-dai:name xml:lang='de'>Some other org</dcx-dai:name>\n"
+        + "            </dcx-dai:organization>\n"
+        + "        </dcx-dai:contributorDetails>\n\n"
+        + "        <dcx-dai:contributorDetails>\n"
+        + "            <dcx-dai:organization xml:lang='dut'>\n"
+        + "                <dcx-dai:name>Something different</dcx-dai:name>\n"
+        + "            </dcx-dai:organization>\n"
+        + "        </dcx-dai:contributorDetails>\n\n"
+        + "    </ddm:dcmiMetadata>\n"
+        + "</ddm:DDM>\n");
 
     @Test
     void RIG000A_should_map_dai_authors() {
@@ -79,28 +79,28 @@ class RightsMetadataTest {
             .containsOnly("Dutch", "German");
     }
 
-    private final Document ddmWithAuthors = readDocumentFromString(
-        "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>\n"
-            + ddmProfileWithAudiences("D24000")
-            + "    <ddm:dcmiMetadata>\n"
-            + "        <dcx-dai:contributorDetails>\n"
-            + "            <dcx-dai:author xml:lang='nl'>\n"
-            + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
-            + "                <dcx-dai:organization>\n"
-            + "                    <dcx-dai:name>Example Org</dcx-dai:name>\n"
-            + "                </dcx-dai:organization>\n"
-            + "            </dcx-dai:author>\n"
-            + "        </dcx-dai:contributorDetails>\n\n"
-            + "        <dcx-dai:contributorDetails xml:lang='ger'>\n"
-            + "            <dcx-dai:author>\n"
-            + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
-            + "                <dcx-dai:organization>\n"
-            + "                    <dcx-dai:name>Another Org</dcx-dai:name>\n"
-            + "                </dcx-dai:organization>\n"
-            + "            </dcx-dai:author>\n"
-            + "        </dcx-dai:contributorDetails>\n\n"
-            + "    </ddm:dcmiMetadata>\n"
-            + "</ddm:DDM>\n");
+    private final Document ddmWithAuthors = readDocumentFromString(""
+        + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>\n"
+        + minimalDdmProfile()
+        + "    <ddm:dcmiMetadata>\n"
+        + "        <dcx-dai:contributorDetails>\n"
+        + "            <dcx-dai:author xml:lang='nl'>\n"
+        + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
+        + "                <dcx-dai:organization>\n"
+        + "                    <dcx-dai:name>Example Org</dcx-dai:name>\n"
+        + "                </dcx-dai:organization>\n"
+        + "            </dcx-dai:author>\n"
+        + "        </dcx-dai:contributorDetails>\n\n"
+        + "        <dcx-dai:contributorDetails xml:lang='ger'>\n"
+        + "            <dcx-dai:author>\n"
+        + "                <dcx-dai:role>RightsHolder</dcx-dai:role>\n"
+        + "                <dcx-dai:organization>\n"
+        + "                    <dcx-dai:name>Another Org</dcx-dai:name>\n"
+        + "                </dcx-dai:organization>\n"
+        + "            </dcx-dai:author>\n"
+        + "        </dcx-dai:contributorDetails>\n\n"
+        + "    </ddm:dcmiMetadata>\n"
+        + "</ddm:DDM>\n");
 
     @Test
     void RIG000B_should_map_organizations() {
@@ -120,14 +120,14 @@ class RightsMetadataTest {
 
     @Test
     void RIG001_should_map_dcterms_rights_holders() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + "    <ddm:dcmiMetadata>\n"
-                + "        <dct:rightsHolder>James Bond</dct:rightsHolder>\n"
-                + "        <dct:rightsHolder>Double O'Seven</dct:rightsHolder>\n"
-                + "    </ddm:dcmiMetadata>\n"
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + "    <ddm:dcmiMetadata>\n"
+            + "        <dct:rightsHolder>James Bond</dct:rightsHolder>\n"
+            + "        <dct:rightsHolder>Double O'Seven</dct:rightsHolder>\n"
+            + "    </ddm:dcmiMetadata>\n"
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getPrimitiveMultipleValueField("dansRights", RIGHTS_HOLDER, result))
@@ -136,14 +136,14 @@ class RightsMetadataTest {
 
     @Test
     void RIG003_should_collect_languages_from_dcterms_rights_holders() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + "    <ddm:dcmiMetadata>\n"
-                + "        <dct:rightsHolder xml:lang='dut'>James Bond</dct:rightsHolder>\n"
-                + "        <dct:rightsHolder xml:lang='nl'>Double O'Seven</dct:rightsHolder>\n"
-                + "    </ddm:dcmiMetadata>\n"
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + "    <ddm:dcmiMetadata>\n"
+            + "        <dct:rightsHolder xml:lang='dut'>James Bond</dct:rightsHolder>\n"
+            + "        <dct:rightsHolder xml:lang='nl'>Double O'Seven</dct:rightsHolder>\n"
+            + "    </ddm:dcmiMetadata>\n"
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getControlledMultiValueField("dansRights", "dansMetadataLanguage", result))
@@ -152,10 +152,10 @@ class RightsMetadataTest {
 
     @Test
     void RIG00N_rights_holder_must_be_present() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + "</ddm:DDM>\n");
         try {
             mapDdmToDataset(doc, false, false);
         }
@@ -167,11 +167,11 @@ class RightsMetadataTest {
     @Test
     void RIG002_should_apply_default_personal_data() throws ParserConfigurationException, IOException, SAXException {
         // required in DDM, validated by v2-schema
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D24000")
-                + dcmi("")
-                + "</ddm:DDM>\n");
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + dcmi("")
+            + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
         assertThat(getControlledSingleValueField("dansRights", "dansPersonalDataPresent", result))

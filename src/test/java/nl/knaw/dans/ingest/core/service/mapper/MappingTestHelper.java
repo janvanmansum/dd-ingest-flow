@@ -72,21 +72,15 @@ class MappingTestHelper {
             + "        <ddm:audience>D19200</ddm:audience>\n"
             + content
             + "    </ddm:profile>\n"
-            + "    <ddm:dcmiMetadata><dct:rightsHolder>A. Mandatory</dct:rightsHolder></ddm:dcmiMetadata>\n"
+            + dcmi("")
             + "</ddm:DDM>\n");
     }
 
-    static String ddmProfileWithAudiences(String... audience) {
+    static String minimalDdmProfile() {
         return ""
             + "    <ddm:profile>\n"
-            + "        <dc:title xml:lang='en'>Title of the dataset</dc:title>\n"
-            + "        <dc:description xml:lang='la'>Lorem ipsum.</dc:description>\n"
-            + "        <dc:creator>Bergman, W.A.</dc:creator>\n"
-            + "        <ddm:created>2012-12</ddm:created>\n"
-            + "        <ddm:available>2014-12</ddm:available>\n"
-            + Arrays.stream(audience).map(s -> "<ddm:audience>"+s+"</ddm:audience>")
-                .collect(Collectors.joining("\n        ", "        ","\n"))
-            + "        <ddm:accessRights xml:lang='en'>OPEN_ACCESS</ddm:accessRights>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <ddm:audience>D24000</ddm:audience>"
             + "    </ddm:profile>\n";
     }
 

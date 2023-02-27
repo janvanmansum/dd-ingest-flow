@@ -12,7 +12,6 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_N
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
-import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmProfileWithAudiences;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmWithCustomProfileContent;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
@@ -100,9 +99,16 @@ public class CitationMetadataFromProfileTest {
 
     @Test
     void CIT013_should_map_audience() throws ParserConfigurationException, IOException, SAXException {
-        var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
-                + ddmProfileWithAudiences("D19200", "D11200", "D88200", "D40200", "D17200")
+        var doc = readDocumentFromString(""
+                + "<ddm:DDM " + rootAttributes + ">\n"
+                + "    <ddm:profile>\n"
+                + "        <dc:title>Title of the dataset</dc:title>\n"
+                + "        <ddm:audience>D19200</ddm:audience>"
+                + "        <ddm:audience>D11200</ddm:audience>"
+                + "        <ddm:audience>D88200</ddm:audience>"
+                + "        <ddm:audience>D40200</ddm:audience>"
+                + "        <ddm:audience>D17200</ddm:audience>"
+                + "    </ddm:profile>\n"
                 + dcmi("")
                 + "</ddm:DDM>\n");
 
