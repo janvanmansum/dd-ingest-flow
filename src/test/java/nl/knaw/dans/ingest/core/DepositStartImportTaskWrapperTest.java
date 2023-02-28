@@ -24,6 +24,7 @@ import nl.knaw.dans.ingest.core.deposit.DepositWriterImpl;
 import nl.knaw.dans.ingest.core.domain.DepositLocation;
 import nl.knaw.dans.ingest.core.io.BagDataManager;
 import nl.knaw.dans.ingest.core.io.FileService;
+import nl.knaw.dans.ingest.core.service.BlockedTargetService;
 import nl.knaw.dans.ingest.core.service.DansBagValidator;
 import nl.knaw.dans.ingest.core.service.DepositIngestTask;
 import nl.knaw.dans.ingest.core.service.DepositMigrationTask;
@@ -78,6 +79,7 @@ public class DepositStartImportTaskWrapperTest {
         var mapper = getMapperFactory();
         var validator = Mockito.mock(DansBagValidator.class);
         var eventWriter = Mockito.mock(EventWriter.class);
+        var blockedTargetService = Mockito.mock(BlockedTargetService.class);
         var fileService = Mockito.mock(FileService.class);
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var bagDirResolver = new BagDirResolverImpl(fileService);
@@ -105,7 +107,8 @@ public class DepositStartImportTaskWrapperTest {
             1000,
             Path.of("dummy"),
             eventWriter,
-            depositManager
+            depositManager,
+            blockedTargetService
         );
     }
 

@@ -33,6 +33,7 @@ public class DepositIngestTaskFactoryBuilder {
     private final DepositManager depositManager;
     private final DepositToDvDatasetMetadataMapperFactory depositToDvDatasetMetadataMapperFactory;
     private final ZipFileHandler zipFileHandler;
+    private final BlockedTargetService blockedTargetService;
     private final DepositReader depositReader;
 
     public DepositIngestTaskFactoryBuilder(
@@ -43,6 +44,7 @@ public class DepositIngestTaskFactoryBuilder {
         DepositManager depositManager,
         DepositToDvDatasetMetadataMapperFactory depositToDvDatasetMetadataMapperFactory,
         ZipFileHandler zipFileHandler,
+        BlockedTargetService blockedTargetService,
         DepositReader depositReader) {
         this.dataverseClient = dataverseClient;
         this.dansBagValidator = dansBagValidator;
@@ -51,6 +53,7 @@ public class DepositIngestTaskFactoryBuilder {
         this.depositManager = depositManager;
         this.depositToDvDatasetMetadataMapperFactory = depositToDvDatasetMetadataMapperFactory;
         this.zipFileHandler = zipFileHandler;
+        this.blockedTargetService = blockedTargetService;
         this.depositReader = depositReader;
     }
 
@@ -64,7 +67,8 @@ public class DepositIngestTaskFactoryBuilder {
             dataverseExtra,
             depositManager,
             depositToDvDatasetMetadataMapperFactory,
-            zipFileHandler
+            zipFileHandler,
+            blockedTargetService
         );
     }
 }
