@@ -64,9 +64,7 @@ public class DatasetUpdater extends DatasetEditor {
         try {
             Thread.sleep(4000);
 
-            var doi = isMigration
-                ? getDoiByIsVersionOf()
-                : getDoi(String.format("dansSwordToken:\"%s\"", deposit.getVaultMetadata().getSwordToken()));
+            var doi = deposit.getDataverseDoi();
 
             try {
                 var api = dataverseClient.dataset(doi);
