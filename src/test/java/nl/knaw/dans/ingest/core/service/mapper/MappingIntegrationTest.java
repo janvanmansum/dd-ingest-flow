@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.knaw.dans.ingest.core.domain.VaultMetadata;
 import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundSingleValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.ControlledMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
@@ -40,6 +41,8 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBU
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES_INFORMATION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -153,29 +156,26 @@ class MappingIntegrationTest {
     }
 
     @Test
-    void DD_1216_description_type_series_information_maps_only_to_series() throws Exception {
+    void DD_1292_multiple_series_informations_to_single_compound_field() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">\n"
                 + ddmProfileWithAudiences("D24000")
                 + "    <ddm:dcmiMetadata>\n"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
-                + "        <ddm:description descriptionType=\"SeriesInformation\">series 123</ddm:description>\n"
+                + "        <ddm:description descriptionType=\"SeriesInformation\">series\n123</ddm:description>\n"
+                + "        <ddm:description descriptionType=\"SeriesInformation\">another\nseries\n456</ddm:description>\n"
                 + "    </ddm:dcmiMetadata>\n"
                 + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false, false);
 
-        // TODO improve assertions after DD-1237 (note that the single compound field is an anonymous class)
-        //  {"typeClass" : "compound", "typeName" : "series", "multiple" : false, "value" :
-        //  {"seriesName" : {"typeClass" : "primitive", "typeName" : "seriesInformation", "multiple" : false, "value" : "<p>series 123</p>"}}
-        //  }
-        var str = toCompactJsonString(result);
-
-        // not as description and series
-        assertThat(str).containsOnlyOnce("<p>series 123</p>");
-
-        // no square bracket
-        assertThat(str).containsOnlyOnce("\"value\":{\"seriesInformation\"");
+        var field = (CompoundSingleValueField) result.getDatasetVersion().getMetadataBlocks()
+            .get("citation").getFields().stream()
+            .filter(f -> f.getTypeName().equals(SERIES)).findFirst().orElseThrow();
+        assertThat(field.getValue())
+            .extracting(SERIES_INFORMATION )
+            .extracting("value")
+            .isEqualTo("<p>series<br>123</p><p>another<br>series<br>456</p>");
     }
 
     @Test
