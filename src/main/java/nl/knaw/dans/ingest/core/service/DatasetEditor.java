@@ -33,6 +33,7 @@ import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 
 import java.io.FileInputStream;
@@ -47,7 +48,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +61,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class DatasetEditor {
+    protected static final List<String> embargoExclusions = Arrays.asList("easy-migration.zip", "original-metadata.zip");
 
     protected final DataverseClient dataverseClient;
     protected final boolean isMigration;
@@ -132,7 +136,7 @@ public abstract class DatasetEditor {
             var fileMeta = new FileMeta();
             fileMeta.setLabel("original-metadata.zip");
             var fileInfo = new FileInfo(path, checksum, fileMeta);
-            var id = addFile(persistentId,fileInfo);
+            var id = addFile(persistentId, fileInfo);
             result.put(id, fileInfo);
             try {
                 Files.deleteIfExists(path);
@@ -219,7 +223,7 @@ public abstract class DatasetEditor {
             var files = api.getFiles(Version.LATEST.toString()).getData();
 
             var items = files.stream()
-                .filter(f -> !"easy-migration.zip".equals(f.getLabel()) && !"original-metadata.zip".equals(f.getLabel()))
+                .filter(f -> !embargoExclusions.contains(f.getLabel()))
                 .map(FileMeta::getDataFile)
                 .map(DataFile::getId)
                 .collect(Collectors.toList());
