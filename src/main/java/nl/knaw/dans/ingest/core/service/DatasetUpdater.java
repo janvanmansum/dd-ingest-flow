@@ -80,8 +80,7 @@ public class DatasetUpdater extends DatasetEditor {
                     throw new CannotUpdateDraftDatasetException(deposit);
                 }
 
-                var blocks = objectMapper.writeValueAsString(metadataBlocks);
-                api.updateMetadataFromJsonLd(blocks, true);
+                api.updateMetadata(metadataBlocks);
                 api.awaitUnlock();
 
                 var license = toJson(Map.of("http://schema.org/license", getLicense(deposit.getDdm())));
