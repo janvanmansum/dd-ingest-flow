@@ -146,9 +146,11 @@ public abstract class DatasetEditor {
         var wrappedZip = zipFileHandler.wrapIfZipFile(fileInfo.getPath());
 
         var file = wrappedZip.orElse(fileInfo.getPath());
-        var metadata = objectMapper.writeValueAsString(fileInfo.getMetadata());
-        log.info("Adding file {} with metadata {}", file, metadata);
-        var result = dataset.addFileItem(Optional.of(file.toFile()), Optional.of(metadata));
+        if (log.isDebugEnabled()) {
+            var metadata = objectMapper.writeValueAsString(fileInfo.getMetadata());
+            log.debug("Adding file {} with metadata {}", file, metadata);
+        }
+        var result = dataset.addFile(file, fileInfo.getMetadata());
 
         if (wrappedZip.isPresent()) {
             try {
