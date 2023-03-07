@@ -298,11 +298,11 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getProfileDescriptions(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/dcterms:description | /ddm:DDM/ddm:profile/dc:description");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/dcterms:description", "/ddm:DDM/ddm:profile/dc:description");
     }
 
     Stream<Node> getDcmiDctermsDescriptions(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:description");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:description", "/ddm:DDM/ddm:dcmiMetadata/dc:description");
     }
 
     Stream<Node> getDcmiDdmDescriptions(Document ddm) {
@@ -334,7 +334,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getSubjects(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:subject");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:subject", "/ddm:DDM/ddm:dcmiMetadata/dc:subject");
     }
 
     Stream<Node> getDdmSubjects(Document ddm) {
@@ -342,7 +342,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getLanguages(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:language");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:language", "/ddm:DDM/ddm:dcmiMetadata/dc:language");
     }
 
     Stream<Node> getDdmLanguages(Document ddm) {
@@ -400,11 +400,11 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getIdentifiers(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:identifier");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:identifier", "/ddm:DDM/ddm:dcmiMetadata/dc:identifier");
     }
 
     Stream<String> getTitles(Document ddm) {
-        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:profile/dc:title");
+        return XPathEvaluator.strings(ddm, "/ddm:DDM/ddm:profile/dc:title", "/ddm:DDM/ddm:profile/dcterms:title");
     }
 
     Stream<Node> getOtherTitles(Document ddm) {
@@ -414,12 +414,13 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getCreators(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-            "/ddm:DDM/ddm:profile/dcx-dai:creatorDetails | /ddm:DDM/ddm:profile/dcx-dai:creator | /ddm:DDM/ddm:profile/dc:creator");
+            "/ddm:DDM/ddm:profile/dcx-dai:creatorDetails", "/ddm:DDM/ddm:profile/dcx-dai:creator", "/ddm:DDM/ddm:profile/dc:creator", "/ddm:DDM/ddm:profile/dcterms:creator");
     }
 
     Stream<Node> getOtherDescriptions(Document ddm) {
         return XPathEvaluator.nodes(ddm,
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:date",
+            "/ddm:DDM/ddm:dcmiMetadata/dc:date",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:dateAccepted",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:dateCopyrighted",
             "/ddm:DDM/ddm:dcmiMetadata/dcterms:modified",
@@ -437,7 +438,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getPublishers(Document ddm) {
-        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:publisher");
+        return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:dcmiMetadata/dcterms:publisher", "/ddm:DDM/ddm:dcmiMetadata/dc:publisher");
     }
 
     Stream<Node> getAvailable(Document ddm) {
