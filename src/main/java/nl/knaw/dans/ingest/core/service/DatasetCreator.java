@@ -89,6 +89,9 @@ public class DatasetCreator extends DatasetEditor {
         api.updateMetadataFromJsonLd(license, true);
         api.awaitUnlock();
 
+        configureEnableAccessRequests(persistentId, true);
+        api.awaitUnlock();
+
         // add files to dataset
         var pathToFileInfo = getFileInfo();
         log.debug("File info: {}", pathToFileInfo);
@@ -97,9 +100,6 @@ public class DatasetCreator extends DatasetEditor {
         log.debug("Database ID's: {}", databaseIds);
         // update individual files metadata
         updateFileMetadata(databaseIds);
-        api.awaitUnlock();
-
-        configureEnableAccessRequests(persistentId, true);
         api.awaitUnlock();
 
         api.assignRole(getRoleAssignment());
