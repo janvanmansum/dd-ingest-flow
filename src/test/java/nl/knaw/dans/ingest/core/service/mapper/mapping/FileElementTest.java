@@ -28,12 +28,12 @@ class FileElementTest extends BaseTest {
         var doc = readDocumentFromString(
             "<file filepath=\"data/leeg.txt\" xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" xmlns:dcterms=\"http://purl.org/dc/terms/\">\n"
                 + "    <dcterms:format>text/plain</dcterms:format>\n"
-                + "    <dcterms:hardware>Hardware</dcterms:hardware>\n"
+                + "    <hardware>Hardware</hardware>\n"
                 + "    <dcterms:description>Empty file</dcterms:description>\n"
-                + "    <dcterms:time_period>Classical</dcterms:time_period>\n"
+                + "    <time_period>Classical</time_period>\n"
                 + "</file>");
 
-        var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
+        var result = FileElement.toFileMeta(doc.getDocumentElement(), true, true);
 
         assertEquals("leeg.txt", result.getLabel());
         assertEquals(" ", result.getDirectoryLabel());

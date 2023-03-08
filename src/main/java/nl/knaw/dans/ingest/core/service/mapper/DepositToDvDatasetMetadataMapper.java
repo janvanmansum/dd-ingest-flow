@@ -97,8 +97,11 @@ public class DepositToDvDatasetMetadataMapper {
     private List<String> spatialCoverageCountryTerms;
     private final boolean deduplicate;
 
-    DepositToDvDatasetMetadataMapper(boolean deduplicate, Set<String> activeMetadataBlocks, Map<String, String> iso1ToDataverseLanguage,
+    private final boolean isMigration;
+
+    DepositToDvDatasetMetadataMapper(boolean isMigration, boolean deduplicate, Set<String> activeMetadataBlocks, Map<String, String> iso1ToDataverseLanguage,
         Map<String, String> iso2ToDataverseLanguage, List<String> spatialCoverageCountryTerms) {
+        this.isMigration = isMigration;
         this.deduplicate = deduplicate;
         this.activeMetadataBlocks = activeMetadataBlocks;
         this.iso1ToDataverseLanguage = iso1ToDataverseLanguage;
@@ -124,7 +127,7 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addTitle(getTitles(ddm)); // CIT001
             citationFields.addAlternativeTitle(otherTitlesAndAlternativeTitles.stream().map(Node::getTextContent)); // CIT002
 
-            if (vaultMetadata != null) {
+            if (isMigration) {
                 citationFields.addOtherIdsStrings(Stream.ofNullable(vaultMetadata.getOtherId()) // CIT002A
                     .filter(DepositPropertiesVaultMetadata::isValidOtherIdValue), DepositPropertiesVaultMetadata.toOtherIdValue);
             }
@@ -153,7 +156,7 @@ public class DepositToDvDatasetMetadataMapper {
                 // TRM006
                 termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse("");
             }
-            else {
+            else if (isMigration) {
                 // CIT012A
                 citationFields.addDescription(getDctAccessRights(ddm), Description.toDescription);
             }
@@ -173,7 +176,9 @@ public class DepositToDvDatasetMetadataMapper {
             // TODO: CIT022 ?? (role = funder)
             citationFields.addDistributor(getPublishers(ddm).filter(Publisher::isNotDans), Publisher.toDistributorValueObject); // CIT024
             citationFields.addDistributionDate(getAvailable(ddm).map(Base::toYearMonthDayFormat)); // CIT025
-            citationFields.addDateOfDeposit(dateOfDeposit); // CIT025A
+            if (isMigration) {
+                citationFields.addDateOfDeposit(dateOfDeposit); // CIT025A
+            }
             citationFields.addDatesOfCollection(getDatesOfCollection(ddm)
                 .filter(DatesOfCollection::isValidDatesOfCollectionPattern), DatesOfCollection.toDateOfCollectionValue); // CIT026
             citationFields.addSeries(getDcmiDdmDescriptions(ddm).filter(Description::isSeriesInformation)); // CIT027
@@ -185,8 +190,10 @@ public class DepositToDvDatasetMetadataMapper {
 
         if (activeMetadataBlocks.contains("dansRights")) {
             checkForAnyRightsHolder(ddm);
-            rightsFields.addRightsHolders(getContributorDetailsAuthors(ddm).filter(DcxDaiAuthor::isRightsHolder).map(DcxDaiAuthor::toRightsHolder)); // RIG000A
-            rightsFields.addRightsHolders(getContributorDetailsOrganizations(ddm).filter(DcxDaiOrganization::isRightsHolder).map(DcxDaiOrganization::toRightsHolder)); // RIG000B
+            if (isMigration) {
+                rightsFields.addRightsHolders(getContributorDetailsAuthors(ddm).filter(DcxDaiAuthor::isRightsHolder).map(DcxDaiAuthor::toRightsHolder)); // RIG000A
+                rightsFields.addRightsHolders(getContributorDetailsOrganizations(ddm).filter(DcxDaiOrganization::isRightsHolder).map(DcxDaiOrganization::toRightsHolder)); // RIG000B
+            }
             rightsFields.addRightsHolders(getRightsHolders(ddm)); // RIG001
             rightsFields.addPersonalDataPresent(getPersonalData(ddm).map(PersonalData::toPersonalDataPresent)); // RIG002
             rightsFields.addLanguageOfMetadata(getLanguageAttributes(ddm)

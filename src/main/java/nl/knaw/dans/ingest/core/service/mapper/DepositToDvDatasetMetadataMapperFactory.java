@@ -42,8 +42,9 @@ public class DepositToDvDatasetMetadataMapperFactory {
         this.dataverseClient = dataverseClient;
     }
 
-    public DepositToDvDatasetMetadataMapper createMapper(boolean deduplicate) {
+    public DepositToDvDatasetMetadataMapper createMapper(boolean isMigration, boolean deduplicate) {
         return new DepositToDvDatasetMetadataMapper(
+            isMigration,
             deduplicate,
             getActiveMetadataBlocks(),
             iso1ToDataverseLanguage,

@@ -44,7 +44,7 @@ public class FileElement extends Base {
         "ANONYMOUS", false
     );
 
-    public static FileMeta toFileMeta(Node node, boolean defaultRestrict) {
+    public static FileMeta toFileMeta(Node node, boolean defaultRestrict, boolean isMigration) {
         var filepathAttribute = getAttribute(node, "filepath")
             .map(Node::getTextContent)
             .orElseThrow(() -> new RuntimeException("File node without a filepath attribute"));

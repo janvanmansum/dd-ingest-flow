@@ -22,6 +22,7 @@ import nl.knaw.dans.ingest.core.domain.Deposit;
 import nl.knaw.dans.ingest.core.domain.DepositLocation;
 import nl.knaw.dans.ingest.core.domain.VaultMetadata;
 import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
+import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapper;
 import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapperFactory;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.Amd;
 import nl.knaw.dans.ingest.core.validation.DepositorAuthorizationValidator;
@@ -101,6 +102,11 @@ public class DepositMigrationTask extends DepositIngestTask {
     @Override
     DatasetEditor newDatasetUpdater(Dataset dataset) {
         return newDatasetUpdater(dataset, true);
+    }
+
+    @Override
+    DepositToDvDatasetMetadataMapper getMapper() {
+        return datasetMetadataMapperFactory.createMapper(true, false); // TODO: WHY IS THIS ALWAYS FALSE?
     }
 
     @Override

@@ -55,7 +55,7 @@ class MappingTestHelper {
         iso2ToDataverseLanguage.put("dut", "Dutch");
         iso2ToDataverseLanguage.put("ger", "German");
         return new DepositToDvDatasetMetadataMapper(
-            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, List.of("Netherlands", "United Kingdom", "Belgium", "Germany")
+            false, true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, List.of("Netherlands", "United Kingdom", "Belgium", "Germany")
         ).toDataverseDataset(ddm, null, null, null, vaultMetadata, filesThatAreAccessibleToNonePresentInDeposit, filesThatAreRestrictedRequestPresentInDeposit);
     }
 
@@ -108,7 +108,7 @@ class MappingTestHelper {
         return result.getDatasetVersion().getMetadataBlocks()
             .get(block).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
-            .map(t -> ((ControlledMultiValueField)t).getValue())
+            .map(t -> ((ControlledMultiValueField) t).getValue())
             .findFirst().orElse(null);
     }
 
@@ -116,7 +116,7 @@ class MappingTestHelper {
         return result.getDatasetVersion().getMetadataBlocks()
             .get(block).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
-            .map(t -> ((CompoundMultiValueField)t).getValue())
+            .map(t -> ((CompoundMultiValueField) t).getValue())
             .findFirst().orElse(null);
     }
 
@@ -124,16 +124,15 @@ class MappingTestHelper {
         return result.getDatasetVersion().getMetadataBlocks()
             .get(block).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
-            .map(t -> ((ControlledSingleValueField)t).getValue())
+            .map(t -> ((ControlledSingleValueField) t).getValue())
             .findFirst().orElse(null);
     }
-
 
     static List<String> getPrimitiveMultipleValueField(String blockId, String fieldId, Dataset result) {
         return result.getDatasetVersion().getMetadataBlocks()
             .get(blockId).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
-            .map(f -> (((PrimitiveMultiValueField)f).getValue()))
+            .map(f -> (((PrimitiveMultiValueField) f).getValue()))
             .findFirst().orElse(null);
     }
 
@@ -141,7 +140,7 @@ class MappingTestHelper {
         return result.getDatasetVersion().getMetadataBlocks()
             .get(blockId).getFields().stream()
             .filter(f -> f.getTypeName().equals(fieldId))
-            .map(f -> (((PrimitiveSingleValueField)f).getValue()))
+            .map(f -> (((PrimitiveSingleValueField) f).getValue()))
             .findFirst().orElse(null);
     }
 }

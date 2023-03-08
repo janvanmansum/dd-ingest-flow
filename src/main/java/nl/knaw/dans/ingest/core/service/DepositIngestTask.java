@@ -32,6 +32,7 @@ import nl.knaw.dans.ingest.core.exception.InvalidDepositorRoleException;
 import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.exception.TargetBlockedException;
 import nl.knaw.dans.ingest.core.sequencing.TargetedTask;
+import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapper;
 import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapperFactory;
 import nl.knaw.dans.ingest.core.validation.DepositorAuthorizationValidator;
 import nl.knaw.dans.lib.dataverse.DataverseException;
@@ -408,7 +409,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             .strings(deposit.getFilesXml(), "/files:files/files:file/files:accessibleToRights")
             .collect(Collectors.toList());
 
-        var mapper = datasetMetadataMapperFactory.createMapper(false); // TODO: WHY IS THIS ALWAYS FALSE?
+        var mapper = getMapper();
         return mapper.toDataverseDataset(
             deposit.getDdm(),
             deposit.getOtherDoiId(),
@@ -418,6 +419,10 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             // TRM002
             accessibleToValues.contains("NONE"),
             accessibleToValues.contains("RESTRICTED_REQUEST") || accessibleToValues.contains("KNOWN"));
+    }
+
+    DepositToDvDatasetMetadataMapper getMapper() {
+        return datasetMetadataMapperFactory.createMapper(false, false); // TODO: WHY IS THIS ALWAYS FALSE?
     }
 
     Optional<String> getDateOfDeposit() {
