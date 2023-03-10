@@ -80,6 +80,10 @@ public class DatasetUpdater extends DatasetEditor {
                     throw new CannotUpdateDraftDatasetException(deposit);
                 }
 
+                configureEnableAccessRequests(doi);
+                configureTermsOfAccess(doi, deposit.allowAccessRequests() && api.getLatestVersion().getData().getLatestVersion().getFileAccessRequest());
+                api.awaitUnlock();
+
                 api.updateMetadata(metadataBlocks);
                 api.awaitUnlock();
 
@@ -184,11 +188,6 @@ public class DatasetUpdater extends DatasetEditor {
                     .collect(Collectors.toSet());
 
                 embargoFiles(doi, dateAvailable, fileIdsToEmbargo);
-
-                /*
-                 * Cannot enable requests if they were disallowed because of closed files in a previous version. However, disabling is possible because the update may add a closed file.
-                 */
-                configureEnableAccessRequests(doi, false);
 
                 return doi;
             }
@@ -328,9 +327,9 @@ public class DatasetUpdater extends DatasetEditor {
     }
 
     /**
-     * Creatings a mapping for moving files to a new location. To determine this, the file needs to be unique in the old and the new version, because its checksum is used to locate it. Files that
-     * occur multiple times in either the old or the new version cannot be moved in this way. They will appear to have been deleted in the old version and added in the new. This has the same net
-     * result, except that the "Changes" overview in Dataverse does not record that the file was effectively moved.
+     * Creates a mapping for moving files to a new location. To determine this, the file needs to be unique in the old and the new version, because its checksum is used to locate it. Files that occur
+     * multiple times in either the old or the new version cannot be moved in this way. They will appear to have been deleted in the old version and added in the new. This has the same net result,
+     * except that the "Changes" overview in Dataverse does not record that the file was effectively moved.
      *
      * @param pathToFileMetaInLatestVersion map from path to file metadata in the old version
      * @param pathToFileInfo                map from path to file info in the new version (i.e. the deposit).
@@ -410,5 +409,14 @@ public class DatasetUpdater extends DatasetEditor {
             })
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    void configureEnableAccessRequests(String persistentId) throws IOException, DataverseException {
+        var api = dataverseClient.accessRequests(persistentId);
+
+        if (!deposit.allowAccessRequests()) {
+            api.disable();
+        } // An update cannot enable requests if not already enabled.
     }
 }

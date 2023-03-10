@@ -22,7 +22,6 @@ import nl.knaw.dans.ingest.core.domain.Deposit;
 import nl.knaw.dans.ingest.core.domain.FileInfo;
 import nl.knaw.dans.ingest.core.exception.FailedDepositException;
 import nl.knaw.dans.lib.dataverse.DataverseApi;
-import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.DataverseException;
 import nl.knaw.dans.lib.dataverse.model.RoleAssignment;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
@@ -89,7 +88,8 @@ public class DatasetCreator extends DatasetEditor {
         api.updateMetadataFromJsonLd(license, true);
         api.awaitUnlock();
 
-        configureEnableAccessRequests(persistentId, true);
+        configureEnableAccessRequests(persistentId);
+        configureTermsOfAccess(persistentId, deposit.allowAccessRequests());
         api.awaitUnlock();
 
         // add files to dataset

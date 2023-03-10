@@ -215,7 +215,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     void doRun() throws Exception {
         var deposit = getDeposit();
         var isUpdate = deposit.isUpdate();
-
+        log.debug("Is update: {}", isUpdate);
         if (isUpdate) {
             log.debug("Figuring out the doi for deposit {}", deposit.getDepositId());
             var dataverseDoi = resolveDoi(deposit);
@@ -237,9 +237,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     void createOrUpdateDataset(boolean isUpdate) throws Exception {
         // get metadata
         var dataverseDataset = getMetadata();
-
-        log.debug("Is update: {}", isUpdate);
-
         var persistentId = isUpdate
             ? newDatasetUpdater(dataverseDataset).performEdit()
             : newDatasetCreator(dataverseDataset, depositorRole).performEdit();
@@ -404,10 +401,6 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     Dataset getMetadata() {
         var date = getDateOfDeposit();
         var contact = getDatasetContact();
-        var accessibleToValues = XPathEvaluator
-            .strings(deposit.getFilesXml(), "/files:files/files:file/files:accessibleToRights")
-            .collect(Collectors.toList());
-
         var mapper = datasetMetadataMapperFactory.createMapper(false); // TODO: WHY IS THIS ALWAYS FALSE?
         return mapper.toDataverseDataset(
             deposit.getDdm(),
@@ -415,9 +408,8 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             date.orElse(null),
             contact.orElse(null),
             deposit.getVaultMetadata(),
-            // TRM002
-            accessibleToValues.contains("NONE"),
-            accessibleToValues.contains("RESTRICTED_REQUEST") || accessibleToValues.contains("KNOWN"));
+            deposit.restrictedFilesPresent()
+      );
     }
 
     Optional<String> getDateOfDeposit() {
