@@ -80,13 +80,17 @@ public class DatasetUpdater extends DatasetEditor {
 
                 var latestVersion = api.getLatestVersion().getData().getLatestVersion();
                 var datasetVersion = dataset.getDatasetVersion();
+                var fileAccessRequest = deposit.allowAccessRequests() && api.getLatestVersion().getData().getLatestVersion().getFileAccessRequest();
+                // Possibly disable file access request (never enable if it was not already).
+                datasetVersion.setFileAccessRequest(fileAccessRequest);
 
                 // Copy the terms of access from the latest version (not automatically inherited, alas!) if no new terms were provided.
                 if (StringUtils.isBlank(datasetVersion.getTermsOfAccess())) {
-                    datasetVersion.setTermsOfAccess(latestVersion.getTermsOfAccess());
+                    datasetVersion.setTermsOfAccess(StringUtils.isNotBlank(latestVersion.getTermsOfAccess()) ?
+                        latestVersion.getTermsOfAccess() :
+                        // if fileAccessRequest ends up false, Dataverse requires termsOfAccess to be filled in.
+                        (fileAccessRequest ? "" : "N/a"));
                 }
-                // Possibly disable file access request (never enable if it was not already).
-                datasetVersion.setFileAccessRequest(deposit.allowAccessRequests() && api.getLatestVersion().getData().getLatestVersion().getFileAccessRequest());
                 api.updateMetadata(datasetVersion);
                 api.awaitUnlock();
 
