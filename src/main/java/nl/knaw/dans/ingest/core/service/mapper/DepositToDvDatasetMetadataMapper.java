@@ -94,7 +94,7 @@ public class DepositToDvDatasetMetadataMapper {
 
     private final Map<String, String> iso1ToDataverseLanguage;
     private final Map<String, String> iso2ToDataverseLanguage;
-    private List<String> spatialCoverageCountryTerms;
+    private final List<String> spatialCoverageCountryTerms;
     private final boolean deduplicate;
 
     DepositToDvDatasetMetadataMapper(boolean deduplicate, Set<String> activeMetadataBlocks, Map<String, String> iso1ToDataverseLanguage,
@@ -112,9 +112,8 @@ public class DepositToDvDatasetMetadataMapper {
         @Nullable String dateOfDeposit,
         @Nullable AuthenticatedUser contactData,
         @NonNull VaultMetadata vaultMetadata,
-        boolean filesThatAreAccessibleToNonePresentInDeposit,
-        boolean filesThatAreRestrictedRequestPresentInDeposit) throws MissingRequiredFieldException {
-        var termsOfAccess = "N/a";
+        boolean restrictedFilesPresent) throws MissingRequiredFieldException {
+        var termsOfAccess = "";
 
         if (activeMetadataBlocks.contains("citation")) {
             checkRequiredField(TITLE, getTitles(ddm));
@@ -145,12 +144,8 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addDescription(getDcmiDctermsDescriptions(ddm), Description.toDescription); // CIT012
             citationFields.addDescription(getDcmiDdmDescriptions(ddm).filter(Description::isNotMapped), Description.toDescription); // CIT012
 
-            if (filesThatAreAccessibleToNonePresentInDeposit) {
+            if (restrictedFilesPresent) {
                 // TRM005
-                termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse(termsOfAccess);
-            }
-            else if (filesThatAreRestrictedRequestPresentInDeposit) {
-                // TRM006
                 termsOfAccess = getDctAccessRights(ddm).map(Node::getTextContent).findFirst().orElse("");
             }
             else {
@@ -279,6 +274,7 @@ public class DepositToDvDatasetMetadataMapper {
 
         var version = new DatasetVersion();
         version.setTermsOfAccess(termsOfAccess);
+        version.setFileAccessRequest(true);
         version.setMetadataBlocks(fields);
         version.setFiles(new ArrayList<>());
 
