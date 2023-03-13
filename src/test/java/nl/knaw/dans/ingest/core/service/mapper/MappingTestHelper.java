@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 public class MappingTestHelper {
     public static final AuthenticatedUser mockedContact = new AuthenticatedUser();
 
-    {
+    static {
         mockedContact.setDisplayName("D. O'Seven");
         mockedContact.setEmail("J.Bond@does.not.exist.dans.knaw.nl");
         mockedContact.setAffiliation("DANS");
@@ -89,13 +89,6 @@ public class MappingTestHelper {
     }
 
     static Dataset mapDdmToDataset(Document ddm, boolean restrictedFilesPresent) {
-        final Set<String> activeMetadataBlocks = Set.of("citation", "dansRights", "dansRelationalMetadata", "dansArchaeologyMetadata", "dansTemporalSpatial", "dansDataVaultMetadata");
-        final VaultMetadata vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "otherIdVersion", "swordToken");
-        final Map<String, String> iso1ToDataverseLanguage = new HashMap<>();
-        final Map<String, String> iso2ToDataverseLanguage = new HashMap<>();
-        iso1ToDataverseLanguage.put("nl", "Dutch");
-        iso1ToDataverseLanguage.put("de", "German");
-
         return new DepositToDvDatasetMetadataMapper(
             true,
             Set.of("citation", "dansRights", "dansRelationMetadata", "dansArchaeologyMetadata", "dansTemporalSpatial", "dansDataVaultMetadata"),
@@ -141,12 +134,6 @@ public class MappingTestHelper {
         return new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()
-            .writeValueAsString(result);
-    }
-
-    public static String toCompactJsonString(Dataset result) throws JsonProcessingException {
-        return new ObjectMapper()
-            .writer()
             .writeValueAsString(result);
     }
 
