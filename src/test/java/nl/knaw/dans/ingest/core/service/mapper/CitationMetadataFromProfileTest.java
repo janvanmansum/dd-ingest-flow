@@ -20,11 +20,13 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.List;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmWithCustomProfileContent;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
@@ -33,6 +35,7 @@ import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimi
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocumentFromString;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.toPrettyJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CitationMetadataFromProfileTest {
@@ -112,7 +115,33 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT013_should_map_audience() throws ParserConfigurationException, IOException, SAXException {
+    void CIT009_description_type_technical_info_maps_once_to_description_DD_1216() throws Exception {
+        String dcmiContent = ""
+            + "<dct:description>plain description</dct:description>\n"
+            + "<ddm:description descriptionType=\"TechnicalInfo\">technical description</ddm:description>\n"
+            + "<ddm:description descriptionType=\"NotKnown\">not known description type</ddm:description>\n";
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <dc:description>Lorem ipsum.</dc:description>\n"
+            + "        <ddm:audience>D24000</ddm:audience>"
+            + "    </ddm:profile>\n"
+            + dcmi(dcmiContent)
+            + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc, false);
+        var str = toPrettyJsonString(result);
+        assertThat(str).containsOnlyOnce("not known description type");
+        assertThat(str).containsOnlyOnce("technical description");
+        assertThat(str).containsOnlyOnce("Lorem ipsum");
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("<p>plain description</p>", "<p>Lorem ipsum.</p>", "<p>technical description</p>", "<p>not known description type</p>");
+    }
+
+    @Test
+    void CIT013_subject_omits_other_DD_1265() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">\n"
             + "    <ddm:profile>\n"
@@ -124,11 +153,28 @@ public class CitationMetadataFromProfileTest {
             + "        <ddm:audience>D17200</ddm:audience>"
             + "    </ddm:profile>\n"
             + dcmi("")
-            + "</ddm:DDM>\n");
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
-        assertThat(getControlledMultiValueField("citation", "subject", result))
-            .containsExactlyInAnyOrder("Astronomy and Astrophysics", "Law", "Mathematical Sciences");
+        assertThat(getControlledMultiValueField("citation", SUBJECT, result))
+            .isEqualTo(List.of("Astronomy and Astrophysics", "Law", "Mathematical Sciences"));
+    }
+
+    @Test
+    void CIT013_subject_is_other_DD_1265() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title xml:lang='en'>Title of the dataset</dc:title>\n"
+            + "        <ddm:audience>D19200</ddm:audience>"
+            + "        <ddm:audience>D88200</ddm:audience>"
+            + "    </ddm:profile>\n"
+            + dcmi("")
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false);
+        assertThat(getControlledMultiValueField("citation", SUBJECT, result))
+            .isEqualTo(List.of("Other"));
     }
 
     @Test
