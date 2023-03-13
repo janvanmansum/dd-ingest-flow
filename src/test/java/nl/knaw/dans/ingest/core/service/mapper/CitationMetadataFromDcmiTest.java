@@ -16,7 +16,11 @@
 package nl.knaw.dans.ingest.core.service.mapper;
 
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundSingleValueField;
+import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
@@ -60,17 +64,43 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT002A () throws Exception {
+    public void CIT002A_CIT002B_other_id () throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
-            + minimalDdmProfile() + dcmi("")
+            + minimalDdmProfile() + dcmi("<dct:identifier xsi:type='id-type:EASY2'>easy-dataset:123</dct:identifier>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
         var field = getCompoundMultiValueField("citation", "otherId", result);
+
+        // CIT002A from vault metadata
         assertThat(field).extracting("otherIdAgency").extracting("value")
-            .containsExactlyInAnyOrder("otherId");
+            .contains("otherId");
         assertThat(field).extracting("otherIdValue").extracting("value")
-            .containsExactlyInAnyOrder("something");
+            .contains("something");
+
+        // CIT002B from @type="EASY2"
+        assertThat(field).extracting("otherIdAgency").extracting("value")
+            .contains("DANS-KNAW");
+        assertThat(field).extracting("otherIdValue").extracting("value")
+            .contains("easy-dataset:123");
+    }
+
+    @Test
+    public void CIT011_dates () throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <dct:modified>2015-09-08</dct:modified>\n"
+            + "        <dct:date>2015-09-07</dct:date>\n"
+            + "        <dct:dateAccepted>2015-09-06</dct:dateAccepted>\n"
+            + "        <dct:dateCopyrighted>2015-09-05</dct:dateCopyrighted>\n"
+            + "        <dct:issued>2015-09-04</dct:issued>\n")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", "dsDescription", result);
+        var s =toPrettyJsonString(result);
+        assertThat(field).extracting("dsDescriptionValue").extracting("value")
+            .containsExactlyInAnyOrder("Issued: 2015-09-04", "Date Copyrighted: 2015-09-05", "Date Accepted: 2015-09-06", "Date: 2015-09-07", "Modified: 2015-09-08");
     }
 
     @Test
