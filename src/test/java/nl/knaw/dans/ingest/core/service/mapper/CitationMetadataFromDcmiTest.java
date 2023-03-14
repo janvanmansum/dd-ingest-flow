@@ -31,6 +31,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES_I
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundSingleValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveSingleValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.minimalDdmProfile;
@@ -231,5 +232,22 @@ public class CitationMetadataFromDcmiTest {
             .isEqualTo("<p>series<br>123</p><p>another<br>series<br>456</p>");
     }
 
-    // TODO 28
+    @Test
+    void CIT028_source() throws Exception {
+        var doc = readDocumentFromString(
+            "<ddm:DDM " + rootAttributes + ">\n"
+                + minimalDdmProfile()
+                + dcmi(""
+                + "<dc:source>LISS panel, CentERdata</dc:source>"
+                + " <dc:source>General population sample survey, part of the International Social Survey Programme</dc:source>"
+                + "<dct:source>HTTP</dct:source>")
+                + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc, false);
+        var field = getPrimitiveMultiValueField("citation", "dataSources", result);
+        assertThat(field).containsExactlyInAnyOrder(
+            "LISS panel, CentERdata",
+            "General population sample survey, part of the International Social Survey Programme",
+            "HTTP");
+    }
 }
