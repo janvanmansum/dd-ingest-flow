@@ -30,6 +30,11 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY_URI;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_CITATION;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_ID_NUMBER;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_ID_TYPE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_URL;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES_INFORMATION;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
@@ -167,25 +172,25 @@ public class CitationMetadataFromDcmiTest {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">\n"
             + minimalDdmProfile()
-            + dcmi("<ddm:subject schemeURI=\"https://data.cultureelerfgoed.nl/term/id/pan/PAN\"\n"
-            + "                     subjectScheme=\"PAN thesaurus ideaaltypes\"\n"
-            + "                     valueURI=\"https://data.cultureelerfgoed.nl/term/id/pan/08-01-08\"\n"
-            + "                     xml:lang=\"en\">non-military uniform button\n"
+            + dcmi("<ddm:subject schemeURI='https://data.cultureelerfgoed.nl/term/id/pan/PAN'\n"
+            + "                     subjectScheme='PAN thesaurus ideaaltypes'\n"
+            + "                     valueURI='https://data.cultureelerfgoed.nl/term/id/pan/08-01-08'\n"
+            + "                     xml:lang='en'>non-military uniform button\n"
             + "        </ddm:subject>\n"
-            + "        <ddm:subject schemeURI=\"https://data.cultureelerfgoed.nl/term/id/pan/PAN\"\n"
-            + "                     subjectScheme=\"whoops\"\n"
-            + "                     valueURI=\"https://data.cultureelerfgoed.nl/term/id/pan/08-01-08\"\n"
-            + "                     xml:lang=\"en\">non-military uniform button\n"
+            + "        <ddm:subject schemeURI='https://data.cultureelerfgoed.nl/term/id/pan/PAN'\n"
+            + "                     subjectScheme='whoops'\n"
+            + "                     valueURI='https://data.cultureelerfgoed.nl/term/id/pan/08-01-08'\n"
+            + "                     xml:lang='en'>non-military uniform button\n"
             + "        </ddm:subject>\n"
-            + "        <ddm:subject schemeURI=\"http://vocab.getty.edu/aat/\"\n"
-            + "                     subjectScheme=\"Art and Architecture Thesaurus\"\n"
-            + "                     valueURI=\"http://vocab.getty.edu/aat/300239261\"\n"
-            + "                     xml:lang=\"en\">Broader Match: buttons (fasteners)\n"
+            + "        <ddm:subject schemeURI='http://vocab.getty.edu/aat/'\n"
+            + "                     subjectScheme='Art and Architecture Thesaurus'\n"
+            + "                     valueURI='http://vocab.getty.edu/aat/300239261'\n"
+            + "                     xml:lang='en'>Broader Match: buttons (fasteners)\n"
             + "        </ddm:subject>\n"
-            + "        <ddm:subject schemeURI=\"http://vocab.getty.edu/whoops/\"\n"
-            + "                     subjectScheme=\"Art and Architecture Thesaurus\"\n"
-            + "                     valueURI=\"http://vocab.getty.edu/aat/300239261\"\n"
-            + "                     xml:lang=\"en\">Broader Match: buttons (fasteners)\n"
+            + "        <ddm:subject schemeURI='http://vocab.getty.edu/whoops/'\n"
+            + "                     subjectScheme='Art and Architecture Thesaurus'\n"
+            + "                     valueURI='http://vocab.getty.edu/aat/300239261'\n"
+            + "                     xml:lang='en'>Broader Match: buttons (fasteners)\n"
             + "        </ddm:subject>\n")
             + "</ddm:DDM>\n");
 
@@ -199,11 +204,54 @@ public class CitationMetadataFromDcmiTest {
             .containsOnly("https://data.cultureelerfgoed.nl/term/id/pan/PAN",
                 "http://vocab.getty.edu/aat/");
         // note that the whoops elements are ignored
-        assertThat(toPrettyJsonString(result)).containsOnlyOnce("buttons");
-        assertThat(toPrettyJsonString(result)).containsOnlyOnce("uniform");
+        String jsonString = toPrettyJsonString(result);
+        assertThat(jsonString).containsOnlyOnce("buttons");
+        assertThat(jsonString).containsOnlyOnce("uniform");
     }
 
-    // TODO 16-17
+    @Test
+    void CIT016_language() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + dcmi("<dct:language>gibberish</dct:language><dct:language>koeterwaals</dct:language>")
+            + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc, false);
+        var field = getCompoundMultiValueField("citation", KEYWORD, result);
+        String jsonString = toPrettyJsonString(result);
+        assertThat(field).extracting(KEYWORD_VALUE).extracting("value")
+            .containsOnly("gibberish", "koeterwaals");
+        assertThat(field).extracting(KEYWORD_VOCABULARY).extracting("value")
+            .containsOnly("", ""); // TODO shouldn't these be null?
+        assertThat(field).extracting(KEYWORD_VOCABULARY_URI).extracting("value")
+            .containsOnly("", "");
+    }
+
+    @Test
+    void CIT017_ISBN_ISSN() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + dcmi(""
+            + "        <dc:identifier xsi:type='id-type:ISSN'>0925-6229</dc:identifier>\n"
+            + "        <dc:identifier xsi:type='ISSN'>987-654</dc:identifier>\n"
+            + "        <dc:identifier xsi:type='id-type:ISBN'>0-345-24223-8</dc:identifier>\n"
+            + "        <dc:identifier xsi:type='ISBN'>978-3-16-148410-0</dc:identifier>")
+            + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc, false);
+        var field = getCompoundMultiValueField("citation", PUBLICATION, result);
+        String jsonString = toPrettyJsonString(result);
+        assertThat(field).extracting(PUBLICATION_ID_TYPE).extracting("value")
+            .containsOnly("issn", "issn", "isbn", "isbn");
+        assertThat(field).extracting(PUBLICATION_ID_NUMBER).extracting("value")
+            .containsOnly("0925-6229", "987-654", "0-345-24223-8", "978-3-16-148410-0");
+        assertThat(field).extracting(PUBLICATION_CITATION).extracting("value")
+            .containsOnly("", ""); // TODO shouldn't these be null?
+        assertThat(field).extracting(PUBLICATION_URL).extracting("value")
+            .containsOnly("", "");
+    }
 
     @Test
     void CIT017A_provenance_maps_to_notes_DD_1216() throws Exception {
