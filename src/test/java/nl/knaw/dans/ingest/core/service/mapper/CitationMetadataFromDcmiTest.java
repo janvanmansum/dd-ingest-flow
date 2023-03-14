@@ -25,6 +25,10 @@ import java.util.Map;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VALUE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY_URI;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES_INFORMATION;
@@ -156,7 +160,50 @@ public class CitationMetadataFromDcmiTest {
         assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("");
     }
 
-    // TODO 14-17
+    // TODO 14
+
+    @Test
+    void CIT015_pan() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + minimalDdmProfile()
+            + dcmi("<ddm:subject schemeURI=\"https://data.cultureelerfgoed.nl/term/id/pan/PAN\"\n"
+            + "                     subjectScheme=\"PAN thesaurus ideaaltypes\"\n"
+            + "                     valueURI=\"https://data.cultureelerfgoed.nl/term/id/pan/08-01-08\"\n"
+            + "                     xml:lang=\"en\">non-military uniform button\n"
+            + "        </ddm:subject>\n"
+            + "        <ddm:subject schemeURI=\"https://data.cultureelerfgoed.nl/term/id/pan/PAN\"\n"
+            + "                     subjectScheme=\"whoops\"\n"
+            + "                     valueURI=\"https://data.cultureelerfgoed.nl/term/id/pan/08-01-08\"\n"
+            + "                     xml:lang=\"en\">non-military uniform button\n"
+            + "        </ddm:subject>\n"
+            + "        <ddm:subject schemeURI=\"http://vocab.getty.edu/aat/\"\n"
+            + "                     subjectScheme=\"Art and Architecture Thesaurus\"\n"
+            + "                     valueURI=\"http://vocab.getty.edu/aat/300239261\"\n"
+            + "                     xml:lang=\"en\">Broader Match: buttons (fasteners)\n"
+            + "        </ddm:subject>\n"
+            + "        <ddm:subject schemeURI=\"http://vocab.getty.edu/whoops/\"\n"
+            + "                     subjectScheme=\"Art and Architecture Thesaurus\"\n"
+            + "                     valueURI=\"http://vocab.getty.edu/aat/300239261\"\n"
+            + "                     xml:lang=\"en\">Broader Match: buttons (fasteners)\n"
+            + "        </ddm:subject>\n")
+            + "</ddm:DDM>\n");
+
+        var result = mapDdmToDataset(doc, false);
+        var field = getCompoundMultiValueField("citation", KEYWORD, result);
+        assertThat(field).extracting(KEYWORD_VALUE).extracting("value")
+            .containsOnly("non-military uniform button", "buttons (fasteners)");
+        assertThat(field).extracting(KEYWORD_VOCABULARY).extracting("value")
+            .containsOnly("PAN thesaurus ideaaltypes", "Art and Architecture Thesaurus");
+        assertThat(field).extracting(KEYWORD_VOCABULARY_URI).extracting("value")
+            .containsOnly("https://data.cultureelerfgoed.nl/term/id/pan/PAN",
+                "http://vocab.getty.edu/aat/");
+        // note that the whoops elements are ignored
+        assertThat(toPrettyJsonString(result)).containsOnlyOnce("buttons");
+        assertThat(toPrettyJsonString(result)).containsOnlyOnce("uniform");
+    }
+
+    // TODO 16-17
 
     @Test
     void CIT017A_provenance_maps_to_notes_DD_1216() throws Exception {
@@ -179,7 +226,7 @@ public class CitationMetadataFromDcmiTest {
     // TODO 18-21
 
     @Test
-    void CIT021A_description_type_other_maps_only_to_author_name_DD_1216() throws Exception { // TODO no rule number
+    void CIT021A_description_type_other_maps_only_to_author_name_DD_1216() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">\n"
             + minimalDdmProfile()
@@ -198,7 +245,7 @@ public class CitationMetadataFromDcmiTest {
     // TODO 22-26
 
     @Test
-    public void CIT027_without_series_info_in_dcmi () throws Exception {  // TODO should not produce <p></p>
+    public void CIT027_without_series_info_in_dcmi () throws Exception {
         // see also DD_1292_multiple_series_informations_to_single_compound_field in MappingIntegrationMap
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
