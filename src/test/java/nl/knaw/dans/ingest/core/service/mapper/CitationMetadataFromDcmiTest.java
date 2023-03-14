@@ -86,6 +86,22 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
+    public void CIT008_contact () throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", "datasetContact", result);
+        assertThat(field).extracting("datasetContactAffiliation").extracting("value")
+            .contains("DANS");
+        assertThat(field).extracting("datasetContactName").extracting("value")
+            .contains("D. O'Seven");
+        assertThat(field).extracting("datasetContactEmail").extracting("value")
+            .contains("J.Bond@does.not.exist.dans.knaw.nl");
+    }
+
+    @Test
     public void CIT011_dates () throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -98,13 +114,26 @@ public class CitationMetadataFromDcmiTest {
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
         List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", "dsDescription", result);
-        var s =toPrettyJsonString(result);
         assertThat(field).extracting("dsDescriptionValue").extracting("value")
             .containsExactlyInAnyOrder("Issued: 2015-09-04", "Date Copyrighted: 2015-09-05", "Date Accepted: 2015-09-06", "Date: 2015-09-07", "Modified: 2015-09-08");
     }
 
     @Test
-    void CIT012_DctAccesRights_maps_to_description_DD_1216() throws Exception {
+    public void CIT012_description () throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <dct:description>blabla rabarbera</dct:description>\n"
+            + "        <dct:description>pietje puck</dct:description>\n")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", "dsDescription", result);
+        assertThat(field).extracting("dsDescriptionValue").extracting("value")
+            .containsExactlyInAnyOrder("<p>blabla rabarbera</p>", "<p>pietje puck</p>");
+    }
+
+    @Test
+    void CIT012A_DctAccesRights_maps_to_description_DD_1216() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">\n"
             + "    <ddm:profile>\n"
@@ -126,6 +155,8 @@ public class CitationMetadataFromDcmiTest {
         assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("");
     }
 
+    // TODO 14-17
+
     @Test
     void CIT017A_provenance_maps_to_notes_DD_1216() throws Exception {
         var doc = readDocumentFromString(""
@@ -144,6 +175,8 @@ public class CitationMetadataFromDcmiTest {
             .isEqualTo("copied xml to csv");
     }
 
+    // TODO 18-21
+
     @Test
     void CIT021A_description_type_other_maps_only_to_author_name_DD_1216() throws Exception { // TODO no rule number
         var doc = readDocumentFromString(""
@@ -160,6 +193,8 @@ public class CitationMetadataFromDcmiTest {
         // not as description and author
         assertThat(toPrettyJsonString(result)).containsOnlyOnce(expected);
     }
+
+    // TODO 22-26
 
     @Test
     public void CIT027_without_series_info_in_dcmi () throws Exception {  // TODO should not produce <p></p>
@@ -195,4 +230,6 @@ public class CitationMetadataFromDcmiTest {
             .extracting("value")
             .isEqualTo("<p>series<br>123</p><p>another<br>series<br>456</p>");
     }
+
+    // TODO 28
 }
