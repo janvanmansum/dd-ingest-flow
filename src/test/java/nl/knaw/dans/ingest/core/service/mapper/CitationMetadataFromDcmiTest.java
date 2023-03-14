@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CitationMetadataFromDcmiTest {
 
     @Test
-    public void CIT002_CIT010_first_title_alternatives_and_the_rest () throws Exception {
+    public void CIT002_CIT010_first_title_alternatives_and_the_rest() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -74,7 +74,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT002A_CIT002B_other_id () throws Exception {
+    public void CIT002A_CIT002B_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:identifier xsi:type='id-type:EASY2'>easy-dataset:123</dct:identifier>")
@@ -96,7 +96,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT008_contact () throws Exception {
+    public void CIT008_contact() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -112,7 +112,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dates () throws Exception {
+    public void CIT011_dates() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -129,7 +129,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT012_description () throws Exception {
+    public void CIT012_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -219,7 +219,6 @@ public class CitationMetadataFromDcmiTest {
 
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", KEYWORD, result);
-        String jsonString = toPrettyJsonString(result);
         assertThat(field).extracting(KEYWORD_VALUE).extracting("value")
             .containsOnly("gibberish", "koeterwaals");
         assertThat(field).extracting(KEYWORD_VOCABULARY).extracting("value")
@@ -242,7 +241,6 @@ public class CitationMetadataFromDcmiTest {
 
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", PUBLICATION, result);
-        String jsonString = toPrettyJsonString(result);
         assertThat(field).extracting(PUBLICATION_ID_TYPE).extracting("value")
             .containsOnly("issn", "issn", "isbn", "isbn");
         assertThat(field).extracting(PUBLICATION_ID_NUMBER).extracting("value")
@@ -293,7 +291,7 @@ public class CitationMetadataFromDcmiTest {
     // TODO 22-26
 
     @Test
-    public void CIT027_without_series_info_in_dcmi () throws Exception {
+    public void CIT027_without_series_info_in_dcmi() throws Exception {
         // see also DD_1292_multiple_series_informations_to_single_compound_field in MappingIntegrationMap
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -322,7 +320,7 @@ public class CitationMetadataFromDcmiTest {
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(SERIES)).findFirst().orElseThrow();
         assertThat(field.getValue())
-            .extracting(SERIES_INFORMATION )
+            .extracting(SERIES_INFORMATION)
             .extracting("value")
             .isEqualTo("<p>series<br>123</p><p>another<br>series<br>456</p>");
     }
