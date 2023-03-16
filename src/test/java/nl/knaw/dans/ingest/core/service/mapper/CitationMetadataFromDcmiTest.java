@@ -23,8 +23,16 @@ import java.util.List;
 import java.util.Map;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_END;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_START;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DISTRIBUTOR;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DISTRIBUTOR_NAME;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.GRANT_NUMBER;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.GRANT_NUMBER_AGENCY;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.GRANT_NUMBER_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY;
@@ -288,7 +296,59 @@ public class CitationMetadataFromDcmiTest {
         assertThat(toPrettyJsonString(result)).containsOnlyOnce(expected);
     }
 
-    // TODO 22-26
+    // TODO 22
+
+    @Test
+    public void CIT023_nwo_project_nr() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile()
+            + dcmi("<dct:identifier xsi:type='id-type:NWO-PROJECTNR'>380-60-007</dct:identifier>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", GRANT_NUMBER, result);
+        assertThat(field).extracting(GRANT_NUMBER_AGENCY).extracting("value")
+            .containsExactlyInAnyOrder("NWO");
+        assertThat(field).extracting(GRANT_NUMBER_VALUE).extracting("value")
+            .containsExactlyInAnyOrder("380-60-007");
+    }
+
+    @Test
+    public void CIT024_publisher() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile()
+            + dcmi("<dct:publisher>Synthegra</dct:publisher>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DISTRIBUTOR, result);
+        assertThat(field).extracting(DISTRIBUTOR_NAME).extracting("value")
+            .containsExactlyInAnyOrder("Synthegra");
+    }
+
+    @Test
+    public void CIT026_dates_of_collection() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <ddm:datesOfCollection>2022-01-01/2022-02-01</ddm:datesOfCollection>\n"
+            + "        <ddm:datesOfCollection>\n"
+            + "            2021-02-01/2021-03-01\n"
+            + "        </ddm:datesOfCollection>\n"
+            + "        <ddm:datesOfCollection>\n"
+            + "            2020-04-01/\n"
+            + "        </ddm:datesOfCollection>\n"
+            + "        <ddm:datesOfCollection>\n"
+            + "            /2019-05-01\n"
+            + "        </ddm:datesOfCollection>\n")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DATE_OF_COLLECTION, result);
+        assertThat(field).extracting(DATE_OF_COLLECTION_START).extracting("value")
+            .containsExactlyInAnyOrder("2022-01-01","2021-02-01","2020-04-01","");
+        assertThat(field).extracting(DATE_OF_COLLECTION_END).extracting("value")
+            .containsExactlyInAnyOrder("2022-02-01","2021-03-01","2019-05-01","");
+    }
 
     @Test
     public void CIT027_without_series_info_in_dcmi() throws Exception {
