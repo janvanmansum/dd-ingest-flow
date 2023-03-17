@@ -427,8 +427,8 @@ public class CitationMetadataFromDcmiTest {
                 + minimalDdmProfile()
                 + "    <ddm:dcmiMetadata>"
                 + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>"
-                + "        <ddm:description descriptionType='SeriesInformation'>series123</ddm:description>"
-                + "        <ddm:description descriptionType='SeriesInformation'>anotherseries456</ddm:description>"
+                + "        <ddm:description descriptionType='SeriesInformation'>series\n123</ddm:description>"
+                + "        <ddm:description descriptionType='SeriesInformation'>another\nseries\n456</ddm:description>"
                 + "    </ddm:dcmiMetadata>"
                 + "</ddm:DDM>");
 
