@@ -39,6 +39,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY_URI;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.LANGUAGE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_CITATION;
@@ -50,6 +51,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES_I
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundSingleValueField;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveSingleValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
@@ -292,11 +294,25 @@ public class CitationMetadataFromDcmiTest {
         assertThat(getPrimitiveSingleValueField("citation", NOTES_TEXT, result))
             .isEqualTo("copied xml to csv");
     }
+    @Test
+    void CIT018_language() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile()
+            + dcmi(""
+            + "  <ddm:language encodingScheme='ISO639-1' code='fy'>West-Fries</ddm:language>\n"
+            + "  <ddm:language encodingScheme='ISO639-2' code='kal'>Groenlands</ddm:language>\n"
+            + "  <ddm:language encodingScheme='ISO639-2' code='baq'>Baskisch</ddm:language>\n")
+            + "</ddm:DDM>");
 
-    // TODO 18-20
+        var result = mapDdmToDataset(doc, false);
+
+        assertThat(getControlledMultiValueField("citation", LANGUAGE, result))
+            .containsExactlyInAnyOrder("Western Frisian", "Kalaallisut, Greenlandic", "Basque");
+    }
 
     @Test
-    void CIT021_contributor() throws Exception {
+    void CIT020_contributor_author() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>"
             + minimalDdmProfile()
@@ -320,23 +336,20 @@ public class CitationMetadataFromDcmiTest {
             + "         </dcx-dai:author>"
             + "     </dcx-dai:contributorDetails>"
             + "     <dcx-dai:contributorDetails>"
-            + "         <dcx-dai:organization>"
-            + "             <dcx-dai:name xml:lang='en'>Anti-Vampire League</dcx-dai:name>"
-            + "             <dcx-dai:role>"
-            + "                 Funder"
-            + "             </dcx-dai:role>"
-            + "             <dcx-dai:ISNI>http://isni.org/isni/0000000121032683</dcx-dai:ISNI>"
-            + "         </dcx-dai:organization>"
+            + "         <dcx-dai:author>"
+            + "             <dcx-dai:initials>A</dcx-dai:initials>"
+            + "             <dcx-dai:surname>Jones</dcx-dai:surname>"
+            + "             <dcx-dai:role>Funder</dcx-dai:role>"
+            + "         </dcx-dai:author>"
             + "     </dcx-dai:contributorDetails>")
             + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", CONTRIBUTOR, result);
         assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
-            .containsOnly("Other"); // see CIT024 publisher becomes distributor
+            .containsOnly("Other", "Funder"); // see CIT024 publisher becomes distributor
         assertThat(field).extracting(CONTRIBUTOR_NAME).extracting("value")
-            .containsOnly("M. H. van Binsbergen (Kohnstamm Instituut)");
-        // note the other contributors are mapped to funder/rightsholder
+            .containsOnly("M. H. van Binsbergen (Kohnstamm Instituut)", "A Jones");
     }
 
     @Test
