@@ -22,7 +22,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_TYPE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_END;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_START;
@@ -64,9 +66,9 @@ public class CitationMetadataFromDcmiTest {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
-            + "        <dct:title>title 1</dct:title>\n"
-            + "        <dct:title>title 2</dct:title>\n"
-            + "        <dct:alternative>alt title 1</dct:alternative>\n"
+            + "        <dct:title>title 1</dct:title>"
+            + "        <dct:title>title 2</dct:title>"
+            + "        <dct:alternative>alt title 1</dct:alternative>"
             + "        <dct:alternative>alt title 2</dct:alternative>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
@@ -124,11 +126,11 @@ public class CitationMetadataFromDcmiTest {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
-            + "        <dct:modified>2015-09-08</dct:modified>\n"
-            + "        <dct:date>2015-09-07</dct:date>\n"
-            + "        <dct:dateAccepted>2015-09-06</dct:dateAccepted>\n"
-            + "        <dct:dateCopyrighted>2015-09-05</dct:dateCopyrighted>\n"
-            + "        <dct:issued>2015-09-04</dct:issued>\n")
+            + "        <dct:modified>2015-09-08</dct:modified>"
+            + "        <dct:date>2015-09-07</dct:date>"
+            + "        <dct:dateAccepted>2015-09-06</dct:dateAccepted>"
+            + "        <dct:dateCopyrighted>2015-09-05</dct:dateCopyrighted>"
+            + "        <dct:issued>2015-09-04</dct:issued>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
         List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", "dsDescription", result);
@@ -141,8 +143,8 @@ public class CitationMetadataFromDcmiTest {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
-            + "        <dct:description>blabla rabarbera</dct:description>\n"
-            + "        <dct:description>pietje puck</dct:description>\n")
+            + "        <dct:description>blabla rabarbera</dct:description>"
+            + "        <dct:description>pietje puck</dct:description>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
         List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", "dsDescription", result);
@@ -153,14 +155,14 @@ public class CitationMetadataFromDcmiTest {
     @Test
     void CIT012A_DctAccesRights_maps_to_description_DD_1216() throws Exception {
         var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">\n"
-            + "    <ddm:profile>\n"
-            + "        <dc:title>Title of the dataset</dc:title>\n"
-            + "        <dc:description>Lorem ipsum.</dc:description>\n"
+            + "<ddm:DDM " + rootAttributes + ">"
+            + "    <ddm:profile>"
+            + "        <dc:title>Title of the dataset</dc:title>"
+            + "        <dc:description>Lorem ipsum.</dc:description>"
             + "        <ddm:audience>D24000</ddm:audience>"
-            + "    </ddm:profile>\n"
-            + dcmi("<dct:accessRights>Some story</dct:accessRights>\n")
-            + "</ddm:DDM>\n");
+            + "    </ddm:profile>"
+            + dcmi("<dct:accessRights>Some story</dct:accessRights>")
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var str = toPrettyJsonString(result);
@@ -173,34 +175,48 @@ public class CitationMetadataFromDcmiTest {
         assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("");
     }
 
-    // TODO 14
+    @Test
+    void CIT014_subject() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "  <dc:subject xml:lang='en'>metal</dc:subject>"
+            + "  <dct:subject>childcare; voor- en vroegschoolse educatie; schoolloopbanen; school career; sociaal-emotionele ontwikkeling; social-emotional development; primary school; basisschool</dct:subject>")
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false);
+        var field = getCompoundMultiValueField("citation", KEYWORD, result);
+        assertThat(field).extracting(KEYWORD_VALUE).extracting("value")
+            .containsOnly("metal", "childcare; voor- en vroegschoolse educatie; schoolloopbanen; school career; sociaal-emotionele ontwikkeling; social-emotional development; primary school; basisschool");
+        assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("");
+    }
 
     @Test
     void CIT015_pan() throws Exception {
         var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
-            + dcmi("<ddm:subject schemeURI='https://data.cultureelerfgoed.nl/term/id/pan/PAN'\n"
-            + "                     subjectScheme='PAN thesaurus ideaaltypes'\n"
-            + "                     valueURI='https://data.cultureelerfgoed.nl/term/id/pan/08-01-08'\n"
-            + "                     xml:lang='en'>non-military uniform button\n"
-            + "        </ddm:subject>\n"
-            + "        <ddm:subject schemeURI='https://data.cultureelerfgoed.nl/term/id/pan/PAN'\n"
-            + "                     subjectScheme='whoops'\n"
-            + "                     valueURI='https://data.cultureelerfgoed.nl/term/id/pan/08-01-08'\n"
-            + "                     xml:lang='en'>non-military uniform button\n"
-            + "        </ddm:subject>\n"
-            + "        <ddm:subject schemeURI='http://vocab.getty.edu/aat/'\n"
-            + "                     subjectScheme='Art and Architecture Thesaurus'\n"
-            + "                     valueURI='http://vocab.getty.edu/aat/300239261'\n"
-            + "                     xml:lang='en'>Broader Match: buttons (fasteners)\n"
-            + "        </ddm:subject>\n"
-            + "        <ddm:subject schemeURI='http://vocab.getty.edu/whoops/'\n"
-            + "                     subjectScheme='Art and Architecture Thesaurus'\n"
-            + "                     valueURI='http://vocab.getty.edu/aat/300239261'\n"
-            + "                     xml:lang='en'>Broader Match: buttons (fasteners)\n"
-            + "        </ddm:subject>\n")
-            + "</ddm:DDM>\n");
+            + dcmi("<ddm:subject schemeURI='https://data.cultureelerfgoed.nl/term/id/pan/PAN'"
+            + "                     subjectScheme='PAN thesaurus ideaaltypes'"
+            + "                     valueURI='https://data.cultureelerfgoed.nl/term/id/pan/08-01-08'"
+            + "                     xml:lang='en'>non-military uniform button"
+            + "        </ddm:subject>"
+            + "        <ddm:subject schemeURI='https://data.cultureelerfgoed.nl/term/id/pan/PAN'"
+            + "                     subjectScheme='whoops'"
+            + "                     valueURI='https://data.cultureelerfgoed.nl/term/id/pan/08-01-08'"
+            + "                     xml:lang='en'>non-military uniform button"
+            + "        </ddm:subject>"
+            + "        <ddm:subject schemeURI='http://vocab.getty.edu/aat/'"
+            + "                     subjectScheme='Art and Architecture Thesaurus'"
+            + "                     valueURI='http://vocab.getty.edu/aat/300239261'"
+            + "                     xml:lang='en'>Broader Match: buttons (fasteners)"
+            + "        </ddm:subject>"
+            + "        <ddm:subject schemeURI='http://vocab.getty.edu/whoops/'"
+            + "                     subjectScheme='Art and Architecture Thesaurus'"
+            + "                     valueURI='http://vocab.getty.edu/aat/300239261'"
+            + "                     xml:lang='en'>Broader Match: buttons (fasteners)"
+            + "        </ddm:subject>")
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", KEYWORD, result);
@@ -220,10 +236,10 @@ public class CitationMetadataFromDcmiTest {
     @Test
     void CIT016_language() throws Exception {
         var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
             + dcmi("<dct:language>gibberish</dct:language><dct:language>koeterwaals</dct:language>")
-            + "</ddm:DDM>\n");
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", KEYWORD, result);
@@ -238,14 +254,14 @@ public class CitationMetadataFromDcmiTest {
     @Test
     void CIT017_ISBN_ISSN() throws Exception {
         var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
             + dcmi(""
-            + "        <dc:identifier xsi:type='id-type:ISSN'>0925-6229</dc:identifier>\n"
-            + "        <dc:identifier xsi:type='ISSN'>987-654</dc:identifier>\n"
-            + "        <dc:identifier xsi:type='id-type:ISBN'>0-345-24223-8</dc:identifier>\n"
+            + "        <dc:identifier xsi:type='id-type:ISSN'>0925-6229</dc:identifier>"
+            + "        <dc:identifier xsi:type='ISSN'>987-654</dc:identifier>"
+            + "        <dc:identifier xsi:type='id-type:ISBN'>0-345-24223-8</dc:identifier>"
             + "        <dc:identifier xsi:type='ISBN'>978-3-16-148410-0</dc:identifier>")
-            + "</ddm:DDM>\n");
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", PUBLICATION, result);
@@ -262,10 +278,10 @@ public class CitationMetadataFromDcmiTest {
     @Test
     void CIT017A_provenance_maps_to_notes_DD_1216() throws Exception {
         var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
-            + dcmi("<dct:provenance>copied xml to csv</dct:provenance>\n")
-            + "</ddm:DDM>\n");
+            + dcmi("<dct:provenance>copied xml to csv</dct:provenance>")
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var str = toPrettyJsonString(result);
@@ -277,15 +293,59 @@ public class CitationMetadataFromDcmiTest {
             .isEqualTo("copied xml to csv");
     }
 
-    // TODO 18-21
+    // TODO 18-20
+
+    @Test
+    void CIT021_contributor() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>"
+            + minimalDdmProfile()
+            + dcmi(""
+            + "    <dcx-dai:contributorDetails>"
+            + "      <dcx-dai:author>"
+            + "        <dcx-dai:titles>dr.</dcx-dai:titles>"
+            + "        <dcx-dai:initials>M. H.</dcx-dai:initials>"
+            + "        <dcx-dai:surname>van Binsbergen</dcx-dai:surname>"
+            + "        <dcx-dai:role>Distributor</dcx-dai:role>"
+            + "        <dcx-dai:organization>"
+            + "          <dcx-dai:name>Kohnstamm Instituut</dcx-dai:name>"
+            + "        </dcx-dai:organization>"
+            + "       </dcx-dai:author>"
+            + "     </dcx-dai:contributorDetails>"
+            + "     <dcx-dai:contributorDetails>"
+            + "         <dcx-dai:author>"
+            + "             <dcx-dai:initials>R</dcx-dai:initials>"
+            + "             <dcx-dai:surname>Smith</dcx-dai:surname>"
+            + "             <dcx-dai:role>RightsHolder</dcx-dai:role>"
+            + "         </dcx-dai:author>"
+            + "     </dcx-dai:contributorDetails>"
+            + "     <dcx-dai:contributorDetails>"
+            + "         <dcx-dai:organization>"
+            + "             <dcx-dai:name xml:lang='en'>Anti-Vampire League</dcx-dai:name>"
+            + "             <dcx-dai:role>"
+            + "                 Funder"
+            + "             </dcx-dai:role>"
+            + "             <dcx-dai:ISNI>http://isni.org/isni/0000000121032683</dcx-dai:ISNI>"
+            + "         </dcx-dai:organization>"
+            + "     </dcx-dai:contributorDetails>")
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false);
+        var field = getCompoundMultiValueField("citation", CONTRIBUTOR, result);
+        assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
+            .containsOnly("Other"); // see CIT024 publisher becomes distributor
+        assertThat(field).extracting(CONTRIBUTOR_NAME).extracting("value")
+            .containsOnly("M. H. van Binsbergen (Kohnstamm Instituut)");
+        // note the other contributors are mapped to funder/rightsholder
+    }
 
     @Test
     void CIT021A_description_type_other_maps_only_to_author_name_DD_1216() throws Exception {
         var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
-            + dcmi("<ddm:description descriptionType='Other'>Author from description other</ddm:description>\n")
-            + "</ddm:DDM>\n");
+            + dcmi("<ddm:description descriptionType='Other'>Author from description other</ddm:description>")
+            + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", "contributor", result);
@@ -295,8 +355,6 @@ public class CitationMetadataFromDcmiTest {
         // not as description and author
         assertThat(toPrettyJsonString(result)).containsOnlyOnce(expected);
     }
-
-    // TODO 22
 
     @Test
     public void CIT023_nwo_project_nr() throws Exception {
@@ -331,16 +389,16 @@ public class CitationMetadataFromDcmiTest {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
-            + "        <ddm:datesOfCollection>2022-01-01/2022-02-01</ddm:datesOfCollection>\n"
-            + "        <ddm:datesOfCollection>\n"
-            + "            2021-02-01/2021-03-01\n"
-            + "        </ddm:datesOfCollection>\n"
-            + "        <ddm:datesOfCollection>\n"
-            + "            2020-04-01/\n"
-            + "        </ddm:datesOfCollection>\n"
-            + "        <ddm:datesOfCollection>\n"
-            + "            /2019-05-01\n"
-            + "        </ddm:datesOfCollection>\n")
+            + "        <ddm:datesOfCollection>2022-01-01/2022-02-01</ddm:datesOfCollection>"
+            + "        <ddm:datesOfCollection>"
+            + "            2021-02-01/2021-03-01"
+            + "        </ddm:datesOfCollection>"
+            + "        <ddm:datesOfCollection>"
+            + "            2020-04-01/"
+            + "        </ddm:datesOfCollection>"
+            + "        <ddm:datesOfCollection>"
+            + "            /2019-05-01"
+            + "        </ddm:datesOfCollection>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
         List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DATE_OF_COLLECTION, result);
@@ -365,14 +423,14 @@ public class CitationMetadataFromDcmiTest {
     @Test
     void CIT027_multiple_series_informations_to_single_compound_field_DD_1292() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
+            "<ddm:DDM " + rootAttributes + ">"
                 + minimalDdmProfile()
-                + "    <ddm:dcmiMetadata>\n"
-                + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>\n"
-                + "        <ddm:description descriptionType='SeriesInformation'>series\n123</ddm:description>\n"
-                + "        <ddm:description descriptionType='SeriesInformation'>another\nseries\n456</ddm:description>\n"
-                + "    </ddm:dcmiMetadata>\n"
-                + "</ddm:DDM>\n");
+                + "    <ddm:dcmiMetadata>"
+                + "        <dct:rightsHolder>Mr. Rights</dct:rightsHolder>"
+                + "        <ddm:description descriptionType='SeriesInformation'>series123</ddm:description>"
+                + "        <ddm:description descriptionType='SeriesInformation'>anotherseries456</ddm:description>"
+                + "    </ddm:dcmiMetadata>"
+                + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
 
@@ -388,13 +446,13 @@ public class CitationMetadataFromDcmiTest {
     @Test
     void CIT028_source() throws Exception {
         var doc = readDocumentFromString(
-            "<ddm:DDM " + rootAttributes + ">\n"
+            "<ddm:DDM " + rootAttributes + ">"
                 + minimalDdmProfile()
                 + dcmi(""
                 + "<dc:source>LISS panel, CentERdata</dc:source>"
                 + " <dc:source>General population sample survey, part of the International Social Survey Programme</dc:source>"
                 + "<dct:source>HTTP</dct:source>")
-                + "</ddm:DDM>\n");
+                + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
         var field = getPrimitiveMultiValueField("citation", "dataSources", result);
