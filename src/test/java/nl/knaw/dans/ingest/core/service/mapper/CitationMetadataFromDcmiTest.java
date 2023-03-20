@@ -22,9 +22,15 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ALTERNATIVE_TITLE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_TYPE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATASET_CONTACT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATASET_CONTACT_AFFILIATION;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATASET_CONTACT_EMAIL;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATASET_CONTACT_NAME;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATA_SOURCES;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_END;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DATE_OF_COLLECTION_START;
@@ -41,6 +47,9 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.KEYWORD_VOCABULARY_URI;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.LANGUAGE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.NOTES_TEXT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.OTHER_ID;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.OTHER_ID_AGENCY;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.OTHER_ID_VALUE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_CITATION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_ID_NUMBER;
@@ -76,12 +85,12 @@ public class CitationMetadataFromDcmiTest {
         var result = mapDdmToDataset(doc, true);
 
         // CIT002 first of dcmi title/alternative
-        assertThat(getPrimitiveSingleValueField("citation", "alternativeTitle", result))
+        assertThat(getPrimitiveSingleValueField("citation", ALTERNATIVE_TITLE, result))
             .isEqualTo("title 1");
 
         // CIT010 rest of dcmi title/alternative
-        assertThat(getCompoundMultiValueField("citation", "dsDescription", result))
-            .extracting("dsDescriptionValue").extracting("value")
+        assertThat(getCompoundMultiValueField("citation", DESCRIPTION, result))
+            .extracting(DESCRIPTION_VALUE).extracting("value")
             .containsExactlyInAnyOrder("<p>title 2</p>", "<p>alt title 1</p>", "<p>alt title 2</p>");
     }
 
@@ -92,18 +101,18 @@ public class CitationMetadataFromDcmiTest {
             + minimalDdmProfile() + dcmi("<dct:identifier xsi:type='id-type:EASY2'>easy-dataset:123</dct:identifier>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        var field = getCompoundMultiValueField("citation", "otherId", result);
+        var field = getCompoundMultiValueField("citation", OTHER_ID, result);
 
         // CIT002A from vault metadata
-        assertThat(field).extracting("otherIdAgency").extracting("value")
+        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
             .contains("otherId");
-        assertThat(field).extracting("otherIdValue").extracting("value")
+        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
             .contains("something");
 
         // CIT002B from @type="EASY2"
-        assertThat(field).extracting("otherIdAgency").extracting("value")
+        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
             .contains("DANS-KNAW");
-        assertThat(field).extracting("otherIdValue").extracting("value")
+        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
             .contains("easy-dataset:123");
     }
 
@@ -114,12 +123,12 @@ public class CitationMetadataFromDcmiTest {
             + minimalDdmProfile() + dcmi("")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        var field = getCompoundMultiValueField("citation", "datasetContact", result);
-        assertThat(field).extracting("datasetContactAffiliation").extracting("value")
+        var field = getCompoundMultiValueField("citation", DATASET_CONTACT, result);
+        assertThat(field).extracting(DATASET_CONTACT_AFFILIATION).extracting("value")
             .contains("DANS");
-        assertThat(field).extracting("datasetContactName").extracting("value")
+        assertThat(field).extracting(DATASET_CONTACT_NAME).extracting("value")
             .contains("D. O'Seven");
-        assertThat(field).extracting("datasetContactEmail").extracting("value")
+        assertThat(field).extracting(DATASET_CONTACT_EMAIL).extracting("value")
             .contains("J.Bond@does.not.exist.dans.knaw.nl");
     }
 
@@ -135,8 +144,8 @@ public class CitationMetadataFromDcmiTest {
             + "        <dct:issued>2015-09-04</dct:issued>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", "dsDescription", result);
-        assertThat(field).extracting("dsDescriptionValue").extracting("value")
+        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
             .containsExactlyInAnyOrder("Issued: 2015-09-04", "Date Copyrighted: 2015-09-05", "Date Accepted: 2015-09-06", "Date: 2015-09-07", "Modified: 2015-09-08");
     }
 
@@ -149,8 +158,8 @@ public class CitationMetadataFromDcmiTest {
             + "        <dct:description>pietje puck</dct:description>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", "dsDescription", result);
-        assertThat(field).extracting("dsDescriptionValue").extracting("value")
+        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
             .containsExactlyInAnyOrder("<p>blabla rabarbera</p>", "<p>pietje puck</p>");
     }
 
@@ -294,6 +303,7 @@ public class CitationMetadataFromDcmiTest {
         assertThat(getPrimitiveSingleValueField("citation", NOTES_TEXT, result))
             .isEqualTo("copied xml to csv");
     }
+
     @Test
     void CIT018_language() throws Exception {
         var doc = readDocumentFromString(""
@@ -361,7 +371,7 @@ public class CitationMetadataFromDcmiTest {
             + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
-        var field = getCompoundMultiValueField("citation", "contributor", result);
+        var field = getCompoundMultiValueField("citation", CONTRIBUTOR, result);
         var expected = "Author from description other";
         assertThat(field).extracting(CONTRIBUTOR_NAME).extracting("value")
             .containsOnly(expected);
@@ -429,7 +439,7 @@ public class CitationMetadataFromDcmiTest {
             + minimalDdmProfile() + dcmi("")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        assertThat(getCompoundSingleValueField("citation", "series", result))
+        assertThat(getCompoundSingleValueField("citation", SERIES, result))
             .isNull();
     }
 
@@ -468,7 +478,7 @@ public class CitationMetadataFromDcmiTest {
                 + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
-        var field = getPrimitiveMultiValueField("citation", "dataSources", result);
+        var field = getPrimitiveMultiValueField("citation", DATA_SOURCES, result);
         assertThat(field).containsExactlyInAnyOrder(
             "LISS panel, CentERdata",
             "General population sample survey, part of the International Social Survey Programme",

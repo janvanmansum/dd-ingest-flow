@@ -17,8 +17,16 @@ package nl.knaw.dans.ingest.core.service.mapper;
 
 import org.junit.jupiter.api.Test;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ABR_ARTIFACT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ABR_COMPLEX;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ABR_PERIOD;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ABR_RAPPORT_NUMMER;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ABR_RAPPORT_TYPE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ABR_VERWERVINGSWIJZE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ARCHIS_NUMBER;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ARCHIS_NUMBER_ID;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ARCHIS_NUMBER_TYPE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ARCHIS_ZAAK_ID;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveMultiValueField;
@@ -40,7 +48,7 @@ public class DansArchaeologyMetadataTest {
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
 
-        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansArchisZaakId", result))
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ARCHIS_ZAAK_ID, result))
             .containsOnly("123");
     }
 
@@ -54,7 +62,7 @@ public class DansArchaeologyMetadataTest {
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
 
-        var archisNr = getCompoundMultiValueField("dansArchaeologyMetadata", "dansArchisNumber", result);
+        var archisNr = getCompoundMultiValueField("dansArchaeologyMetadata", ARCHIS_NUMBER, result);
         assertThat(archisNr).extracting(ARCHIS_NUMBER_TYPE).extracting("value")
             .containsOnly("monument");
         assertThat(archisNr).extracting(ARCHIS_NUMBER_ID).extracting("value")
@@ -78,11 +86,11 @@ public class DansArchaeologyMetadataTest {
         var result = mapDdmToDataset(doc, true);
 
         // AR003
-        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansAbrRapportType", result))
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_RAPPORT_TYPE, result))
             .containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/d6b2e162-3f49-4027-8f03-28194db2905e");
 
         // AR004
-        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansAbrRapportNummer", result))
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_RAPPORT_NUMMER, result))
             .containsOnly("BAAC 123-A");
     }
 
@@ -101,7 +109,7 @@ public class DansArchaeologyMetadataTest {
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
 
-        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansAbrVerwervingswijze", result))
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_VERWERVINGSWIJZE, result))
             .containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/967bfdf8-c44d-4c69-8318-34ed1ab1e784");
     }
 
@@ -120,7 +128,7 @@ public class DansArchaeologyMetadataTest {
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
 
-        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansAbrComplex", result))
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_COMPLEX, result))
             .containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/9a758542-8d0d-4afa-b664-104b938fe13e");
     }
 
@@ -140,7 +148,7 @@ public class DansArchaeologyMetadataTest {
         var result = mapDdmToDataset(doc, true);
 
         // AR001
-        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansAbrArtifact", result))
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_ARTIFACT, result))
             .containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/5bd97bc0-697c-4128-b7b2-d2324bc4a2e1");
     }
 
@@ -159,7 +167,7 @@ public class DansArchaeologyMetadataTest {
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
 
-        var field = getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansAbrPeriod", result);
+        var field = getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_PERIOD, result);
         assertThat(field).containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/5b253754-ddd0-4ae0-a5bb-555176bca858");
     }
 

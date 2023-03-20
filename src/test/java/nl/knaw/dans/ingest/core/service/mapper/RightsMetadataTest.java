@@ -23,6 +23,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.LANGUAGE_OF_METADATA;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PERSONAL_DATA_PRESENT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RIGHTS_HOLDER;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getControlledMultiValueField;
@@ -67,7 +69,7 @@ class RightsMetadataTest {
     void RIG000A_should_map_dai_authors() {
 
         var result = mapDdmToDataset(ddmWithOrganizations, false);
-        assertThat(getPrimitiveMultiValueField("dansRights", "dansRightsHolder", result))
+        assertThat(getPrimitiveMultiValueField("dansRights", RIGHTS_HOLDER, result))
             .containsOnly("Some org", "Some other org");
     }
 
@@ -75,7 +77,7 @@ class RightsMetadataTest {
     void RIG003_should_collect_languages_from_authors() {
 
         var result = mapDdmToDataset(ddmWithOrganizations, false);
-        assertThat(getControlledMultiValueField("dansRights", "dansMetadataLanguage", result))
+        assertThat(getControlledMultiValueField("dansRights", LANGUAGE_OF_METADATA, result))
             .containsOnly("Dutch", "German");
     }
 
@@ -106,7 +108,7 @@ class RightsMetadataTest {
     void RIG000B_should_map_organizations() {
 
         var result = mapDdmToDataset(ddmWithAuthors, false);
-        assertThat(getPrimitiveMultiValueField("dansRights", "dansRightsHolder", result))
+        assertThat(getPrimitiveMultiValueField("dansRights", RIGHTS_HOLDER, result))
             .containsOnly("Example Org", "Another Org");
     }
 
@@ -114,7 +116,7 @@ class RightsMetadataTest {
     void RIG003_should_collect_languages_from_organizations() {
 
         var result = mapDdmToDataset(ddmWithAuthors, false);
-        assertThat(getControlledMultiValueField("dansRights", "dansMetadataLanguage", result))
+        assertThat(getControlledMultiValueField("dansRights", LANGUAGE_OF_METADATA, result))
             .containsOnly("Dutch", "German");
     }
 
@@ -146,7 +148,7 @@ class RightsMetadataTest {
             + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false);
-        assertThat(getControlledMultiValueField("dansRights", "dansMetadataLanguage", result))
+        assertThat(getControlledMultiValueField("dansRights", LANGUAGE_OF_METADATA, result))
             .containsOnly("Dutch");
     }
 
@@ -174,7 +176,7 @@ class RightsMetadataTest {
             + "</ddm:DDM>\n");
 
         var result = mapDdmToDataset(doc, false);
-        assertThat(getControlledSingleValueField("dansRights", "dansPersonalDataPresent", result))
+        assertThat(getControlledSingleValueField("dansRights", PERSONAL_DATA_PRESENT, result))
             .isEqualTo("Unknown");
     }
 
@@ -192,7 +194,7 @@ class RightsMetadataTest {
             + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
-        assertThat(getControlledSingleValueField("dansRights", "dansPersonalDataPresent", result))
+        assertThat(getControlledSingleValueField("dansRights", PERSONAL_DATA_PRESENT, result))
             .isEqualTo("Yes");
         // "No" is tested in the PersonalDataTest class
     }

@@ -22,11 +22,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.List;
 
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ALTERNATIVE_TITLE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR_NAME;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DESCRIPTION_VALUE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.DISTRIBUTION_DATE;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PRODUCTION_DATE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SUBJECT;
+import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.TITLE;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmWithCustomProfileContent;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
@@ -45,7 +49,7 @@ public class CitationMetadataFromProfileTest {
         var doc = ddmWithCustomProfileContent("");
 
         var result = mapDdmToDataset(doc, false);
-        assertThat(getPrimitiveSingleValueField("citation", "title", result))
+        assertThat(getPrimitiveSingleValueField("citation", TITLE, result))
             .isEqualTo("Title of the dataset");
     }
 
@@ -182,7 +186,7 @@ public class CitationMetadataFromProfileTest {
         var doc = ddmWithCustomProfileContent("<ddm:created>2012-12</ddm:created>");
 
         var result = mapDdmToDataset(doc, false);
-        assertThat(getPrimitiveSingleValueField("citation", "productionDate", result))
+        assertThat(getPrimitiveSingleValueField("citation", PRODUCTION_DATE, result))
             .isEqualTo("2012-12-01");
     }
 
@@ -191,7 +195,7 @@ public class CitationMetadataFromProfileTest {
         var doc = ddmWithCustomProfileContent("<ddm:available>2014-12</ddm:available>");
 
         var result = mapDdmToDataset(doc, false);
-        assertThat(getPrimitiveSingleValueField("citation", "distributionDate", result))
+        assertThat(getPrimitiveSingleValueField("citation", DISTRIBUTION_DATE, result))
             .isEqualTo("2014-12-01");
     }
 }
