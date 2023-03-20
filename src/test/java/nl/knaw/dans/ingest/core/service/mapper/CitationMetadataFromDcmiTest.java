@@ -257,7 +257,7 @@ public class CitationMetadataFromDcmiTest {
         assertThat(field).extracting(KEYWORD_VALUE).extracting("value")
             .containsOnly("gibberish", "koeterwaals");
         assertThat(field).extracting(KEYWORD_VOCABULARY).extracting("value")
-            .containsOnly("", ""); // TODO shouldn't these be null?
+            .containsOnly("", "");
         assertThat(field).extracting(KEYWORD_VOCABULARY_URI).extracting("value")
             .containsOnly("", "");
     }
@@ -281,7 +281,7 @@ public class CitationMetadataFromDcmiTest {
         assertThat(field).extracting(PUBLICATION_ID_NUMBER).extracting("value")
             .containsOnly("0925-6229", "987-654", "0-345-24223-8", "978-3-16-148410-0");
         assertThat(field).extracting(PUBLICATION_CITATION).extracting("value")
-            .containsOnly("", ""); // TODO shouldn't these be null?
+            .containsOnly("", "");
         assertThat(field).extracting(PUBLICATION_URL).extracting("value")
             .containsOnly("", "");
     }
