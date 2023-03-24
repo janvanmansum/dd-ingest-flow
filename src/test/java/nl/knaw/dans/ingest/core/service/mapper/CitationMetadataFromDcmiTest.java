@@ -95,13 +95,16 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT002A_CIT002B_other_id() throws Exception {
+    public void CIT002A_4_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
-            + minimalDdmProfile() + dcmi("<dct:identifier xsi:type='id-type:EASY2'>easy-dataset:123</dct:identifier>")
+            + minimalDdmProfile() + dcmi(""
+            + "<dct:identifier xsi:type='id-type:EASY2'>easy-dataset:123</dct:identifier>"
+            + "<dct:identifier>typeless:123</dct:identifier>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
         var field = getCompoundMultiValueField("citation", OTHER_ID, result);
+        assertThat(field).hasSize(4);
 
         // CIT002A from vault metadata
         assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
@@ -114,6 +117,18 @@ public class CitationMetadataFromDcmiTest {
             .contains("DANS-KNAW");
         assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
             .contains("easy-dataset:123");
+
+        // CIT003 from bag-info.txt Has-Organizational-Identifier
+        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
+            .contains("doi");
+        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
+            .contains("typeless:123");
+
+        // CIT004
+        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
+            .contains("");
+        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
+            .contains("10.12345/678");
     }
 
     @Test
@@ -319,6 +334,19 @@ public class CitationMetadataFromDcmiTest {
 
         assertThat(getControlledMultiValueField("citation", LANGUAGE, result))
             .containsExactlyInAnyOrder("Western Frisian", "Kalaallisut, Greenlandic", "Basque");
+    }
+
+    @Test
+    void CIT018_language_is_not_iso() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile()
+            + dcmi(""
+            + "  <ddm:language encodingScheme='rabarber' code='baq'>Baskisch</ddm:language>\n")
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false).getDatasetVersion().getMetadataBlocks();
+        assertThat(result.get("dansArchaeologyMetadata").getFields()).isEmpty();
     }
 
     @Test

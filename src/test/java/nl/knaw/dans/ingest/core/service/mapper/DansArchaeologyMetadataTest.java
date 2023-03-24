@@ -34,7 +34,9 @@ import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmTo
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.minimalDdmProfile;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocumentFromString;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.toPrettyJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class DansArchaeologyMetadataTest {
 
@@ -95,6 +97,30 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
+    void AR003_AR004_abr_report_number_without_type() throws Exception {
+
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <ddm:reportNumber"
+            + "                subjectScheme='ABR Rapporten'"
+            + "                schemeURI='https://data.cultureelerfgoed.nl/term/id/abr/7a99aaba-c1e7-49a4-9dd8-d295dbcc870e'"
+            + "                reportNo='123-A'>"
+            + "            BAAC 123-A"
+            + "        </ddm:reportNumber>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+
+        // AR003
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_RAPPORT_TYPE, result))
+            .isNull();
+
+        // AR004
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_RAPPORT_NUMMER, result))
+            .containsOnly("BAAC 123-A");
+    }
+
+    @Test
     void AR005_aquisition_method() throws Exception {
 
         var doc = readDocumentFromString(""
@@ -130,6 +156,79 @@ public class DansArchaeologyMetadataTest {
 
         assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_COMPLEX, result))
             .containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/9a758542-8d0d-4afa-b664-104b938fe13e");
+    }
+
+    @Test
+    void old_abr_complex() throws Exception {
+
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <ddm:subject xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'\n"
+            + "    schemeURI='https://data.cultureelerfgoed.nl/term/id/rn/a4a7933c-e096-4bcf-a921-4f70a78749fe'\n"
+            + "    subjectScheme='Archeologisch Basis Register'\n"
+            + "    valueURI='https://data.cultureelerfgoed.nl/term/id/rn/ea77d56e-1475-4e4c-94f5-489bd3d9a3e7'\n"
+            + "    >\n"
+            + "    ABR BASIS REGISTER OLD\n"
+            + "</ddm:subject>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var s = toPrettyJsonString(result);
+        assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", "dansAbrArtifact", result))
+            .containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/ea77d56e-1475-4e4c-94f5-489bd3d9a3e7");
+    }
+
+    @Test
+    void old_abr_complex_with_incomplete_URI() throws Exception {
+
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <ddm:subject xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'\n"
+            + "    schemeURI='https://data.cultureelerfgoed.nl/term/id/rn/a4a7933c-e096-4bcf-a921-4f70a78749fe'\n"
+            + "    subjectScheme='Archeologisch Basis Register'\n"
+            + "    valueURI='https:data.cultureelerfgoed.nl/term/id/rn/ea77d56e-1475-4e4c-94f5-489bd3d9a3e7'\n"
+            + "    >\n"
+            + "    ABR BASIS REGISTER OLD\n"
+            + "</ddm:subject>")
+            + "</ddm:DDM>");
+
+        assertThatThrownBy(() -> mapDdmToDataset(doc, true))
+            .isInstanceOf(NullPointerException.class); // TODO should be fixed
+    }
+
+    @Test
+    void old_abr_complex_with_invalid_URI() throws Exception {
+
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <ddm:subject xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'\n"
+            + "    schemeURI='https://data.cultureelerfgoed.nl/term/id/rn/a4a7933c-e096-4bcf-a921-4f70a78749fe'\n"
+            + "    subjectScheme='Archeologisch Basis Register'\n"
+            + "    valueURI='https:{//}data.cultureelerfgoed.nl/term/id/rn/ea77d56e-1475-4e4c-94f5-489bd3d9a3e7'\n"
+            + "    >\n"
+            + "    ABR BASIS REGISTER OLD\n"
+            + "</ddm:subject>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true).getDatasetVersion().getMetadataBlocks();
+        assertThat(result.get("dansArchaeologyMetadata").getFields()).isEmpty();
+    }
+
+    @Test
+    void AR006_abr_complex_without() throws Exception {
+
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <ddm:subject"
+            + "                subjectScheme='ABR Complextypen'"
+            + "                schemeURI='https://data.cultureelerfgoed.nl/term/id/abr/e9546020-4b28-4819-b0c2-29e7c864c5c0'>"
+            + "            houtwinning"
+            + "        </ddm:subject>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true).getDatasetVersion().getMetadataBlocks();
+        assertThat(result.get("dansArchaeologyMetadata").getFields()).isEmpty();
     }
 
     @Test
@@ -169,6 +268,23 @@ public class DansArchaeologyMetadataTest {
 
         var field = getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_PERIOD, result);
         assertThat(field).containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/5b253754-ddd0-4ae0-a5bb-555176bca858");
+    }
+
+    @Test
+    void AR008_abr_period_without_value_uri() throws Exception {
+
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <ddm:temporal"
+            + "                subjectScheme='ABR Periodes'"
+            + "                schemeURI='https://data.cultureelerfgoed.nl/term/id/abr/9b688754-1315-484b-9c89-8817e87c1e84'"
+            + "                >"
+            + "            Midden Romeinse Tijd A"
+            + "        </ddm:temporal>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true).getDatasetVersion().getMetadataBlocks();
+        assertThat(result.get("dansArchaeologyMetadata").getFields()).isEmpty();
     }
 
 }

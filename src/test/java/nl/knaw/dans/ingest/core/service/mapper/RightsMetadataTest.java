@@ -198,4 +198,22 @@ class RightsMetadataTest {
             .isEqualTo("Yes");
         // "No" is tested in the PersonalDataTest class
     }
+
+    @Test
+    void RIG002_should_handle_missing_personal_data_attribute() throws ParserConfigurationException, IOException, SAXException {
+        // required in DDM, validated by v2-schema
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">\n"
+            + "    <ddm:profile>\n"
+            + "        <dc:title>Title of the dataset</dc:title>\n"
+            + "        <ddm:audience>D19200</ddm:audience>\n"
+            + "        <ddm:personalData></ddm:personalData>\n"
+            + "    </ddm:profile>\n"
+            + dcmi("")
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false);
+        assertThat(getControlledSingleValueField("dansRights", PERSONAL_DATA_PRESENT, result))
+            .isEqualTo("Unknown");
+    }
 }

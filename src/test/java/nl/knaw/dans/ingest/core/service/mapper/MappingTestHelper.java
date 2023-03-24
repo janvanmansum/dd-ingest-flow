@@ -95,7 +95,7 @@ public class MappingTestHelper {
             config.getIso1ToDataverseLanguage(),
             config.getIso2ToDataverseLanguage(),
             config.getSpatialCoverageCountryTerms()
-        ).toDataverseDataset(ddm, null, "2023-02-27", mockedContact, mockedVaultMetadata, restrictedFilesPresent);
+        ).toDataverseDataset(ddm, "doi:10.12345/678", "2023-02-27", mockedContact, mockedVaultMetadata, restrictedFilesPresent);
     }
 
     public static final String rootAttributes = "xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'\n"
