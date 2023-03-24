@@ -66,7 +66,10 @@ public class MappingTestHelper {
         "otherId:something",
         "1.0",
         "swordToken");
-
+    public static final String rootAttributes = "xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'\n"
+        + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n"
+        + "         xmlns:dc='http://purl.org/dc/elements/1.1/'\n"
+        + "         xmlns:dct='http://purl.org/dc/terms/'\n";
     private static final IngestFlowConfig config = getIngestFlowConfig();
 
     private static IngestFlowConfig getIngestFlowConfig() {
@@ -95,13 +98,8 @@ public class MappingTestHelper {
             config.getIso1ToDataverseLanguage(),
             config.getIso2ToDataverseLanguage(),
             config.getSpatialCoverageCountryTerms()
-        ).toDataverseDataset(ddm, "doi:10.12345/678", "2023-02-27", mockedContact, mockedVaultMetadata, restrictedFilesPresent);
+        ).toDataverseDataset(ddm, "doi:10.12345/678", "2023-02-27", mockedContact, mockedVaultMetadata, restrictedFilesPresent, null);
     }
-
-    public static final String rootAttributes = "xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'\n"
-        + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n"
-        + "         xmlns:dc='http://purl.org/dc/elements/1.1/'\n"
-        + "         xmlns:dct='http://purl.org/dc/terms/'\n";
 
     public static Document ddmWithCustomProfileContent(String content) throws ParserConfigurationException, IOException, SAXException {
         return readDocumentFromString(""
@@ -188,9 +186,10 @@ public class MappingTestHelper {
     public static Map<String, List<String>> getFieldNamesOfMetadataBlocks(Dataset result) {
         var metadataBlocks = result.getDatasetVersion().getMetadataBlocks();
         Map<String, List<String>> fields = new HashMap<>();
-        for (String blockName : metadataBlocks.keySet())
+        for (String blockName : metadataBlocks.keySet()) {
             fields.put(blockName, metadataBlocks.get(blockName).getFields()
                 .stream().map(MetadataField::getTypeName).collect(Collectors.toList()));
+        }
         return fields;
     }
 }
