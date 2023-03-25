@@ -239,11 +239,8 @@ public class DatasetUpdater extends DatasetEditor {
 
                 seen.add(id);
 
-                var json = objectMapper.writeValueAsString(fileMeta);
-                log.debug("id = {}, json = {}", id, json);
-
-                var result = dataverseClient.file(id).updateMetadata(json);
-                log.debug("id = {}, result = {}", id, result);
+                var result = dataverseClient.file(id).updateMetadata(fileMeta);
+                log.debug("Called updateFileMetadata for id = {}; result = {}", id, result);
             }
         }
     }
@@ -288,13 +285,7 @@ public class DatasetUpdater extends DatasetEditor {
             var meta = new FileMeta();
             meta.setForceReplace(true);
             meta.setLabel(file.getFileName().toString());
-            var json = objectMapper.writeValueAsString(meta);
-
-            log.debug("Calling replaceFileItem({}, {})", entry.getValue().getPath(), json);
-            var result = fileApi.replaceFileItem(
-                Optional.of(file.toFile()),
-                Optional.of(json)
-            );
+            var result = fileApi.replaceFile(file, meta);
 
             if (wrappedZip.isPresent()) {
                 try {
