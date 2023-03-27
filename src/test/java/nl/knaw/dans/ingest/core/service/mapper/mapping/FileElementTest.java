@@ -15,12 +15,21 @@
  */
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
+import gov.loc.repository.bagit.reader.BagReader;
+import nl.knaw.dans.ingest.core.domain.Deposit;
+import nl.knaw.dans.ingest.core.service.XPathEvaluator;
+import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
+import static nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement.toFileMeta;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -28,17 +37,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FileElementTest extends BaseTest {
 
-    private String ns = "xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>\n";
+    private final String ns = ""
+        + "xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' "
+        + "xmlns:dcterms='http://purl.org/dc/terms/' "
+        + "xmlns:afm='http://easy.dans.knaw.nl/schemas/bag/metadata/afm/'";
 
     @Test
     void toFileMetadata_should_include_metadata_from_child_elements() throws Exception {
-        var doc = readDocumentFromString(
-            "<file filepath=\"data/leeg.txt\" xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" xmlns:dcterms=\"http://purl.org/dc/terms/\">\n"
+        var doc = readDocumentFromString(String.format(""
+                + "<file filepath='data/leeg.txt' %s>\n"
                 + "    <dcterms:format>text/plain</dcterms:format>\n"
                 + "    <dcterms:hardware>Hardware</dcterms:hardware>\n"
                 + "    <dcterms:description>Empty file</dcterms:description>\n"
                 + "    <dcterms:time_period>Classical</dcterms:time_period>\n"
-                + "</file>");
+                + "</file>",ns));
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
 
@@ -50,9 +62,9 @@ class FileElementTest extends BaseTest {
 
     @Test
     void toFileMetadata_should_strip_data_prefix_from_path_to_get_directoryLabel() throws Exception {
-        var doc = readDocumentFromString(
-            "    <file filepath=\"data/this/is/the/directory/label/leeg.txt\" xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" xmlns:dcterms=\"http://purl.org/dc/terms/\">\n"
-                + "    </file>");
+        var doc = readDocumentFromString(String.format(""
+                + "    <file filepath='data/this/is/the/directory/label/leeg.txt' %s>\n"
+                + "    </file>",ns));
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("leeg.txt", result.getLabel());
@@ -62,9 +74,9 @@ class FileElementTest extends BaseTest {
 
     @Test
     void toFileMetadata_should_require_path_starting_with_data() throws Exception {
-        var doc = readDocumentFromString(""
-            + "    <file filepath='/this/is/the/directory/label/leeg.txt' " + ns
-            + "    </file>");
+        var doc = readDocumentFromString(String.format(""
+            + "    <file filepath='/this/is/the/directory/label/leeg.txt' %s>"
+            + "    </file>",ns));
 
         assertThatThrownBy(() ->  FileElement.toFileMeta(doc.getDocumentElement(), true))
             .isInstanceOf(RuntimeException.class) // TODO shouldn't this be something like InvalidPathException?
@@ -73,10 +85,10 @@ class FileElementTest extends BaseTest {
 
     @Test
     void toFileMetadata_plain_description_CIT004() throws Exception {
-        var doc = readDocumentFromString(""
-            + "    <file filepath='data/this/is/the/directory/label/leeg.txt' " + ns
+        var doc = readDocumentFromString(String.format(""
+            + "    <file filepath='data/this/is/the/directory/label/leeg.txt' %s>"
             + "         <dcterms:description>Empty file</dcterms:description>\n"
-            + "    </file>");
+            + "    </file>",ns));
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("leeg.txt", result.getLabel());
@@ -87,14 +99,16 @@ class FileElementTest extends BaseTest {
 
     @Test
     void toFileMetadata_should_represent_keyvalue_pairs_in_the_description() throws Exception {
-        var doc = readDocumentFromString(
-            "    <file filepath=\"data/this/is/the/directory/label/leeg.txt\" xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" xmlns:afm=\"http://easy.dans.knaw.nl/schemas/bag/metadata/afm/\">\n"
-                + "       <afm:othmat_codebook>FOTOBEST.csv; FOTOLST.csv</afm:othmat_codebook>"
-                + "       <afm:keyvaluepair>\n"
-                + "             <afm:key>FOTONR</afm:key>\n"
-                + "             <afm:value>3</afm:value>\n"
-                + "       </afm:keyvaluepair>"
-                + "    </file>");
+        String filePath = "data/this/is/the/directory/label/leeg.txt";
+        var doc = readDocumentFromString(String.format(""
+            + "<file filepath='%s' %s>"
+            + "    <afm:othmat_codebook>FOTOBEST.csv; FOTOLST.csv</afm:othmat_codebook>"
+            + "    <afm:keyvaluepair>"
+            + "        <afm:key>FOTONR</afm:key>"
+            + "        <afm:value>3</afm:value>"
+            + "    </afm:keyvaluepair>"
+            + "</file>", filePath, ns)
+        );
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("leeg.txt", result.getLabel());
@@ -105,11 +119,9 @@ class FileElementTest extends BaseTest {
 
     @Test
     void toFileMetadata_should_include_original_filepath_if_directoryLabel_or_label_change_during_sanitation() throws Exception {
-        var doc = readDocumentFromString(
-            "    <file filepath=\"data/directory/path/with/&lt;for'bidden&gt;/(chars)/strange?filename*.txt\" "
-                + "         xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" "
-                + "         xmlns:dcterms=\"http://purl.org/dc/terms/\">\n"
-                + "    </file>");
+        String filePath = "data/directory/path/with/&lt;for'bidden&gt;/(chars)/strange?filename*.txt";
+        String s = String.format("<file filepath=\"%s\" %s></file>", filePath, ns);
+        var doc = readDocumentFromString(s);
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("strange_filename_.txt", result.getLabel());
@@ -120,11 +132,9 @@ class FileElementTest extends BaseTest {
 
     @Test
     void toFileMetadata_should_NOT_include_original_filepath_if_directoryLabel_or_label_stay_unchanged_during_sanitation() throws Exception {
-        var doc = readDocumentFromString(
-            "    <file filepath=\"data/directory/path/with/all/legal/chars/normal_filename.txt\""
-                + "         xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" "
-                + "         xmlns:dcterms=\"http://purl.org/dc/terms/\">\n"
-                + "    </file>");
+        String filePath = "data/directory/path/with/all/legal/chars/normal_filename.txt";
+        var doc = readDocumentFromString(String.format(
+            "<file filepath='%s' %s></file>", filePath, ns));
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("normal_filename.txt", result.getLabel());
         assertEquals("directory/path/with/all/legal/chars", result.getDirectoryLabel());
@@ -136,10 +146,7 @@ class FileElementTest extends BaseTest {
     void toFileMetadata_should_only_replace_nonASCII_chars_in_directory_names_during_sanitization() throws Exception {
         var originalFilePath = "data/directory/path/with/all/leg\u00e5l/chars/n\u00f8rmal_filename.txt";
         var doc = readDocumentFromString(String.format(
-            "    <file filepath=\"%s\""
-                + "         xmlns=\"http://easy.dans.knaw.nl/schemas/bag/metadata/files/\" "
-                + "         xmlns:dcterms=\"http://purl.org/dc/terms/\">\n"
-                + "    </file>", originalFilePath));
+            "<file filepath='%s' %s></file>", originalFilePath, ns));
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("n\u00f8rmal_filename.txt", result.getLabel());
@@ -149,7 +156,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void replaceForbiddenCharactersInFilename_should_replace_each_char_with_underscore() throws ParserConfigurationException, IOException, SAXException {
+    void FIL001_toFileMetadata_should_replace_each_forbidden_char_in_filename_with_underscore() throws Exception {
         /*
         Replace forbidden chars with underscore. (Forbidden chars are:
         : (colon)
@@ -166,15 +173,15 @@ class FileElementTest extends BaseTest {
         var filename = "test**::?>>.txt";
         var filePath = "data/directory/path/with/all/leg\u00e5l/chars/" + filename;
         var doc = readDocumentFromString(String.format(
-            "<file filepath='%s' %s></file>", filePath, ns)
-        );
+            "<file filepath='%s' %s></file>", filePath, ns));
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
+        assertEquals("directory/path/with/all/leg_l/chars", result.getDirectoryLabel());
         assertEquals("test_______.txt", result.getLabel());
     }
 
     @Test
-    void replaceForbiddenCharactersInPath_should_replace_each_char_with_underscore() throws ParserConfigurationException, IOException, SAXException {
+    void FIL002_toFileMetadata_should_replace_each_forbidden_char_in_path_with_underscore() throws Exception {
         /*
         Replace forbidden chars with underscore. Only the following characters are allowed:
         alphanumeric chars (only ASCII)
@@ -186,10 +193,50 @@ class FileElementTest extends BaseTest {
         */
         var filename = "dir()\t\t ^^^/xyz/\\a.b-c";
         var doc = readDocumentFromString(String.format(
-            "<file filepath='data/%s/file.txt' %s></file>", filename, ns)
-        );
+            "<file filepath='data/%s/fil^e.txt' %s></file>", filename, ns));
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("dir__   ___/xyz/\\a.b-c", result.getDirectoryLabel());
+        assertEquals("fil^e.txt", result.getLabel());
+    }
+
+    @Test
+    void FIL006() throws Exception {
+        var s = (""
+            // TODO qualification does not work with file.xml of the bag, not even with the default namespace added
+            + "<?xml version='1.0' encoding='UTF-8'?>\n"
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
+            + "    <file filepath='data/file1.txt'>"
+            + "        <dcterms:description>A file with a simple description</dcterms:description>"
+            + "    </file>"
+            + "    <file filepath='data/subdir/file2.txt'>"
+            + "        <accessibleToRights>RESTRICTED_REQUEST</accessibleToRights>"
+            + "    </file>"
+            + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'>"
+            + "        <dcterms:description>A file with a problematic name</dcterms:description>"
+            + "    </file>"
+            + "</files>").getBytes(StandardCharsets.UTF_8);
+        var xmlReader = new XmlReaderImpl().getFactory().newDocumentBuilder();
+        var deposit = new Deposit();
+        Path bagDir = Paths.get("src/test/resources/examples/valid-easy-submitted/example-bag-medium");
+        deposit.setBagDir(bagDir);
+        deposit.setBag(new BagReader().read(bagDir));
+        deposit.setFilesXml(xmlReader.parse(new InputSource(new ByteArrayInputStream(s))));
+        deposit.setDdm(xmlReader.parse(bagDir.resolve("metadata/dataset.xml").toFile()));
+
+        // FIL001 - F005
+        var files = XPathEvaluator.nodes(deposit.getFilesXml(), "/files:files/files:file")
+            .map(node -> toFileMeta(node, true))
+            .collect(Collectors.toList());
+        assertThat(files).hasSize(3);
+        assertThat(files.get(0).getDescription()).isEqualTo("A file with a simple description");
+
+        // FIL006
+        var fileInfoMap = FileElement.pathToFileInfo(deposit);
+        assertThat(fileInfoMap).hasSize(3);
+        assertThat(fileInfoMap.get(Paths.get("data/subdir/file2.txt")).getMetadata())
+            .hasFieldOrPropertyWithValue("label","file2.txt")
+            .hasFieldOrPropertyWithValue("directoryLabel","subdir")
+            .hasFieldOrPropertyWithValue("restricted",true);
     }
 }
