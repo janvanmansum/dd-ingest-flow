@@ -16,12 +16,19 @@
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FileElementTest extends BaseTest {
+
+    private String ns = "xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>\n";
 
     @Test
     void toFileMetadata_should_include_metadata_from_child_elements() throws Exception {
@@ -50,6 +57,31 @@ class FileElementTest extends BaseTest {
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("leeg.txt", result.getLabel());
         assertEquals("this/is/the/directory/label", result.getDirectoryLabel());
+        assertTrue(result.getRestricted());
+    }
+
+    @Test
+    void toFileMetadata_should_require_path_starting_with_data() throws Exception {
+        var doc = readDocumentFromString(""
+            + "    <file filepath='/this/is/the/directory/label/leeg.txt' " + ns
+            + "    </file>");
+
+        assertThatThrownBy(() ->  FileElement.toFileMeta(doc.getDocumentElement(), true))
+            .isInstanceOf(RuntimeException.class) // TODO shouldn't this be something like InvalidPathException?
+            .hasMessage("file outside data folder: /this/is/the/directory/label/leeg.txt");
+    }
+
+    @Test
+    void toFileMetadata_plain_description_CIT004() throws Exception {
+        var doc = readDocumentFromString(""
+            + "    <file filepath='data/this/is/the/directory/label/leeg.txt' " + ns
+            + "         <dcterms:description>Empty file</dcterms:description>\n"
+            + "    </file>");
+
+        var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
+        assertEquals("leeg.txt", result.getLabel());
+        assertEquals("this/is/the/directory/label", result.getDirectoryLabel());
+        assertEquals("Empty file", result.getDescription());
         assertTrue(result.getRestricted());
     }
 
@@ -117,7 +149,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void replaceForbiddenCharactersInFilename_should_replace_each_char_with_underscore() {
+    void replaceForbiddenCharactersInFilename_should_replace_each_char_with_underscore() throws ParserConfigurationException, IOException, SAXException {
         /*
         Replace forbidden chars with underscore. (Forbidden chars are:
         : (colon)
@@ -132,12 +164,17 @@ class FileElementTest extends BaseTest {
         */
         // note that there are 7 invalid characters between 'test' and '.txt'
         var filename = "test**::?>>.txt";
-        var result = FileElement.replaceForbiddenCharactersInFilename(filename);
+        var filePath = "data/directory/path/with/all/leg\u00e5l/chars/" + filename;
+        var doc = readDocumentFromString(String.format(
+            "<file filepath='%s' %s></file>", filePath, ns)
+        );
 
-        assertEquals("test_______.txt", result);
+        var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
+        assertEquals("test_______.txt", result.getLabel());
     }
+
     @Test
-    void replaceForbiddenCharactersInPath_should_replace_each_char_with_underscore() {
+    void replaceForbiddenCharactersInPath_should_replace_each_char_with_underscore() throws ParserConfigurationException, IOException, SAXException {
         /*
         Replace forbidden chars with underscore. Only the following characters are allowed:
         alphanumeric chars (only ASCII)
@@ -148,8 +185,11 @@ class FileElementTest extends BaseTest {
          space (but not tab)
         */
         var filename = "dir()\t\t ^^^/xyz/\\a.b-c";
-        var result = FileElement.replaceForbiddenCharactersInPath(filename);
+        var doc = readDocumentFromString(String.format(
+            "<file filepath='data/%s/file.txt' %s></file>", filename, ns)
+        );
 
-        assertEquals("dir____ ___/xyz/\\a.b-c", result);
+        var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
+        assertEquals("dir__   ___/xyz/\\a.b-c", result.getDirectoryLabel());
     }
 }

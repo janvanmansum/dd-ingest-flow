@@ -172,14 +172,14 @@ public class FileElement extends Base {
         return result;
     }
 
-    static String replaceForbiddenCharactersInPath(String dirPath) {
+    private static String replaceForbiddenCharactersInPath(String dirPath) {
         if (dirPath == null) {
             return null;
         }
         return directoryLabelForbidden.matcher(dirPath).replaceAll("_");
     }
 
-    static String replaceForbiddenCharactersInFilename(String filename) {
+    private static String replaceForbiddenCharactersInFilename(String filename) {
         if (filename == null) {
             return null;
         }
