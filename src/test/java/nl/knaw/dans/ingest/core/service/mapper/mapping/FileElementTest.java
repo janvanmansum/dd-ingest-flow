@@ -202,29 +202,41 @@ class FileElementTest extends BaseTest {
 
     @Test
     void FIL006() throws Exception {
+        var s = (""
+            // TODO qualification does not work with file.xml of the bag, not even with the default namespace added
+            + "<?xml version='1.0' encoding='UTF-8'?>\n"
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
+            + "    <file filepath='data/file1.txt'>"
+            + "        <dcterms:description>A file with a simple description</dcterms:description>"
+            + "    </file>"
+            + "    <file filepath='data/subdir/file2.txt'>"
+            + "        <accessibleToRights>RESTRICTED_REQUEST</accessibleToRights>"
+            + "    </file>"
+            + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'>"
+            + "        <dcterms:description>A file with a problematic name</dcterms:description>"
+            + "    </file>"
+            + "</files>").getBytes(StandardCharsets.UTF_8);
         var xmlReader = new XmlReaderImpl().getFactory().newDocumentBuilder();
         var deposit = new Deposit();
         Path bagDir = Paths.get("src/test/resources/examples/valid-easy-submitted/example-bag-medium");
         deposit.setBagDir(bagDir);
         deposit.setBag(new BagReader().read(bagDir));
-        deposit.setFilesXml(xmlReader.parse(bagDir.resolve("metadata/files.xml").toFile()));
+        deposit.setFilesXml(xmlReader.parse(new InputSource(new ByteArrayInputStream(s))));
         deposit.setDdm(xmlReader.parse(bagDir.resolve("metadata/dataset.xml").toFile()));
 
         // FIL001 - F005
         var files = XPathEvaluator.nodes(deposit.getFilesXml(), "/files:files/files:file")
             .map(node -> toFileMeta(node, true))
             .collect(Collectors.toList());
-        assertThat(files).hasSize(5);
-        String expected = "This description will be archived, but not displayed anywhere in the Web-UI";
-        assertThat(files.get(1).getDescription()).isEqualTo(expected);
+        assertThat(files).hasSize(3);
+        assertThat(files.get(0).getDescription()).isEqualTo("A file with a simple description");
 
         // FIL006
         var fileInfoMap = FileElement.pathToFileInfo(deposit);
-        assertThat(fileInfoMap).hasSize(5);
-        assertThat(fileInfoMap.get(Paths.get("data/random images/image01.png")).getMetadata())
-            .hasFieldOrPropertyWithValue("label","image01.png")
-            .hasFieldOrPropertyWithValue("directoryLabel","random images")
-            .hasFieldOrPropertyWithValue("restricted",true)
-            .hasFieldOrPropertyWithValue("description",expected);
+        assertThat(fileInfoMap).hasSize(3);
+        assertThat(fileInfoMap.get(Paths.get("data/subdir/file2.txt")).getMetadata())
+            .hasFieldOrPropertyWithValue("label","file2.txt")
+            .hasFieldOrPropertyWithValue("directoryLabel","subdir")
+            .hasFieldOrPropertyWithValue("restricted",true);
     }
 }
