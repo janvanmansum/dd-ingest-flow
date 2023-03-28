@@ -70,7 +70,7 @@ public class MappingTestHelper {
         + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n"
         + "         xmlns:dc='http://purl.org/dc/elements/1.1/'\n"
         + "         xmlns:dct='http://purl.org/dc/terms/'\n";
-    private static final IngestFlowConfig config = getIngestFlowConfig();
+    public static final IngestFlowConfig config = getIngestFlowConfig();
 
     private static IngestFlowConfig getIngestFlowConfig() {
         IngestFlowConfig config;
