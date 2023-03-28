@@ -26,8 +26,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.charset.Charset;
-
 import java.util.stream.Collectors;
 
 import static nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement.toFileMeta;
@@ -210,6 +208,20 @@ class FileElementTest extends BaseTest {
 
     @Test
     void FIL006() throws Exception {
+        var bagDir = testDir.resolve("bag");
+        FileUtils.write(bagDir.resolve("bagit.txt").toFile(), (""
+            + "BagIt-Version: 0.97\n"
+            + "Tag-File-Character-Encoding: UTF-8\n"), StandardCharsets.UTF_8);
+        var datasetXml = readDocumentFromString( "<?xml version='1.0' encoding='UTF-8'?>\n"
+            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "    <ddm:profile>"
+            + "        <ddm:accessRights>NO_ACCESS</ddm:accessRights>"
+            + "    </ddm:profile>"
+            + "</ddm:DDM>");
+        FileUtils.write(bagDir.resolve("manifest-sha1.txt").toFile(), (""
+            + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
+            + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/subdir/file2.txt\n"
+            + "fa4cdb6b45c8a393aaca564ded8a52d62ee7a944  data/subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt\n"), StandardCharsets.UTF_8);
         var filesXml = readDocumentFromString( "<?xml version='1.0' encoding='UTF-8'?>\n"
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
             + "    <file filepath='data/file1.txt'>"
@@ -222,20 +234,6 @@ class FileElementTest extends BaseTest {
             + "        <dcterms:description>A file with a problematic name</dcterms:description>"
             + "    </file>"
             + "</files>");
-        var datasetXml = readDocumentFromString( "<?xml version='1.0' encoding='UTF-8'?>\n"
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
-            + "    <ddm:profile>"
-            + "        <ddm:accessRights>NO_ACCESS</ddm:accessRights>"
-            + "    </ddm:profile>"
-            + "</ddm:DDM>");
-        var bagDir = testDir.resolve("bag");
-        FileUtils.write(bagDir.resolve("bagit.txt").toFile(), (""
-            + "BagIt-Version: 0.97\n"
-            + "Tag-File-Character-Encoding: UTF-8\n"), StandardCharsets.UTF_8);
-        FileUtils.write(bagDir.resolve("manifest-sha1.txt").toFile(), (""
-            + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
-            + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/subdir/file2.txt\n"
-            + "fa4cdb6b45c8a393aaca564ded8a52d62ee7a944  data/subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt\n"), StandardCharsets.UTF_8);
         var deposit = new Deposit();
         deposit.setBagDir(bagDir);
         deposit.setBag(new BagReader().read(bagDir));
