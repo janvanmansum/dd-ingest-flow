@@ -114,7 +114,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         // TODO this is really ugly, fix it at some point
         try {
             this.deposit = depositManager.readDeposit(depositLocation);
-            log.info("Deposit is update: {}", deposit.isUpdate());
+            log.info("Deposit {} is update: {}", deposit.getDepositId(), deposit.isUpdate());
         }
         catch (InvalidDepositException e) {
             try {
