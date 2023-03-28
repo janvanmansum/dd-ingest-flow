@@ -18,14 +18,16 @@ package nl.knaw.dans.ingest.core.service.mapper.mapping;
 import gov.loc.repository.bagit.reader.BagReader;
 import nl.knaw.dans.ingest.core.domain.Deposit;
 import nl.knaw.dans.ingest.core.service.XPathEvaluator;
-import nl.knaw.dans.ingest.core.service.XmlReaderImpl;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.InputSource;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.Charset;
+
 import java.util.stream.Collectors;
 
 import static nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement.toFileMeta;
@@ -36,11 +38,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FileElementTest extends BaseTest {
+    private final Path testDir = new File("target/test/" + getClass().getSimpleName()).toPath();
 
     private final String ns = ""
         + "xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' "
         + "xmlns:dcterms='http://purl.org/dc/terms/' "
         + "xmlns:afm='http://easy.dans.knaw.nl/schemas/bag/metadata/afm/'";
+
+    @BeforeEach
+    void clear() {
+        testDir.toFile().delete();
+    }
 
     @Test
     void toFileMetadata_should_include_metadata_from_child_elements() throws Exception {
@@ -202,9 +210,7 @@ class FileElementTest extends BaseTest {
 
     @Test
     void FIL006() throws Exception {
-        var s = (""
-            // TODO qualification does not work with file.xml of the bag, not even with the default namespace added
-            + "<?xml version='1.0' encoding='UTF-8'?>\n"
+        var filesXml = readDocumentFromString( "<?xml version='1.0' encoding='UTF-8'?>\n"
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
             + "    <file filepath='data/file1.txt'>"
             + "        <dcterms:description>A file with a simple description</dcterms:description>"
@@ -215,14 +221,26 @@ class FileElementTest extends BaseTest {
             + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'>"
             + "        <dcterms:description>A file with a problematic name</dcterms:description>"
             + "    </file>"
-            + "</files>").getBytes(StandardCharsets.UTF_8);
-        var xmlReader = new XmlReaderImpl().getFactory().newDocumentBuilder();
+            + "</files>");
+        var datasetXml = readDocumentFromString( "<?xml version='1.0' encoding='UTF-8'?>\n"
+            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "    <ddm:profile>"
+            + "        <ddm:accessRights>NO_ACCESS</ddm:accessRights>"
+            + "    </ddm:profile>"
+            + "</ddm:DDM>");
+        var bagDir = testDir.resolve("bag");
+        FileUtils.write(bagDir.resolve("bagit.txt").toFile(), (""
+            + "BagIt-Version: 0.97\n"
+            + "Tag-File-Character-Encoding: UTF-8\n"), StandardCharsets.UTF_8);
+        FileUtils.write(bagDir.resolve("manifest-sha1.txt").toFile(), (""
+            + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
+            + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/subdir/file2.txt\n"
+            + "fa4cdb6b45c8a393aaca564ded8a52d62ee7a944  data/subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt\n"), StandardCharsets.UTF_8);
         var deposit = new Deposit();
-        Path bagDir = Paths.get("src/test/resources/examples/valid-easy-submitted/example-bag-medium");
         deposit.setBagDir(bagDir);
         deposit.setBag(new BagReader().read(bagDir));
-        deposit.setFilesXml(xmlReader.parse(new InputSource(new ByteArrayInputStream(s))));
-        deposit.setDdm(xmlReader.parse(bagDir.resolve("metadata/dataset.xml").toFile()));
+        deposit.setFilesXml(filesXml);
+        deposit.setDdm(datasetXml);
 
         // FIL001 - F005
         var files = XPathEvaluator.nodes(deposit.getFilesXml(), "/files:files/files:file")
