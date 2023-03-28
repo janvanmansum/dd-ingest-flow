@@ -265,7 +265,7 @@ public class DatasetUpdater extends DatasetEditor {
                 seen.add(id);
 
                 var result = dataverseClient.file(id).updateMetadata(fileMeta);
-                log.debug("Called updateFileMetadata for id = {}; result = {}", id, result);
+                log.debug("Called updateFileMetadata for id = {}; result = {}", id, result.getHttpResponse().getStatusLine());
             }
         }
     }
