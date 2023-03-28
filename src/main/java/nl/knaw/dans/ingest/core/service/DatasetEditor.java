@@ -22,12 +22,10 @@ import nl.knaw.dans.ingest.core.dataverse.DatasetService;
 import nl.knaw.dans.ingest.core.domain.Deposit;
 import nl.knaw.dans.ingest.core.domain.FileInfo;
 import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
-import nl.knaw.dans.ingest.core.service.mapper.mapping.AccessRights;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.License;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.DataverseException;
-import nl.knaw.dans.lib.dataverse.DataverseResponse;
 import nl.knaw.dans.lib.dataverse.Version;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
@@ -48,7 +46,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +87,7 @@ public abstract class DatasetEditor {
         this.datasetService = datasetService;
     }
 
-    static Instant parseDate(String value) {
+    private static Instant parseDate(String value) {
         try {
             log.debug("Trying to parse {} as LocalDate", value);
             return LocalDate.parse(value).atStartOfDay(ZoneId.systemDefault()).toInstant();
@@ -183,7 +180,6 @@ public abstract class DatasetEditor {
         return files.entrySet().stream()
             .map(entry -> {
                 // relativize the path
-                // TODO make this all tested
                 var bagPath = entry.getKey();
                 var fileInfo = entry.getValue();
                 var newKey = Path.of("data").relativize(bagPath);
@@ -194,11 +190,7 @@ public abstract class DatasetEditor {
                 // remove entries that match the file exclusion pattern
                 var path = entry.getKey().toString();
 
-                if (fileExclusionPattern != null) {
-                    return !fileExclusionPattern.matcher(path).matches();
-                }
-
-                return true;
+                return  (fileExclusionPattern == null || !fileExclusionPattern.matcher(path).matches());
             })
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

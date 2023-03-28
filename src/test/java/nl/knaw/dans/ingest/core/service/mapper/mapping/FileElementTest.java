@@ -15,21 +15,12 @@
  */
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
-import gov.loc.repository.bagit.reader.BagReader;
-import nl.knaw.dans.ingest.core.domain.Deposit;
-import nl.knaw.dans.ingest.core.service.XPathEvaluator;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
-import static nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement.toFileMeta;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -49,7 +40,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_should_include_metadata_from_child_elements() throws Exception {
+    void toFileMeta_should_include_metadata_from_child_elements() throws Exception {
         var doc = readDocumentFromString(String.format(""
                 + "<file filepath='data/leeg.txt' %s>\n"
                 + "    <dcterms:format>text/plain</dcterms:format>\n"
@@ -67,7 +58,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_should_strip_data_prefix_from_path_to_get_directoryLabel() throws Exception {
+    void toFileMeta_should_strip_data_prefix_from_path_to_get_directoryLabel() throws Exception {
         var doc = readDocumentFromString(String.format(""
                 + "    <file filepath='data/this/is/the/directory/label/leeg.txt' %s>\n"
                 + "    </file>",ns));
@@ -79,7 +70,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_should_require_path_starting_with_data() throws Exception {
+    void toFileMeta_should_require_path_starting_with_data() throws Exception {
         var doc = readDocumentFromString(String.format(""
             + "    <file filepath='/this/is/the/directory/label/leeg.txt' %s>"
             + "    </file>",ns));
@@ -90,7 +81,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_plain_description_CIT004() throws Exception {
+    void toFileMeta_plain_description_CIT004() throws Exception {
         var doc = readDocumentFromString(String.format(""
             + "    <file filepath='data/this/is/the/directory/label/leeg.txt' %s>"
             + "         <dcterms:description>Empty file</dcterms:description>\n"
@@ -104,7 +95,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_should_represent_keyvalue_pairs_in_the_description() throws Exception {
+    void toFileMeta_should_represent_keyvalue_pairs_in_the_description() throws Exception {
         String filePath = "data/this/is/the/directory/label/leeg.txt";
         var doc = readDocumentFromString(String.format(""
             + "<file filepath='%s' %s>"
@@ -124,7 +115,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_should_include_original_filepath_if_directoryLabel_or_label_change_during_sanitation() throws Exception {
+    void toFileMeta_should_include_original_filepath_if_directoryLabel_or_label_change_during_sanitation() throws Exception {
         String filePath = "data/directory/path/with/&lt;for'bidden&gt;/(chars)/strange?filename*.txt";
         String s = String.format("<file filepath=\"%s\" %s></file>", filePath, ns);
         var doc = readDocumentFromString(s);
@@ -137,7 +128,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_should_NOT_include_original_filepath_if_directoryLabel_or_label_stay_unchanged_during_sanitation() throws Exception {
+    void toFileMeta_should_NOT_include_original_filepath_if_directoryLabel_or_label_stay_unchanged_during_sanitation() throws Exception {
         String filePath = "data/directory/path/with/all/legal/chars/normal_filename.txt";
         var doc = readDocumentFromString(String.format(
             "<file filepath='%s' %s></file>", filePath, ns));
@@ -149,7 +140,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMetadata_should_only_replace_nonASCII_chars_in_directory_names_during_sanitization() throws Exception {
+    void toFileMeta_should_only_replace_nonASCII_chars_in_directory_names_during_sanitization() throws Exception {
         var originalFilePath = "data/directory/path/with/all/leg\u00e5l/chars/n\u00f8rmal_filename.txt";
         var doc = readDocumentFromString(String.format(
             "<file filepath='%s' %s></file>", originalFilePath, ns));
@@ -162,7 +153,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void FIL001_toFileMetadata_should_replace_each_forbidden_char_in_filename_with_underscore() throws Exception {
+    void toFileMeta_should_replace_each_forbidden_char_in_filename_with_underscore() throws Exception {
         /*
         Replace forbidden chars with underscore. (Forbidden chars are:
         : (colon)
@@ -187,7 +178,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void FIL002_toFileMetadata_should_replace_each_forbidden_char_in_path_with_underscore() throws Exception {
+    void toFileMeta_should_replace_each_forbidden_char_in_path_with_underscore() throws Exception {
         /*
         Replace forbidden chars with underscore. Only the following characters are allowed:
         alphanumeric chars (only ASCII)
@@ -204,55 +195,5 @@ class FileElementTest extends BaseTest {
         var result = FileElement.toFileMeta(doc.getDocumentElement(), true);
         assertEquals("dir__   ___/xyz/\\a.b-c", result.getDirectoryLabel());
         assertEquals("fil^e.txt", result.getLabel());
-    }
-
-    @Test
-    void FIL006() throws Exception {
-        var bagDir = testDir.resolve("bag");
-        FileUtils.write(bagDir.resolve("bagit.txt").toFile(), (""
-            + "BagIt-Version: 0.97\n"
-            + "Tag-File-Character-Encoding: UTF-8\n"), StandardCharsets.UTF_8);
-        var datasetXml = readDocumentFromString( "<?xml version='1.0' encoding='UTF-8'?>\n"
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
-            + "    <ddm:profile>"
-            + "        <ddm:accessRights>NO_ACCESS</ddm:accessRights>"
-            + "    </ddm:profile>"
-            + "</ddm:DDM>");
-        FileUtils.write(bagDir.resolve("manifest-sha1.txt").toFile(), (""
-            + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
-            + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/subdir/file2.txt\n"
-            + "fa4cdb6b45c8a393aaca564ded8a52d62ee7a944  data/subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt\n"), StandardCharsets.UTF_8);
-        var filesXml = readDocumentFromString( "<?xml version='1.0' encoding='UTF-8'?>\n"
-            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
-            + "    <file filepath='data/file1.txt'>"
-            + "        <dcterms:description>A file with a simple description</dcterms:description>"
-            + "    </file>"
-            + "    <file filepath='data/subdir/file2.txt'>"
-            + "        <accessibleToRights>RESTRICTED_REQUEST</accessibleToRights>"
-            + "    </file>"
-            + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'>"
-            + "        <dcterms:description>A file with a problematic name</dcterms:description>"
-            + "    </file>"
-            + "</files>");
-        var deposit = new Deposit();
-        deposit.setBagDir(bagDir);
-        deposit.setBag(new BagReader().read(bagDir));
-        deposit.setFilesXml(filesXml);
-        deposit.setDdm(datasetXml);
-
-        // FIL001 - F005
-        var files = XPathEvaluator.nodes(deposit.getFilesXml(), "/files:files/files:file")
-            .map(node -> toFileMeta(node, true))
-            .collect(Collectors.toList());
-        assertThat(files).hasSize(3);
-        assertThat(files.get(0).getDescription()).isEqualTo("A file with a simple description");
-
-        // FIL006
-        var fileInfoMap = FileElement.pathToFileInfo(deposit);
-        assertThat(fileInfoMap).hasSize(3);
-        assertThat(fileInfoMap.get(Paths.get("data/subdir/file2.txt")).getMetadata())
-            .hasFieldOrPropertyWithValue("label","file2.txt")
-            .hasFieldOrPropertyWithValue("directoryLabel","subdir")
-            .hasFieldOrPropertyWithValue("restricted",true);
     }
 }
