@@ -28,9 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,8 +46,8 @@ public class DatasetEditorTest extends BaseTest {
         testDir.toFile().delete();
     }
 
-    private DatasetEditor createDatasetEditor(Deposit deposit, final Pattern fileExclusionPattern) {
-        return new DatasetEditor(false, null, deposit, null, fileExclusionPattern, null, null, Mockito.mock(DataverseServiceImpl.class)) {
+    private DatasetEditor createDatasetEditor(Deposit deposit, final Pattern fileExclusionPattern, final List<URI> supportedLicenses) {
+        return new DatasetEditor(false, null, deposit, supportedLicenses, fileExclusionPattern, null, null, Mockito.mock(DataverseServiceImpl.class)) {
 
             @Override
             public String performEdit() {
@@ -92,7 +94,7 @@ public class DatasetEditorTest extends BaseTest {
             + "    </file>"
             + "</files>"));
         var fileInfoMap = FileElement.pathToFileInfo(deposit);
-        var filteredFileInfoMap = createDatasetEditor(deposit, Pattern.compile(".*file1.*"))
+        var filteredFileInfoMap = createDatasetEditor(deposit, Pattern.compile(".*file1.*"), null)
             .getFileInfo();
 
         // trims and filters paths
@@ -129,15 +131,34 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void getDateAvailable() throws Exception {
         var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "    <ddm:profile>"
             + "        <ddm:available>2018-04-09</ddm:available>"
             + "    </ddm:profile>"
             + "</ddm:DDM>");
         var deposit = new Deposit();
         deposit.setDdm(datasetXml);
-        var editor = createDatasetEditor(deposit, null);
-        // TODO assertThat(editor.getDateAvailable(deposit)).isEqualTo("2018-04-09");
+        var editor = createDatasetEditor(deposit, null, null);
+        String actual = editor.getDateAvailable(deposit).toString()
+            .replaceAll("T.*", "");
+        // TODO date changes without time or around midnight, used to determine embargo files
+        assertThat(actual).isEqualTo("2018-04-08");
+    }
+
+    @Test
+    void getDateAvailable_at_midnight() throws Exception {
+        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
+            + "    <ddm:profile>"
+            + "        <ddm:available>2018-04-09T12:00</ddm:available>"
+            + "    </ddm:profile>"
+            + "</ddm:DDM>");
+        var deposit = new Deposit();
+        deposit.setDdm(datasetXml);
+        var editor = createDatasetEditor(deposit, null, null);
+        String actual = editor.getDateAvailable(deposit).toString()
+            .replaceAll("T.*", "");
+        assertThat(actual).isEqualTo("2018-04-09");
     }
 
     @Test
@@ -147,7 +168,7 @@ public class DatasetEditorTest extends BaseTest {
             + "</ddm:DDM>");
         var deposit = new Deposit();
         deposit.setDdm(datasetXml);
-        var editor = createDatasetEditor(deposit, null);
+        var editor = createDatasetEditor(deposit, null, null);
         assertThatThrownBy(() -> editor.getDateAvailable(deposit))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Deposit without a ddm:available element");
@@ -155,14 +176,36 @@ public class DatasetEditorTest extends BaseTest {
 
     @Test
     void getLicense() throws Exception {
+        String license = "http://opensource.org/licenses/MIT";
         var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/' xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>"
-            + "  <ddm:dcmiMetadata>"
-            + "    <dcterms:license xsi:type='dcterms:URI'>http://creativecommons.org/licenses/by-nc-sa/4.0/</dcterms:license>"
-            + "  </ddm:dcmiMetadata>"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'"
+            + "         xmlns:dcterms='http://purl.org/dc/terms/'"
+            + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'"
+            + ">"
+            + "    <ddm:dcmiMetadata>"
+            + "        <dcterms:license xsi:type='dcterms:URI'>" + license + "</dcterms:license>"
+            + "    </ddm:dcmiMetadata>"
             + "</ddm:DDM>");
-        var editor = createDatasetEditor(new Deposit(), null);
-        // TODO assert license
+        List<URI> supportedLicenses = List.of(new URI(license));
+        var editor = createDatasetEditor(new Deposit(), null, supportedLicenses);
+        assertThat(editor.getLicense(datasetXml)).isEqualTo(license);
+    }
+
+    @Test
+    void getLicense_not_supported() throws Exception {
+        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'"
+            + "         xmlns:dcterms='http://purl.org/dc/terms/'"
+            + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'"
+            + ">"
+            + "    <ddm:dcmiMetadata>"
+            + "        <dcterms:license xsi:type='dcterms:URI'>http://opensource.org/licenses/MIT</dcterms:license>"
+            + "    </ddm:dcmiMetadata>"
+            + "</ddm:DDM>");
+        var editor = createDatasetEditor(new Deposit(), null, List.of());
+        assertThatThrownBy(() -> editor.getLicense(datasetXml))
+            .isInstanceOf(IllegalArgumentException.class) // TODO shouldn't this be RejectedDepositException?
+            .hasMessage("Unsupported license: http://opensource.org/licenses/MIT");
     }
 
     @Test
@@ -170,7 +213,7 @@ public class DatasetEditorTest extends BaseTest {
         var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
             + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
             + "</ddm:DDM>");
-        var editor = createDatasetEditor(new Deposit(), null);
+        var editor = createDatasetEditor(new Deposit(), null, null);
         assertThatThrownBy(() -> editor.getLicense(datasetXml))
             .isInstanceOf(RejectedDepositException.class)
             .hasMessage("Rejected null: no license specified");
