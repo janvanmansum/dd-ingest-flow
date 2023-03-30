@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,7 @@ class FileElementTest extends BaseTest {
 
     @BeforeEach
     void clear() {
-        testDir.toFile().delete();
+        FileUtils.deleteQuietly(testDir.toFile());
     }
 
     @Test

@@ -18,7 +18,6 @@ package nl.knaw.dans.ingest.core.service;
 import gov.loc.repository.bagit.reader.BagReader;
 import nl.knaw.dans.ingest.core.dataverse.DataverseServiceImpl;
 import nl.knaw.dans.ingest.core.domain.Deposit;
-import nl.knaw.dans.ingest.core.domain.FileInfo;
 import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.BaseTest;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement;
@@ -43,7 +42,7 @@ public class DatasetEditorTest extends BaseTest {
 
     @BeforeEach
     void clear() {
-        testDir.toFile().delete();
+        FileUtils.deleteQuietly(testDir.toFile());
     }
 
     private DatasetEditor createDatasetEditor(Deposit deposit, final Pattern fileExclusionPattern, final List<URI> supportedLicenses) {
@@ -70,18 +69,120 @@ public class DatasetEditorTest extends BaseTest {
 
     @Test
     void getFileInfo_trims_and_filters_paths() throws Exception {
+        Deposit deposit = createDeposit("");
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setFilesXml(readDocumentFromString(""
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
+            + "    <file filepath='data/file1.txt'/>"
+            + "    <file filepath='data/subdir/file2.txt'/>"
+            + "    <file filepath='data/subdir2/file3.txt'/>"
+            + "</files>"));
+        var fileInfoMap = FileElement.pathToFileInfo(deposit);
+        var filteredFileInfoMap = createDatasetEditor(deposit, Pattern.compile(".*file2.*"), null)
+            .getFileInfo();
+
+        assertThat(fileInfoMap.keySet()).containsExactlyInAnyOrder(
+            Paths.get("data/file1.txt"),
+            Paths.get("data/subdir/file2.txt"),
+            Paths.get("data/subdir2/file3.txt"));
+        assertThat(filteredFileInfoMap.keySet()).containsExactlyInAnyOrder(
+            Paths.get("file1.txt"),
+            Paths.get("subdir2/file3.txt"));
+    }
+
+    @Test
+    void FIL001_FIL002_FIL003() throws Exception {
+        Deposit deposit = createDeposit("");
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setFilesXml(readDocumentFromString(""
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
+            + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'/>"
+            + "</files>"));
+        var fileInfo = createDatasetEditor(deposit, null, null)
+            .getFileInfo().values().iterator().next().getMetadata();
+        assertThat(fileInfo)
+            // FIL001
+            .hasFieldOrPropertyWithValue("label", "c_a_q_d_l_g_p_s_h_.txt")
+            // FIL002
+            .hasFieldOrPropertyWithValue("directoryLabel", "subdir__________")
+            // FIL003
+            .hasFieldOrPropertyWithValue("description", "original_filepath: \"subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt\"");
+    }
+
+    @Test
+    void FIL002A_FIL003() throws Exception {
+        Deposit deposit = createDeposit("");
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setFilesXml(readDocumentFromString(""
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:afm='http://easy.dans.knaw.nl/schemas/bag/metadata/afm/'>"
+            + "    <file filepath='data/subdir/#.txt'>"
+            + "        <afm:keyvaluepair>"
+            + "            <afm:key>FOTONR</afm:key>"
+            + "            <afm:value>3</afm:value>"
+            + "        </afm:keyvaluepair>"
+            + "        <afm:keyvaluepair>"
+            + "            <afm:key>some</afm:key>"
+            + "            <afm:value>thing</afm:value>"
+            + "        </afm:keyvaluepair>"
+            + "    </file>"
+            + "</files>"));
+        var descriptions = createDatasetEditor(deposit, null, null)
+            .getFileInfo().values().iterator().next().getMetadata().getDescription().split("; ");
+        assertThat(descriptions).containsExactlyInAnyOrder(
+            "some: \"thing\"",
+            "original_filepath: \"subdir/#.txt\"",
+            "FOTONR: \"3\"");
+    }
+
+    @Test
+    void FIL002B_FIL003() throws Exception {
+        Deposit deposit = createDeposit("");
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setFilesXml(readDocumentFromString(""
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:afm='http://easy.dans.knaw.nl/schemas/bag/metadata/afm/'>"
+            + "    <file filepath='data/subdir/#.txt'>"
+            + "        <afm:othmat_codebook>FOTOBEST.csv; FOTOLST.csv</afm:othmat_codebook>"
+            + "    </file>"
+            + "</files>"));
+        var description = createDatasetEditor(deposit, null, null)
+            .getFileInfo().values().iterator().next().getMetadata().getDescription();
+        assertThat(description)
+            .contains("othmat_codebook: \"FOTOBEST.csv; FOTOLST.csv\"");
+        assertThat(description.split("; "))
+            .contains("original_filepath: \"subdir/#.txt\"");
+    }
+
+    @Test
+    void FIL004_FIL003() throws Exception {
+        Deposit deposit = createDeposit("");
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setFilesXml(readDocumentFromString(""
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
+            + "    <file filepath='data/subdir/#.txt'>"
+            + "        <dcterms:description>A file with a problematic name</dcterms:description>"
+            + "    </file>"
+            + "</files>"));
+        var fileInfo = createDatasetEditor(deposit, null, null)
+            .getFileInfo().values().iterator().next();
+        assertThat(fileInfo)
+            .hasFieldOrPropertyWithValue("metadata.label", "_.txt")
+            .hasFieldOrPropertyWithValue("metadata.description", "original_filepath: \"subdir/#.txt\"; description: \"A file with a problematic name\"");
+    }
+
+    @Test
+    void FIL005_FIL009_TODO() throws Exception { // TODO break down
         Deposit deposit = createDeposit(""
             + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
             + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/subdir/file2.txt\n"
             + "fa4cdb6b45c8a393aaca564ded8a52d62ee7a944  data/subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt\n");
-        deposit.setDdm(readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        deposit.setDdm(readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
             + "    <ddm:profile>"
             + "        <ddm:accessRights>NO_ACCESS</ddm:accessRights>"
             + "        <ddm:available>2222-01-01</ddm:available>"
             + "    </ddm:profile>"
             + "</ddm:DDM>"));
-        deposit.setFilesXml(readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
             + "    <file filepath='data/file1.txt'>"
             + "        <dcterms:description>A file with a simple description</dcterms:description>"
@@ -93,32 +194,21 @@ public class DatasetEditorTest extends BaseTest {
             + "        <dcterms:description>A file with a problematic name</dcterms:description>"
             + "    </file>"
             + "</files>"));
-        var fileInfoMap = FileElement.pathToFileInfo(deposit);
-        var filteredFileInfoMap = createDatasetEditor(deposit, Pattern.compile(".*file1.*"), null)
+        var fileInfoMap = createDatasetEditor(deposit, null, null)
             .getFileInfo();
 
-        // trims and filters paths
         var path1 = Paths.get("file1.txt");
         var path2 = Paths.get("subdir/file2.txt");
         var path3 = Paths.get("subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt");
-        assertThat(fileInfoMap.keySet())
-            .containsExactlyInAnyOrder(Paths.get("data/" + path1), Paths.get("data/" + path2), Paths.get("data/" + path3));
-        assertThat(filteredFileInfoMap.keySet())
-            .containsExactlyInAnyOrder(path2, path3);
-
-        // integration assertions with FileElement.pathToFileInfo // TODO split into smaller tests
-        FileInfo file1 = fileInfoMap.get(Paths.get("data/" + path1));
-        assertThat(file1)
+        assertThat(fileInfoMap.get(path1))
             .hasFieldOrPropertyWithValue("metadata.description", "A file with a simple description"); // FIL002B
-        FileInfo file2 = filteredFileInfoMap.get(path2);
-        assertThat(file2)
+        assertThat(fileInfoMap.get(path2))
             .hasFieldOrPropertyWithValue("checksum", "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727")
             .hasFieldOrPropertyWithValue("path", Paths.get("target/test/DatasetEditorTest/bag/data/subdir/file2.txt"))
             .hasFieldOrPropertyWithValue("metadata.label", "file2.txt") // FIL001
             .hasFieldOrPropertyWithValue("metadata.directoryLabel", "subdir") // FIL002
             .hasFieldOrPropertyWithValue("metadata.restricted", true); // FIL006
-        FileInfo file3 = filteredFileInfoMap.get(path3);
-        assertThat(file3)
+        assertThat(fileInfoMap.get(path3))
             .hasFieldOrPropertyWithValue("checksum", "fa4cdb6b45c8a393aaca564ded8a52d62ee7a944")
             .hasFieldOrPropertyWithValue("path", Paths.get("target/test/DatasetEditorTest/bag/data/" + path3))
             .hasFieldOrPropertyWithValue("metadata.label", "c_a_q_d_l_g_p_s_h_.txt") // FIL001
@@ -130,7 +220,7 @@ public class DatasetEditorTest extends BaseTest {
 
     @Test
     void getDateAvailable() throws Exception {
-        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        var datasetXml = readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "    <ddm:profile>"
             + "        <ddm:available>2018-04-09</ddm:available>"
@@ -141,13 +231,13 @@ public class DatasetEditorTest extends BaseTest {
         var editor = createDatasetEditor(deposit, null, null);
         String actual = editor.getDateAvailable(deposit).toString()
             .replaceAll("T.*", "");
-        // TODO date changes without time or around midnight, used to determine embargo files
+        // TODO date changes without time or with time around midnight, used to determine embargo files
         assertThat(actual).isEqualTo("2018-04-08");
     }
 
     @Test
     void getDateAvailable_at_midnight() throws Exception {
-        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        var datasetXml = readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "    <ddm:profile>"
             + "        <ddm:available>2018-04-09T12:00</ddm:available>"
@@ -163,7 +253,7 @@ public class DatasetEditorTest extends BaseTest {
 
     @Test
     void getDateAvailable_not_found() throws Exception {
-        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        var datasetXml = readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
             + "</ddm:DDM>");
         var deposit = new Deposit();
@@ -177,7 +267,7 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void getLicense() throws Exception {
         String license = "http://opensource.org/licenses/MIT";
-        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        var datasetXml = readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'"
             + "         xmlns:dcterms='http://purl.org/dc/terms/'"
             + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'"
@@ -193,7 +283,7 @@ public class DatasetEditorTest extends BaseTest {
 
     @Test
     void getLicense_not_supported() throws Exception {
-        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        var datasetXml = readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'"
             + "         xmlns:dcterms='http://purl.org/dc/terms/'"
             + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'"
@@ -210,7 +300,7 @@ public class DatasetEditorTest extends BaseTest {
 
     @Test
     void getLicense_not_found() throws Exception {
-        var datasetXml = readDocumentFromString("<?xml version='1.0' encoding='UTF-8'?>\n"
+        var datasetXml = readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
             + "</ddm:DDM>");
         var editor = createDatasetEditor(new Deposit(), null, null);
