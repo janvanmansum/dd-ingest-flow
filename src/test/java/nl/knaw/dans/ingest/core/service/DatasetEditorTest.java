@@ -262,9 +262,10 @@ public class DatasetEditorTest extends BaseTest {
             + "</files>"));
 
         var datasetEditor = createDatasetEditor(deposit, null, null);
-        // TODO mock dataverseClient and datasetService to show that
-        //  datasetEditor.embargoFiles calls datasetService.setEmbargo only for file1.txt
-        //  and the file original-metadata.zip is added as not restricted
+        // Calling embargoFiles to test these rules makes only sense once
+        // the dataset is added to a real dataverse instance, turning it into an integration test.
+        // The method is kept for documentational reasons.
+        // Note that the file original-metadata.zip is added as not restricted.
     }
 
     @Test
