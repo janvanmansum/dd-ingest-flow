@@ -196,14 +196,11 @@ public class DatasetEditorTest extends BaseTest {
             + "    <file filepath='data/file1.txt'>"
             + "        <accessibleToRights>blabla</accessibleToRights>"
             + "    </file>"
-            + "    <file filepath='data/original-metadata.zip'/>"
             + "</files>"));
         var pathFileInfoMap = createDatasetEditor(deposit, null, null)
             .getFileInfo();
         assertThat(pathFileInfoMap.get(Paths.get("file1.txt")).getMetadata().getRestricted())
             .isEqualTo(true);
-        assertThat(pathFileInfoMap.get(Paths.get("original-metadata.zip")).getMetadata().getRestricted())
-            .isEqualTo(false);
     }
 
     @Test
@@ -227,7 +224,7 @@ public class DatasetEditorTest extends BaseTest {
     }
 
     @Test
-    void FIL006_FIL007_not_open_access() throws Exception {
+    void FIL006_not_open_access() throws Exception {
         Deposit deposit = createDeposit(""
             + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
             + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/original-metadata.zip\n");
@@ -240,18 +237,15 @@ public class DatasetEditorTest extends BaseTest {
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
             + "    <file filepath='data/file1.txt'/>"
-            + "    <file filepath='data/original-metadata.zip'/>"
             + "</files>"));
         var pathFileInfoMap = createDatasetEditor(deposit, null, null)
             .getFileInfo();
         assertThat(pathFileInfoMap.get(Paths.get("file1.txt")).getMetadata().getRestricted())
             .isEqualTo(true);
-        assertThat(pathFileInfoMap.get(Paths.get("original-metadata.zip")).getMetadata().getRestricted())
-            .isEqualTo(false);
     }
 
     @Test
-    void FIL008_FIL009_embargo() throws Exception {
+    void FIL007_FIL008_FIL009() throws Exception {
         Deposit deposit = createDeposit("");
         deposit.setDdm(readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
@@ -262,13 +256,13 @@ public class DatasetEditorTest extends BaseTest {
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
             + "    <file filepath='data/file1.txt'/>"
-            + "    <file filepath='data/original-metadata.zip'/>"
             + "    <file filepath='data/easy-migration.zip'/>"
             + "</files>"));
 
         var datasetEditor = createDatasetEditor(deposit, null, null);
         // TODO mock dataverseClient and datasetService to show that
         //  datasetEditor.embargoFiles calls datasetService.setEmbargo only for file1.txt
+        //  and the not restricted file original-metadata.zip is added
     }
 
     @Test
