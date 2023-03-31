@@ -197,6 +197,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        <accessibleToRights>blabla</accessibleToRights>"
             + "    </file>"
             + "</files>"));
+        // NOTE this test fails when replaced with FileElement.pathToFileInfo(deposit);
         var pathFileInfoMap = createDatasetEditor(deposit, null, null)
             .getFileInfo();
         assertThat(pathFileInfoMap.get(Paths.get("file1.txt")).getMetadata().getRestricted())
@@ -238,6 +239,7 @@ public class DatasetEditorTest extends BaseTest {
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
             + "    <file filepath='data/file1.txt'/>"
             + "</files>"));
+        // NOTE this test fails when replaced with FileElement.pathToFileInfo(deposit);
         var pathFileInfoMap = createDatasetEditor(deposit, null, null)
             .getFileInfo();
         assertThat(pathFileInfoMap.get(Paths.get("file1.txt")).getMetadata().getRestricted())
@@ -307,7 +309,7 @@ public class DatasetEditorTest extends BaseTest {
         var editor = createDatasetEditor(deposit, null, null);
         String actual = editor.getDateAvailable(deposit).toString()
             .replaceAll("T.*", ""); // ignore time
-        assertThat(actual).isEqualTo("2018-04-09"); // may fail locally, supposed to succeed on github
+        assertThat(actual).isEqualTo("2018-04-09"); // may fail when executed locally, supposed to succeed on github
     }
 
     @Test
