@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class FileElement extends Base {
@@ -188,7 +189,8 @@ public class FileElement extends Base {
 
     public static Map<Path, FileInfo> pathToFileInfo(Deposit deposit) {
         // FIL006
-        var defaultRestrict = XPathEvaluator.nodes(deposit.getDdm(), "/ddm:DDM/ddm:profile/ddm:accessRights")
+        Stream<Node> nodes = XPathEvaluator.nodes(deposit.getDdm(), "/ddm:DDM/ddm:profile/ddm:accessRights");
+        var defaultRestrict = nodes
             .map(AccessRights::toDefaultRestrict)
             .findFirst()
             .orElse(true);

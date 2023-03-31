@@ -71,7 +71,7 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void getFileInfo_trims_and_filters_paths() throws Exception {
         Deposit deposit = createDeposit("");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
             + "    <file filepath='data/file1.txt'/>"
@@ -94,7 +94,7 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void FIL001_FIL002_FIL003() throws Exception {
         Deposit deposit = createDeposit("");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
             + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'/>"
@@ -113,7 +113,7 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void FIL002A_FIL003() throws Exception {
         Deposit deposit = createDeposit("");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:afm='http://easy.dans.knaw.nl/schemas/bag/metadata/afm/'>"
             + "    <file filepath='data/subdir/#.txt'>"
@@ -138,7 +138,7 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void FIL002B_FIL003() throws Exception {
         Deposit deposit = createDeposit("");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:afm='http://easy.dans.knaw.nl/schemas/bag/metadata/afm/'>"
             + "    <file filepath='data/subdir/#.txt'>"
@@ -156,7 +156,7 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void FIL004_FIL003() throws Exception {
         Deposit deposit = createDeposit("");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
             + "    <file filepath='data/subdir/#.txt'>"
@@ -171,9 +171,9 @@ public class DatasetEditorTest extends BaseTest {
     }
 
     @Test
-    void FIL005_anonymous() throws Exception { // TODO break down
+    void FIL005_anonymous() throws Exception {
         Deposit deposit = createDeposit("");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
             + "    <file filepath='data/file1.txt'>"
@@ -186,11 +186,11 @@ public class DatasetEditorTest extends BaseTest {
     }
 
     @Test
-    void FIL005_FIL007_not_anonymous() throws Exception {
+    void FIL005_not_anonymous() throws Exception {
         Deposit deposit = createDeposit(""
             + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
             + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/original-metadata.zip\n");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
             + "    <file filepath='data/file1.txt'>"
@@ -209,7 +209,7 @@ public class DatasetEditorTest extends BaseTest {
             + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
             + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/original-metadata.zip\n");
         deposit.setDdm(readDocumentFromString(""
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "    <ddm:profile>"
             + "        <ddm:accessRights>OPEN_ACCESS</ddm:accessRights>"
             + "    </ddm:profile>"
@@ -229,7 +229,7 @@ public class DatasetEditorTest extends BaseTest {
             + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
             + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/original-metadata.zip\n");
         deposit.setDdm(readDocumentFromString(""
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "    <ddm:profile>"
             + "        <ddm:accessRights>blabla</ddm:accessRights>"
             + "    </ddm:profile>"
@@ -248,7 +248,7 @@ public class DatasetEditorTest extends BaseTest {
     void FIL007_FIL008_FIL009() throws Exception {
         Deposit deposit = createDeposit("");
         deposit.setDdm(readDocumentFromString(""
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "    <ddm:profile>"
             + "        <ddm:available>"+ (new DateTime().plusWeeks(7)) +"</ddm:available>"
             + "    </ddm:profile>"
@@ -262,7 +262,7 @@ public class DatasetEditorTest extends BaseTest {
         var datasetEditor = createDatasetEditor(deposit, null, null);
         // TODO mock dataverseClient and datasetService to show that
         //  datasetEditor.embargoFiles calls datasetService.setEmbargo only for file1.txt
-        //  and the not restricted file original-metadata.zip is added
+        //  and the file original-metadata.zip is added as not restricted
     }
 
     @Test
@@ -271,7 +271,7 @@ public class DatasetEditorTest extends BaseTest {
             + "a5c5c4051724b655863c517a15c56e45753c3e5a  data/file1.txt\n"
             + "0d57a5bc9f5af7e8edcc90d64fd3c24dfc23e727  data/subdir/file2.txt\n"
             + "fa4cdb6b45c8a393aaca564ded8a52d62ee7a944  data/subdir_υποφάκελο/c:a*q?d\"l<g>p|s;h#.txt\n");
-        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'/>"));
+        deposit.setDdm(readDocumentFromString("<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'/>"));
         deposit.setFilesXml(readDocumentFromString(""
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
             + "    <file filepath='data/file1.txt'/>"
@@ -329,7 +329,7 @@ public class DatasetEditorTest extends BaseTest {
     void getDateAvailable_not_found() throws Exception {
         var deposit = new Deposit();
         deposit.setDdm(readDocumentFromString(""
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "</ddm:DDM>"));
         var editor = createDatasetEditor(deposit, null, null);
         assertThatThrownBy(() -> editor.getDateAvailable(deposit))
@@ -374,7 +374,7 @@ public class DatasetEditorTest extends BaseTest {
     @Test
     void getLicense_not_found() throws Exception {
         var datasetXml = readDocumentFromString(""
-            + "<ddm:DDM xmlns:ddm='http://easy.dans.knaw.nl/schemas/md/ddm/'>"
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "</ddm:DDM>");
         var editor = createDatasetEditor(new Deposit(), null, null);
         assertThatThrownBy(() -> editor.getLicense(datasetXml))
