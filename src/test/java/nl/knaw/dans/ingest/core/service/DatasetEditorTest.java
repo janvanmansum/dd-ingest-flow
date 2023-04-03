@@ -21,6 +21,13 @@ import nl.knaw.dans.ingest.core.domain.Deposit;
 import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.BaseTest;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement;
+import nl.knaw.dans.lib.dataverse.DatasetApi;
+import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.lib.dataverse.DataverseException;
+import nl.knaw.dans.lib.dataverse.DataverseHttpResponse;
+import nl.knaw.dans.lib.dataverse.model.dataset.FileList;
+import nl.knaw.dans.lib.dataverse.model.file.DataFile;
+import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -46,8 +54,10 @@ public class DatasetEditorTest extends BaseTest {
         FileUtils.deleteQuietly(testDir.toFile());
     }
 
-    private DatasetEditor createDatasetEditor(Deposit deposit, final Pattern fileExclusionPattern, final List<URI> supportedLicenses) {
-        return new DatasetEditor(false, null, deposit, supportedLicenses, fileExclusionPattern, null, null, Mockito.mock(DataverseServiceImpl.class)) {
+    private DatasetEditor createDatasetEditor(Deposit deposit, final boolean isMigration, final Pattern fileExclusionPattern, final List<URI> supportedLicenses) {
+        var dataverseService = new DataverseServiceImpl(Mockito.mock(DataverseClient.class),1,1);
+        var zipFileHandler = new ZipFileHandler(testDir.resolve("tmp"));
+        return new DatasetEditor(isMigration, null, deposit, supportedLicenses, fileExclusionPattern, zipFileHandler, null, dataverseService) {
 
             @Override
             public String performEdit() {
@@ -79,7 +89,7 @@ public class DatasetEditorTest extends BaseTest {
             + "    <file filepath='data/subdir2/file3.txt'/>"
             + "</files>"));
         var fileInfoMap = FileElement.pathToFileInfo(deposit);
-        var filteredFileInfoMap = createDatasetEditor(deposit, Pattern.compile(".*file2.*"), null)
+        var filteredFileInfoMap = createDatasetEditor(deposit, true, Pattern.compile(".*file2.*"), null)
             .getFileInfo();
 
         assertThat(fileInfoMap.keySet()).containsExactlyInAnyOrder(
@@ -99,7 +109,7 @@ public class DatasetEditorTest extends BaseTest {
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/' xmlns:dcterms='http://purl.org/dc/terms/'>"
             + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'/>"
             + "</files>"));
-        var fileMeta = createDatasetEditor(deposit, null, null)
+        var fileMeta = createDatasetEditor(deposit, true, null, null)
             .getFileInfo().values().iterator().next().getMetadata();
         assertThat(fileMeta)
             // FIL001
@@ -127,7 +137,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        </afm:keyvaluepair>"
             + "    </file>"
             + "</files>"));
-        var descriptions = createDatasetEditor(deposit, null, null)
+        var descriptions = createDatasetEditor(deposit, true, null, null)
             .getFileInfo().values().iterator().next().getMetadata().getDescription().split("; ");
         assertThat(descriptions).containsExactlyInAnyOrder(
             "some: \"thing\"",
@@ -145,7 +155,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        <afm:othmat_codebook>FOTOBEST.csv; FOTOLST.csv</afm:othmat_codebook>"
             + "    </file>"
             + "</files>"));
-        var description = createDatasetEditor(deposit, null, null)
+        var description = createDatasetEditor(deposit, true, null, null)
             .getFileInfo().values().iterator().next().getMetadata().getDescription();
         assertThat(description)
             .contains("othmat_codebook: \"FOTOBEST.csv; FOTOLST.csv\"");
@@ -163,7 +173,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        <dcterms:description>A file with a problematic name</dcterms:description>"
             + "    </file>"
             + "</files>"));
-        var fileMeta = createDatasetEditor(deposit, null, null)
+        var fileMeta = createDatasetEditor(deposit, true, null, null)
             .getFileInfo().values().iterator().next().getMetadata();
         assertThat(fileMeta)
             .hasFieldOrPropertyWithValue("label", "_.txt")
@@ -180,7 +190,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        <accessibleToRights>ANONYMOUS</accessibleToRights>"
             + "    </file>"
             + "</files>"));
-        var fileInfo = createDatasetEditor(deposit, null, null)
+        var fileInfo = createDatasetEditor(deposit, true, null, null)
             .getFileInfo().values().iterator().next();
         assertThat(fileInfo.getMetadata().getRestricted()).isEqualTo(false);
     }
@@ -198,7 +208,7 @@ public class DatasetEditorTest extends BaseTest {
             + "    </file>"
             + "</files>"));
         // NOTE this test fails when replaced with FileElement.pathToFileInfo(deposit);
-        var pathFileInfoMap = createDatasetEditor(deposit, null, null)
+        var pathFileInfoMap = createDatasetEditor(deposit, true, null, null)
             .getFileInfo();
         assertThat(pathFileInfoMap.get(Paths.get("file1.txt")).getMetadata().getRestricted())
             .isEqualTo(true);
@@ -219,7 +229,7 @@ public class DatasetEditorTest extends BaseTest {
             + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
             + "    <file filepath='data/file1.txt'/>"
             + "</files>"));
-        var fileInfo = createDatasetEditor(deposit, null, null)
+        var fileInfo = createDatasetEditor(deposit, true, null, null)
             .getFileInfo().values().iterator().next();
         assertThat(fileInfo.getMetadata().getRestricted()).isEqualTo(false);
     }
@@ -240,14 +250,75 @@ public class DatasetEditorTest extends BaseTest {
             + "    <file filepath='data/file1.txt'/>"
             + "</files>"));
         // NOTE this test fails when replaced with FileElement.pathToFileInfo(deposit);
-        var pathFileInfoMap = createDatasetEditor(deposit, null, null)
+        var pathFileInfoMap = createDatasetEditor(deposit, true, null, null)
             .getFileInfo();
         assertThat(pathFileInfoMap.get(Paths.get("file1.txt")).getMetadata().getRestricted())
             .isEqualTo(true);
     }
 
     @Test
-    void FIL007_FIL008_FIL009() throws Exception {
+    void FIL007_addFiles_creates_not_restricted_original_metadata_zip() throws Exception {
+        String ddmContent = ""
+            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
+            + "    <ddm:profile>"
+            + "        <ddm:accessRights>blabla</ddm:accessRights>"
+            + "    </ddm:profile>"
+            + "</ddm:DDM>";
+        String filesXmlContent = ""
+            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
+            + "    <file filepath='data/file1.txt'/>"
+            + "</files>";
+        var payloadFile = testDir.resolve("bag").resolve("data").resolve("file1.txt");
+        var bagMetadataDir = testDir.resolve("bag").resolve("metadata");
+        FileUtils.write(payloadFile.toFile(), "payload content", StandardCharsets.UTF_8);
+        FileUtils.write(bagMetadataDir.resolve("dataset.xml").toFile(), ddmContent, StandardCharsets.UTF_8);
+        FileUtils.write(bagMetadataDir.resolve("files.xml").toFile(), filesXmlContent, StandardCharsets.UTF_8);
+
+        Deposit deposit = createDeposit("");
+        deposit.setDdm(readDocumentFromString(ddmContent));
+        deposit.setFilesXml(readDocumentFromString(filesXmlContent));
+
+        var datasetEditor = createDatasetEditor(deposit, false, null, null);
+        var mockedDatasetApi = Mockito.mock(DatasetApi.class);
+        Mockito.when(datasetEditor.dataverseClient.dataset(Mockito.any())).thenReturn(mockedDatasetApi);
+
+        int payloadFileId = 1;
+        int originalMetadataFileId = 2;
+        mock_datasetApi_addFile(mockedDatasetApi, getResponse(payloadFileId), Mockito.eq(payloadFile));
+        mock_datasetApi_addFile(mockedDatasetApi, getResponse(originalMetadataFileId), Mockito.argThat(p -> p.toString().contains("original-metadata")));
+
+        FileUtils.forceMkdir(testDir.resolve("tmp").toFile());
+
+        var fileInfos = datasetEditor.getFileInfo();
+        var result = datasetEditor.addFiles("1", fileInfos.values());
+
+        assertThat(result.get(payloadFileId).getMetadata().getRestricted())
+            .isEqualTo(true);
+        assertThat(result.get(originalMetadataFileId).getMetadata().getRestricted())
+            .isEqualTo(null); // TODO or should this be false?
+    }
+
+    private void mock_datasetApi_addFile(DatasetApi mockedDatasetApi, DataverseHttpResponse<FileList> originalMetadataFileResponse, Path isOrig) throws IOException, DataverseException {
+        Mockito.when(mockedDatasetApi.addFile(isOrig, (FileMeta) Mockito.any()))
+            .thenReturn(originalMetadataFileResponse);
+    }
+
+    private DataverseHttpResponse<FileList> getResponse(int id) throws IOException {
+        var mockedResponse = (DataverseHttpResponse<FileList>) Mockito.mock(DataverseHttpResponse.class);
+        Mockito.when(mockedResponse.getData()).thenReturn(responsePayload(id));
+        return mockedResponse;
+    }
+
+    private FileList responsePayload(int id) {
+        var fileMeta = new FileMeta();
+        var dataFile = new DataFile();
+        dataFile.setId(id);
+        fileMeta.setDataFile(dataFile);
+        return new FileList(List.of(fileMeta));
+    }
+
+    @Test
+    void FIL008_FIL009() throws Exception {
         Deposit deposit = createDeposit("");
         deposit.setDdm(readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
@@ -261,7 +332,7 @@ public class DatasetEditorTest extends BaseTest {
             + "    <file filepath='data/easy-migration.zip'/>"
             + "</files>"));
 
-        var datasetEditor = createDatasetEditor(deposit, null, null);
+        var datasetEditor = createDatasetEditor(deposit, true, null, null);
         // Calling embargoFiles to test these rules makes only sense once
         // the dataset is added to a real dataverse instance, turning it into an integration test.
         // The method is kept for documentational reasons.
@@ -281,7 +352,7 @@ public class DatasetEditorTest extends BaseTest {
             + "    <file filepath='data/subdir/file2.txt'/>"
             + "    <file filepath='data/subdir_υποφάκελο/c:a*q?d&quot;l&lt;g&gt;p|s;h#.txt'/>"
             + "</files>"));
-        var fileInfoMap = createDatasetEditor(deposit, null, null)
+        var fileInfoMap = createDatasetEditor(deposit, true, null, null)
             .getFileInfo();
 
         var path2 = Paths.get("subdir/file2.txt");
@@ -307,7 +378,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        <ddm:available>2018-04-09</ddm:available>"
             + "    </ddm:profile>"
             + "</ddm:DDM>"));
-        var editor = createDatasetEditor(deposit, null, null);
+        var editor = createDatasetEditor(deposit, true, null, null);
         String actual = editor.getDateAvailable(deposit).toString()
             .replaceAll("T.*", ""); // ignore time
         assertThat(actual).isEqualTo("2018-04-09"); // may fail when executed locally, supposed to succeed on github
@@ -322,7 +393,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        <ddm:available>2018-04-09T12:00</ddm:available>"
             + "    </ddm:profile>"
             + "</ddm:DDM>"));
-        var editor = createDatasetEditor(deposit, null, null);
+        var editor = createDatasetEditor(deposit, true, null, null);
         String actual = editor.getDateAvailable(deposit).toString()
             .replaceAll("T.*", "");
         assertThat(actual).isEqualTo("2018-04-09");
@@ -334,7 +405,7 @@ public class DatasetEditorTest extends BaseTest {
         deposit.setDdm(readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "</ddm:DDM>"));
-        var editor = createDatasetEditor(deposit, null, null);
+        var editor = createDatasetEditor(deposit, true, null, null);
         assertThatThrownBy(() -> editor.getDateAvailable(deposit))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Deposit without a ddm:available element");
@@ -353,7 +424,7 @@ public class DatasetEditorTest extends BaseTest {
             + "    </ddm:dcmiMetadata>"
             + "</ddm:DDM>");
         List<URI> supportedLicenses = List.of(new URI(license));
-        var editor = createDatasetEditor(new Deposit(), null, supportedLicenses);
+        var editor = createDatasetEditor(new Deposit(), true, null, supportedLicenses);
         assertThat(editor.getLicense(datasetXml)).isEqualTo(license);
     }
 
@@ -368,7 +439,7 @@ public class DatasetEditorTest extends BaseTest {
             + "        <dcterms:license xsi:type='dcterms:URI'>http://opensource.org/licenses/MIT</dcterms:license>"
             + "    </ddm:dcmiMetadata>"
             + "</ddm:DDM>");
-        var editor = createDatasetEditor(new Deposit(), null, List.of());
+        var editor = createDatasetEditor(new Deposit(), true, null, List.of());
         assertThatThrownBy(() -> editor.getLicense(datasetXml))
             .isInstanceOf(IllegalArgumentException.class) // TODO shouldn't this be RejectedDepositException?
             .hasMessage("Unsupported license: http://opensource.org/licenses/MIT");
@@ -379,7 +450,7 @@ public class DatasetEditorTest extends BaseTest {
         var datasetXml = readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "</ddm:DDM>");
-        var editor = createDatasetEditor(new Deposit(), null, null);
+        var editor = createDatasetEditor(new Deposit(), true, null, null);
         assertThatThrownBy(() -> editor.getLicense(datasetXml))
             .isInstanceOf(RejectedDepositException.class)
             .hasMessage("Rejected null: no license specified");
