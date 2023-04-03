@@ -93,6 +93,27 @@ public class CitationMetadataFromDcmiTest {
             .extracting(DESCRIPTION_VALUE).extracting("value")
             .containsExactlyInAnyOrder("<p>title 2</p>", "<p>alt title 1</p>", "<p>alt title 2</p>");
     }
+    @Test
+    public void CIT002_alt_title_first() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "        <dct:alternative>alt title 1</dct:alternative>"
+            + "        <dct:title>title 1</dct:title>"
+            + "        <dct:title>title 2</dct:title>"
+            + "        <dct:alternative>alt title 2</dct:alternative>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+
+        // CIT002 first of dcmi title/alternative
+        assertThat(getPrimitiveSingleValueField("citation", ALTERNATIVE_TITLE, result))
+            .isEqualTo("alt title 1");
+
+        // CIT010 rest of dcmi title/alternative
+        assertThat(getCompoundMultiValueField("citation", DESCRIPTION, result))
+            .extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsExactlyInAnyOrder("<p>title 1</p>", "<p>title 2</p>", "<p>title 1</p>", "<p>alt title 2</p>");
+    }
 
     @Test
     public void CIT002A_4_other_id() throws Exception {
