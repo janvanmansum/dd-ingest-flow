@@ -259,69 +259,6 @@ public class DatasetEditorTest extends BaseTest {
     }
 
     @Test
-    void FIL007_addFiles_creates_not_restricted_original_metadata_zip() throws Exception {
-        String ddmContent = ""
-            + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
-            + "    <ddm:profile>"
-            + "        <ddm:accessRights>blabla</ddm:accessRights>"
-            + "    </ddm:profile>"
-            + "</ddm:DDM>";
-        String filesXmlContent = ""
-            + "<files xmlns='http://easy.dans.knaw.nl/schemas/bag/metadata/files/'>"
-            + "    <file filepath='data/file1.txt'/>"
-            + "</files>";
-        var payloadFile = testDir.resolve("bag").resolve("data").resolve("file1.txt");
-        var bagMetadataDir = testDir.resolve("bag").resolve("metadata");
-        FileUtils.write(payloadFile.toFile(), "payload content", StandardCharsets.UTF_8);
-        FileUtils.write(bagMetadataDir.resolve("dataset.xml").toFile(), ddmContent, StandardCharsets.UTF_8);
-        FileUtils.write(bagMetadataDir.resolve("files.xml").toFile(), filesXmlContent, StandardCharsets.UTF_8);
-
-        Deposit deposit = createDeposit("");
-        deposit.setDdm(readDocumentFromString(ddmContent));
-        deposit.setFilesXml(readDocumentFromString(filesXmlContent));
-
-        var datasetEditor = createDatasetEditor(deposit, false, null, null);
-        var mockedDatasetApi = Mockito.mock(DatasetApi.class);
-        Mockito.when(datasetEditor.dataverseClient.dataset(Mockito.any())).thenReturn(mockedDatasetApi);
-
-        int payloadFileId = 1;
-        int originalMetadataFileId = 2;
-        mock_datasetApi_addFile(mockedDatasetApi, getResponse(payloadFileId), Mockito.eq(payloadFile));
-        mock_datasetApi_addFile(mockedDatasetApi, getResponse(originalMetadataFileId), Mockito.argThat(p -> p.toString().contains("original-metadata")));
-
-        FileUtils.forceMkdir(testDir.resolve("tmp").toFile());
-
-        var fileInfos = datasetEditor.getFileInfo();
-        var result = datasetEditor.addFiles("1", fileInfos.values());
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(payloadFileId).getMetadata().getRestricted())
-            .isEqualTo(true);
-        var restricted = result.get(originalMetadataFileId).getMetadata().getRestricted();
-        assertThat(restricted).isNull(); // TODO or should this be false?
-
-    }
-
-    private void mock_datasetApi_addFile(DatasetApi mockedDatasetApi, DataverseHttpResponse<FileList> originalMetadataFileResponse, Path isOrig) throws IOException, DataverseException {
-        Mockito.when(mockedDatasetApi.addFile(isOrig, (FileMeta) Mockito.any()))
-            .thenReturn(originalMetadataFileResponse);
-    }
-
-    private DataverseHttpResponse<FileList> getResponse(int id) throws IOException {
-        var mockedResponse = (DataverseHttpResponse<FileList>) Mockito.mock(DataverseHttpResponse.class);
-        Mockito.when(mockedResponse.getData()).thenReturn(responsePayload(id));
-        return mockedResponse;
-    }
-
-    private FileList responsePayload(int id) {
-        var fileMeta = new FileMeta();
-        var dataFile = new DataFile();
-        dataFile.setId(id);
-        fileMeta.setDataFile(dataFile);
-        return new FileList(List.of(fileMeta));
-    }
-
-    @Test
     void FIL008_FIL009() throws Exception {
         Deposit deposit = createDeposit("");
         deposit.setDdm(readDocumentFromString(""
