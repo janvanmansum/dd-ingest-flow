@@ -294,6 +294,7 @@ public class DatasetEditorTest extends BaseTest {
         var fileInfos = datasetEditor.getFileInfo();
         var result = datasetEditor.addFiles("1", fileInfos.values());
 
+        assertThat(result).hasSize(2);
         System.out.println(String.format("%d: %s",payloadFileId,result.get(payloadFileId).getMetadata().getLabel()));
         System.out.println(String.format("%d: %s",originalMetadataFileId,result.get(originalMetadataFileId).getMetadata().getLabel()));
         assertThat(result.get(payloadFileId).getMetadata().getRestricted())
