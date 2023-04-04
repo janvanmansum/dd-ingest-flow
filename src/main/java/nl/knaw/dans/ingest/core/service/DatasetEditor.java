@@ -111,10 +111,8 @@ public abstract class DatasetEditor {
 
     Map<Integer, FileInfo> addFiles(String persistentId, Collection<FileInfo> fileInfos) throws IOException, DataverseException {
         var result = new HashMap<Integer, FileInfo>(fileInfos.size());
-        System.out.println("adding files "+fileInfos.size());
 
         for (var fileInfo : fileInfos) {
-            System.out.println("adding file");
             log.debug("Adding file, directoryLabel = {}, label = {}",
                 fileInfo.getMetadata().getDirectoryLabel(), fileInfo.getMetadata().getLabel());
 
@@ -125,21 +123,16 @@ public abstract class DatasetEditor {
     }
 
     protected FileInfo createOriginalMetadataFileInfo() throws IOException {
-        System.out.println("it is migration");
         var path = zipFileHandler.zipOriginalMetadata(deposit.getDdmPath(), deposit.getFilesXmlPath());
-        System.out.println("zip path: " + path);
         var checksum = DigestUtils.sha1Hex(new FileInputStream(path.toFile()));
-        System.out.println("checksum: " + checksum);
         var fileMeta = new FileMeta();
         fileMeta.setLabel(ORIGINAL_METADATA_ZIP);
         return new FileInfo(path, checksum, fileMeta);
     }
 
     private Integer addFile(String persistentId, FileInfo fileInfo) throws IOException, DataverseException {
-        System.out.println("adding file");
         var dataset = dataverseClient.dataset(persistentId);
         var wrappedZip = zipFileHandler.wrapIfZipFile(fileInfo.getPath());
-        System.out.println("wrapped");
 
         var file = wrappedZip.orElse(fileInfo.getPath());
         var result = dataset.addFile(file, fileInfo.getMetadata());
