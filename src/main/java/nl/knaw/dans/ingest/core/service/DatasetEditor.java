@@ -54,7 +54,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class DatasetEditor {
-    protected static final List<String> embargoExclusions = Arrays.asList("easy-migration.zip", "original-metadata.zip");
+
+    public static final String ORIGINAL_METADATA_ZIP = "original-metadata.zip";
+    protected static final List<String> embargoExclusions = Arrays.asList("easy-migration.zip", ORIGINAL_METADATA_ZIP);
 
     protected final DataverseClient dataverseClient;
     protected final boolean isMigration;
@@ -117,23 +119,15 @@ public abstract class DatasetEditor {
             var id = addFile(persistentId, fileInfo);
             result.put(id, fileInfo);
         }
-        if (!isMigration) {
-            var path = zipFileHandler.zipOriginalMetadata(deposit.getDdmPath(), deposit.getFilesXmlPath());
-            var checksum = DigestUtils.sha1Hex(new FileInputStream(path.toFile()));
-            var fileMeta = new FileMeta();
-            fileMeta.setLabel("original-metadata.zip");
-            var fileInfo = new FileInfo(path, checksum, fileMeta);
-            var id = addFile(persistentId, fileInfo);
-            result.put(id, fileInfo);
-            try {
-                Files.deleteIfExists(path);
-            }
-            catch (IOException e) {
-                log.warn("Unable to delete zipfile {}", path, e);
-            }
-        }
-
         return result;
+    }
+
+    protected FileInfo createOriginalMetadataFileInfo() throws IOException {
+        var path = zipFileHandler.zipOriginalMetadata(deposit.getDdmPath(), deposit.getFilesXmlPath());
+        var checksum = DigestUtils.sha1Hex(new FileInputStream(path.toFile()));
+        var fileMeta = new FileMeta();
+        fileMeta.setLabel(ORIGINAL_METADATA_ZIP);
+        return new FileInfo(path, checksum, fileMeta);
     }
 
     private Integer addFile(String persistentId, FileInfo fileInfo) throws IOException, DataverseException {
@@ -141,11 +135,8 @@ public abstract class DatasetEditor {
         var wrappedZip = zipFileHandler.wrapIfZipFile(fileInfo.getPath());
 
         var file = wrappedZip.orElse(fileInfo.getPath());
-        if (log.isDebugEnabled()) {
-            var metadata = objectMapper.writeValueAsString(fileInfo.getMetadata());
-            log.debug("Adding file {} with metadata {}", file, metadata);
-        }
         var result = dataset.addFile(file, fileInfo.getMetadata());
+        log.debug("Called addFile for {}; result: {}", file, result);
 
         if (wrappedZip.isPresent()) {
             try {
