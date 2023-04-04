@@ -295,8 +295,8 @@ public class DatasetEditorTest extends BaseTest {
 
         assertThat(result.get(payloadFileId).getMetadata().getRestricted())
             .isEqualTo(true);
-        assertThat(result.get(originalMetadataFileId).getMetadata().getRestricted())
-            .isNull(); // TODO or should this be false?
+        var restricted = result.get(originalMetadataFileId).getMetadata().getRestricted();
+        assertThat(restricted).isNull(); // TODO or should this be false?
     }
 
     private void mock_datasetApi_addFile(DatasetApi mockedDatasetApi, DataverseHttpResponse<FileList> originalMetadataFileResponse, Path isOrig) throws IOException, DataverseException {
