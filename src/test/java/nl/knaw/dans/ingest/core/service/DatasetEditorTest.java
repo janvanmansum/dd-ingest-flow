@@ -40,6 +40,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -293,10 +294,13 @@ public class DatasetEditorTest extends BaseTest {
         var fileInfos = datasetEditor.getFileInfo();
         var result = datasetEditor.addFiles("1", fileInfos.values());
 
+        System.out.println(String.format("%d: %s",payloadFileId,result.get(payloadFileId).getMetadata().getLabel()));
+        System.out.println(String.format("%d: %s",originalMetadataFileId,result.get(originalMetadataFileId).getMetadata().getLabel()));
         assertThat(result.get(payloadFileId).getMetadata().getRestricted())
             .isEqualTo(true);
         var restricted = result.get(originalMetadataFileId).getMetadata().getRestricted();
         assertThat(restricted).isNull(); // TODO or should this be false?
+
     }
 
     private void mock_datasetApi_addFile(DatasetApi mockedDatasetApi, DataverseHttpResponse<FileList> originalMetadataFileResponse, Path isOrig) throws IOException, DataverseException {
