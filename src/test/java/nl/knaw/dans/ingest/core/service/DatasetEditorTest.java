@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.nullValue;
 
 public class DatasetEditorTest extends BaseTest {
     private final Path testDir = new File("target/test/" + getClass().getSimpleName()).toPath();
@@ -55,7 +56,7 @@ public class DatasetEditorTest extends BaseTest {
     }
 
     private DatasetEditor createDatasetEditor(Deposit deposit, final boolean isMigration, final Pattern fileExclusionPattern, final List<URI> supportedLicenses) {
-        var dataverseService = new DataverseServiceImpl(Mockito.mock(DataverseClient.class), 1, 1);
+        var dataverseService = new DataverseServiceImpl(Mockito.mock(DataverseClient.class),1,1);
         var zipFileHandler = new ZipFileHandler(testDir.resolve("tmp"));
         return new DatasetEditor(isMigration, null, deposit, supportedLicenses, fileExclusionPattern, zipFileHandler, null, dataverseService) {
 
@@ -294,8 +295,8 @@ public class DatasetEditorTest extends BaseTest {
 
         assertThat(result.get(payloadFileId).getMetadata().getRestricted())
             .isEqualTo(true);
-        assertThat(result.values().stream().map(fileinfo -> fileinfo.getMetadata().getRestricted()))
-            .containsExactlyInAnyOrder(true, null); // TODO or should null be false?
+        assertThat(result.get(originalMetadataFileId).getMetadata().getRestricted())
+            .isNull(); // TODO or should this be false?
     }
 
     private void mock_datasetApi_addFile(DatasetApi mockedDatasetApi, DataverseHttpResponse<FileList> originalMetadataFileResponse, Path isOrig) throws IOException, DataverseException {
@@ -323,7 +324,7 @@ public class DatasetEditorTest extends BaseTest {
         deposit.setDdm(readDocumentFromString(""
             + "<ddm:DDM xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'>"
             + "    <ddm:profile>"
-            + "        <ddm:available>" + (new DateTime().plusWeeks(7)) + "</ddm:available>"
+            + "        <ddm:available>"+ (new DateTime().plusWeeks(7)) +"</ddm:available>"
             + "    </ddm:profile>"
             + "</ddm:DDM>"));
         deposit.setFilesXml(readDocumentFromString(""
