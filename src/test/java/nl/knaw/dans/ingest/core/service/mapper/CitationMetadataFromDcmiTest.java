@@ -245,7 +245,8 @@ public class CitationMetadataFromDcmiTest {
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", KEYWORD, result);
         assertThat(field).extracting(KEYWORD_VALUE).extracting("value")
-            .containsOnly("metal", "childcare; voor- en vroegschoolse educatie; schoolloopbanen; school career; sociaal-emotionele ontwikkeling; social-emotional development; primary school; basisschool");
+            .containsOnly("metal",
+                "childcare; voor- en vroegschoolse educatie; schoolloopbanen; school career; sociaal-emotionele ontwikkeling; social-emotional development; primary school; basisschool");
         assertThat(result.getDatasetVersion().getTermsOfAccess()).isEqualTo("");
     }
 
@@ -486,9 +487,9 @@ public class CitationMetadataFromDcmiTest {
         var result = mapDdmToDataset(doc, true);
         List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DATE_OF_COLLECTION, result);
         assertThat(field).extracting(DATE_OF_COLLECTION_START).extracting("value")
-            .containsExactlyInAnyOrder("2022-01-01","2021-02-01","2020-04-01","");
+            .containsExactlyInAnyOrder("2022-01-01", "2021-02-01", "2020-04-01", "");
         assertThat(field).extracting(DATE_OF_COLLECTION_END).extracting("value")
-            .containsExactlyInAnyOrder("2022-02-01","2021-03-01","2019-05-01","");
+            .containsExactlyInAnyOrder("2022-02-01", "2021-03-01", "2019-05-01", "");
     }
 
     @Test
