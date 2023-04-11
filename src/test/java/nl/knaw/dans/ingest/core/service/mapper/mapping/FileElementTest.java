@@ -82,7 +82,7 @@ class FileElementTest extends BaseTest {
     }
 
     @Test
-    void toFileMeta_plain_description_CIT004() throws Exception {
+    void toFileMeta_plain_description_FIL004() throws Exception {
         var doc = readDocumentFromString(String.format(""
             + "    <file filepath='data/this/is/the/directory/label/leeg.txt' %s>"
             + "         <dcterms:description>Empty file</dcterms:description>\n"
