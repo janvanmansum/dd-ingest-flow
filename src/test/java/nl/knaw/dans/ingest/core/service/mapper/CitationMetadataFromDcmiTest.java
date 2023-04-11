@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.ingest.core.service.mapper;
 
+import nl.knaw.dans.ingest.core.domain.VaultMetadata;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundSingleValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICAT
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_URL;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES_INFORMATION;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.createMapper;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundSingleValueField;
@@ -65,6 +67,7 @@ import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimi
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getPrimitiveSingleValueField;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mapDdmToDataset;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.minimalDdmProfile;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.mockedVaultMetadata;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocumentFromString;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.toPrettyJsonString;
@@ -73,13 +76,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CitationMetadataFromDcmiTest {
 
     @Test
-    public void CIT002_CIT010_first_title_alternatives_and_the_rest() throws Exception {
+    public void CIT002_CIT010_titles_before_alternative_should_map_first_to_alternative_rest_to_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
+            + "        <dct:alternative>alt title 1</dct:alternative>"
             + "        <dct:title>title 1</dct:title>"
             + "        <dct:title>title 2</dct:title>"
-            + "        <dct:alternative>alt title 1</dct:alternative>"
             + "        <dct:alternative>alt title 2</dct:alternative>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
@@ -91,69 +94,77 @@ public class CitationMetadataFromDcmiTest {
         // CIT010 rest of dcmi title/alternative
         assertThat(getCompoundMultiValueField("citation", DESCRIPTION, result))
             .extracting(DESCRIPTION_VALUE).extracting("value")
-            .containsExactlyInAnyOrder("<p>title 2</p>", "<p>alt title 1</p>", "<p>alt title 2</p>");
-    }
-    @Test
-    public void CIT002_alt_title_first() throws Exception {
-        var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">"
-            + minimalDdmProfile() + dcmi(""
-            + "        <dct:alternative>alt title 1</dct:alternative>"
-            + "        <dct:title>title 1</dct:title>"
-            + "        <dct:title>title 2</dct:title>"
-            + "        <dct:alternative>alt title 2</dct:alternative>")
-            + "</ddm:DDM>");
-        var result = mapDdmToDataset(doc, true);
-
-        // CIT002 first of dcmi title/alternative
-        assertThat(getPrimitiveSingleValueField("citation", ALTERNATIVE_TITLE, result))
-            .isEqualTo("alt title 1");
-
-        // CIT010 rest of dcmi title/alternative
-        assertThat(getCompoundMultiValueField("citation", DESCRIPTION, result))
-            .extracting(DESCRIPTION_VALUE).extracting("value")
-            .containsExactlyInAnyOrder("<p>title 1</p>", "<p>title 2</p>", "<p>title 1</p>", "<p>alt title 2</p>");
+            .containsExactlyInAnyOrder("<p>alt title 1</p>", "<p>title 2</p>", "<p>alt title 2</p>");
     }
 
     @Test
-    public void CIT002A_4_other_id() throws Exception {
+    public void CIT002A_vault_metadata_other_id_should_map_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
-            + minimalDdmProfile() + dcmi(""
-            + "<dct:identifier xsi:type='id-type:EASY2'>easy-dataset:123</dct:identifier>"
-            + "<dct:identifier>typeless:123</dct:identifier>")
+            + minimalDdmProfile() + dcmi("")
             + "</ddm:DDM>");
-        var result = mapDdmToDataset(doc, true);
+        var result = createMapper().toDataverseDataset(doc, null, null, null, mockedVaultMetadata, true, null);
         var field = getCompoundMultiValueField("citation", OTHER_ID, result);
-        assertThat(field).hasSize(4);
 
-        // CIT002A from vault metadata
+        assertThat(field).hasSize(1);
         assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
             .contains("otherId");
         assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
             .contains("something");
+    }
 
-        // CIT002B from @type="EASY2"
+    @Test
+    public void CIT00X_vault_metadata_other_id_should_map_to_other_id() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("")
+            + "</ddm:DDM>");
+        var result = createMapper().toDataverseDataset(doc, "otherId:something", null, null, new VaultMetadata(), true, null);
+        var field = getCompoundMultiValueField("citation", OTHER_ID, result);
+
+        assertThat(field).hasSize(1);
+        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
+            .contains("otherId");
+        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
+            .contains("something");
+    }
+
+    @Test
+    public void CIT002B_dct_identifier_type_easy2_should_map_to_other_id() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "<dct:identifier xsi:type='id-type:EASY2'>easy-dataset:123</dct:identifier>")
+            + "</ddm:DDM>");
+        var result = createMapper().toDataverseDataset(doc, null, null, null, new VaultMetadata(), true, null);
+        var field = getCompoundMultiValueField("citation", OTHER_ID, result);
+
+        assertThat(field).hasSize(1);
         assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
             .contains("DANS-KNAW");
         assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
             .contains("easy-dataset:123");
-
-        // CIT003 from bag-info.txt Has-Organizational-Identifier
-        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
-            .contains("doi");
-        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
-            .contains("typeless:123");
-
-        // CIT004
-        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
-            .contains("");
-        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
-            .contains("10.12345/678");
     }
 
     @Test
-    public void CIT008_contact() throws Exception {
+    public void CIT004_typeless_dct_iedntifier_should_map_to_other_id() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi(""
+            + "<dct:identifier>typeless:123</dct:identifier>")
+            + "</ddm:DDM>");
+        var result = createMapper().toDataverseDataset(doc, null, null, null, new VaultMetadata(), true, null);
+        var field = getCompoundMultiValueField("citation", OTHER_ID, result);
+
+        assertThat(field).hasSize(1);
+        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
+            .contains("");
+        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
+            .contains("typeless:123");
+    }
+
+    @Test
+    public void CIT008_conatct_name_email_affiliation_of_amd_should_map_to_contact() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
