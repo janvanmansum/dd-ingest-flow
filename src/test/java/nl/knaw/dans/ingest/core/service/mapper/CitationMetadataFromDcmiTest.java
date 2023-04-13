@@ -76,7 +76,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CitationMetadataFromDcmiTest {
 
     @Test
-    public void CIT002_CIT010_titles_before_alternative_should_map_first_to_alternative_rest_to_description() throws Exception {
+    public void CIT002_CIT010_dct_titles_before_dct_alternative_maps_first_to_alternative_rest_to_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -98,7 +98,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT002A_vault_metadata_other_id_should_map_to_other_id() throws Exception {
+    public void CIT002A_vault_metadata_other_id_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -114,7 +114,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT00X_vault_metadata_other_id_should_map_to_other_id() throws Exception {
+    public void CIT00X_vault_metadata_other_id_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -130,7 +130,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT002B_dct_identifier_type_easy2_should_map_to_other_id() throws Exception {
+    public void CIT002B_dct_identifier_type_easy2_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -147,7 +147,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT004_typeless_dct_iedntifier_should_map_to_other_id() throws Exception {
+    public void CIT004_typeless_dct_iedntifier_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -164,7 +164,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT008_conatct_name_email_affiliation_of_amd_should_map_to_contact() throws Exception {
+    public void CIT008_conatct_name_email_affiliation_of_amd_maps_to_contact() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -180,20 +180,99 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dates() throws Exception {
+    public void CIT011_dct_date_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
-            + minimalDdmProfile() + dcmi(""
-            + "        <dct:modified>2015-09-08</dct:modified>"
-            + "        <dct:date>2015-09-07</dct:date>"
-            + "        <dct:dateAccepted>2015-09-06</dct:dateAccepted>"
-            + "        <dct:dateCopyrighted>2015-09-05</dct:dateCopyrighted>"
-            + "        <dct:issued>2015-09-04</dct:issued>")
+            + minimalDdmProfile() + dcmi("<dct:date>2015-09-07</dct:date>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
         assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
-            .containsExactlyInAnyOrder("Issued: 2015-09-04", "Date Copyrighted: 2015-09-05", "Date Accepted: 2015-09-06", "Date: 2015-09-07", "Modified: 2015-09-08");
+            .containsOnly("Date: 2015-09-07");
+    }
+
+    @Test
+    public void CIT011_dct_dateAccepted_maps_to_ds_description() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("<dct:dateAccepted>2015-09-06</dct:dateAccepted>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("Date Accepted: 2015-09-06");
+    }
+
+    @Test
+    public void CIT011_dct_dateCopyrighted_maps_to_ds_description() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("<dct:dateCopyrighted>2015-09-05</dct:dateCopyrighted>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("Date Copyrighted: 2015-09-05");
+    }
+
+    @Test
+    public void CIT011_dct_dateSubmitted_maps_to_ds_description() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("<dct:dateSubmitted>2015-09-05</dct:dateSubmitted>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("Date Submitted: 2015-09-05");
+    }
+
+    @Test
+    public void CIT011_dct_modified_maps_to_ds_description() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("<dct:modified>2015-09-08</dct:modified>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("Modified: 2015-09-08");
+    }
+
+    @Test
+    public void CIT011_dct_issued_maps_to_ds_description() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("<dct:issued>2015-09-04</dct:issued>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("Issued: 2015-09-04");
+    }
+
+    @Test
+    public void CIT011_dct_valid_maps_to_ds_description() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("<dct:valid>2015-09-04</dct:valid>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("Valid: 2015-09-04");
+    }
+
+    @Test
+    public void CIT011_dct_coverage_maps_to_ds_description() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile() + dcmi("<dct:coverage>2015-09-04</dct:coverage>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
+            .containsOnly("Coverage: 2015-09-04");
     }
 
     @Test
@@ -205,7 +284,7 @@ public class CitationMetadataFromDcmiTest {
             + "        <dct:description>pietje puck</dct:description>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DESCRIPTION, result);
+        var field = getCompoundMultiValueField("citation", DESCRIPTION, result);
         assertThat(field).extracting(DESCRIPTION_VALUE).extracting("value")
             .containsExactlyInAnyOrder("<p>blabla rabarbera</p>", "<p>pietje puck</p>");
     }
@@ -448,7 +527,7 @@ public class CitationMetadataFromDcmiTest {
             + dcmi("<dct:identifier xsi:type='id-type:NWO-PROJECTNR'>380-60-007</dct:identifier>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", GRANT_NUMBER, result);
+        var field = getCompoundMultiValueField("citation", GRANT_NUMBER, result);
         assertThat(field).extracting(GRANT_NUMBER_AGENCY).extracting("value")
             .containsExactlyInAnyOrder("NWO");
         assertThat(field).extracting(GRANT_NUMBER_VALUE).extracting("value")
@@ -463,7 +542,7 @@ public class CitationMetadataFromDcmiTest {
             + dcmi("<dct:publisher>Synthegra</dct:publisher>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DISTRIBUTOR, result);
+        var field = getCompoundMultiValueField("citation", DISTRIBUTOR, result);
         assertThat(field).extracting(DISTRIBUTOR_NAME).extracting("value")
             .containsExactlyInAnyOrder("Synthegra");
     }
@@ -485,7 +564,7 @@ public class CitationMetadataFromDcmiTest {
             + "        </ddm:datesOfCollection>")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        List<Map<String, SingleValueField>> field = getCompoundMultiValueField("citation", DATE_OF_COLLECTION, result);
+        var field = getCompoundMultiValueField("citation", DATE_OF_COLLECTION, result);
         assertThat(field).extracting(DATE_OF_COLLECTION_START).extracting("value")
             .containsExactlyInAnyOrder("2022-01-01", "2021-02-01", "2020-04-01", "");
         assertThat(field).extracting(DATE_OF_COLLECTION_END).extracting("value")
