@@ -72,6 +72,7 @@ import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.readDocu
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.rootAttributes;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.toPrettyJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CitationMetadataFromDcmiTest {
 
@@ -561,6 +562,28 @@ public class CitationMetadataFromDcmiTest {
             .containsOnly(expected);
         // not as description and author
         assertThat(toPrettyJsonString(result)).containsOnlyOnce(expected);
+    }
+
+    @Test
+    void CIT022_ddm_funder_maps_to_grant_number() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile()
+            + dcmi(""
+            + "<ddm:funding>"
+            + "    <ddm:funderName>Funder name</ddm:funderName>"
+            + "    <ddm:fundingProgramme>Funding programme</ddm:fundingProgramme>"
+            + "    <ddm:awardNumber>Award number</ddm:awardNumber>"
+            + "    <ddm:awardTitle xml:lang='en'>Award title</ddm:awardTitle>"
+            + "</ddm:funding>")
+            + "</ddm:DDM>");
+        var result = mapDdmToDataset(doc, true);
+        var field = getCompoundMultiValueField("citation", GRANT_NUMBER, result);
+        assertThat(toPrettyJsonString(result)).doesNotContain("Award title"); // ignored input
+        assertThat(field).extracting(GRANT_NUMBER_AGENCY).extracting("value")
+            .containsExactlyInAnyOrder("Funder name");
+        assertThat(field).extracting(GRANT_NUMBER_VALUE).extracting("value")
+            .containsExactlyInAnyOrder("Funding programme Award number");
     }
 
     @Test
