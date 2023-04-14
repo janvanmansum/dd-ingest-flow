@@ -276,7 +276,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT012_description() throws Exception {
+    public void CIT012_dct_description_maps_to_dsDescription() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -290,7 +290,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT012A_DctAccesRights_maps_to_description_DD_1216() throws Exception {
+    void CIT012A_dct_accesRights_maps_to_dsDescription() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + "    <ddm:profile>"
@@ -313,7 +313,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT014_subject() throws Exception {
+    void CIT014_subject_maps_to_keyword() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -330,7 +330,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT015_pan() throws Exception {
+    void CIT015_ddm_subject_pan_maps_to_keyword() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -372,7 +372,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT016_language() throws Exception {
+    void CIT016_dct_language_maps_to_keyword() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -390,7 +390,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT017_ISBN_ISSN() throws Exception {
+    void CIT017_dc_identifier_ISBN_ISSN_maps_to_publication() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -414,7 +414,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT017A_provenance_maps_to_notes_DD_1216() throws Exception {
+    void CIT017A_dct_provenance_maps_to_notesText() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -432,14 +432,14 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT018_language() throws Exception {
+    void CIT018_ddm_language_code_maps_to_language() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
             + dcmi(""
-            + "  <ddm:language encodingScheme='ISO639-1' code='fy'>West-Fries</ddm:language>\n"
-            + "  <ddm:language encodingScheme='ISO639-2' code='kal'>Groenlands</ddm:language>\n"
-            + "  <ddm:language encodingScheme='ISO639-2' code='baq'>Baskisch</ddm:language>\n")
+            + "  <ddm:language encodingScheme='ISO639-1' code='fy'>West-Fries</ddm:language>"
+            + "  <ddm:language encodingScheme='ISO639-2' code='kal'>Groenlands</ddm:language>"
+            + "  <ddm:language encodingScheme='ISO639-2' code='baq'>Baskisch</ddm:language>")
             + "</ddm:DDM>");
 
         var result = mapDdmToDataset(doc, false);
@@ -449,20 +449,23 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT018_language_is_not_iso() throws Exception {
+    void CIT018_not_iso_language_maps_to_nothing() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
             + dcmi(""
-            + "  <ddm:language encodingScheme='rabarber' code='baq'>Baskisch</ddm:language>\n")
+            + "  <ddm:language encodingScheme='rabarber' code='baq'>Baskisch</ddm:language>")
             + "</ddm:DDM>");
 
-        var result = mapDdmToDataset(doc, false).getDatasetVersion().getMetadataBlocks();
-        assertThat(result.get("dansArchaeologyMetadata").getFields()).isEmpty();
+        var result = mapDdmToDataset(doc, false);
+        var s = toPrettyJsonString(result);
+        assertThat(s).doesNotContain("Baskisch");
+        assertThat(s).doesNotContain("rabarber");
+        assertThat(s).doesNotContain("baq");
     }
 
     @Test
-    void CIT020_contributor_author() throws Exception {
+    void CIT020_contributor_author_role_maps_to_contributor_type() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>"
             + minimalDdmProfile()
@@ -497,13 +500,52 @@ public class CitationMetadataFromDcmiTest {
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", CONTRIBUTOR, result);
         assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
+            .doesNotContain("RightsHolder");
+        assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
             .containsOnly("Other", "Funder"); // see CIT024 publisher becomes distributor
         assertThat(field).extracting(CONTRIBUTOR_NAME).extracting("value")
             .containsOnly("M. H. van Binsbergen (Kohnstamm Instituut)", "A Jones");
     }
 
     @Test
-    void CIT021A_description_type_other_maps_only_to_author_name_DD_1216() throws Exception {
+    void CIT021_contributor_organisation_role_maps_to_contributor_type() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>"
+            + minimalDdmProfile() + dcmi("" 
+            + "        <dcx-dai:contributorDetails>"
+            + "            <dcx-dai:organization>"
+            + "                <dcx-dai:name xml:lang='en'>Contributing Org</dcx-dai:name>"
+            + "                <dcx-dai:role>RightsHolder</dcx-dai:role>"
+            + "            </dcx-dai:organization>"
+            + "            <dcx-dai:organization>"
+            + "                <dcx-dai:name xml:lang='en'>Anti-Vampire League</dcx-dai:name>"
+            + "                <dcx-dai:role>"
+            + "                    Funder"
+            + "                </dcx-dai:role>"
+            + "                <dcx-dai:ISNI>http://isni.org/isni/0000000121032683</dcx-dai:ISNI>"
+            + "            </dcx-dai:organization>"
+            + "            <dcx-dai:organization>"
+            + "                <dcx-dai:name xml:lang=\"en\">Important</dcx-dai:name>"
+            + "                <dcx-dai:role>Important guy</dcx-dai:role>"
+            + "                <dcx-dai:ISNI>http://isni.org/isni/0000000121032684</dcx-dai:ISNI>"
+            + "            </dcx-dai:organization>"
+            + "        </dcx-dai:contributorDetails>")
+            + "</ddm:DDM>");
+
+        var result = mapDdmToDataset(doc, false);
+        var field = getCompoundMultiValueField("citation", CONTRIBUTOR, result);
+        assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
+            .doesNotContain("RightsHolder");
+        assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
+            .doesNotContain("Other", "Funder"); // see CIT024 publisher becomes distributor
+        assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
+            .containsOnly("Important guy", "A Jones");
+        assertThat(field).extracting(CONTRIBUTOR_NAME).extracting("value")
+            .containsOnly("M. H. van Binsbergen (Kohnstamm Instituut)", "A Jones");
+    }
+
+    @Test
+    void CIT021A_description_type_other_maps_only_to_author_name() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -520,7 +562,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT023_nwo_project_nr() throws Exception {
+    public void CIT023_dct_identifier_nwo_project_nr_maps_to_grant_number() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -535,7 +577,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT024_publisher() throws Exception {
+    public void CIT024_dct_publisher_maps_to_distributor() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -548,7 +590,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT026_dates_of_collection() throws Exception {
+    public void CIT026_ddm_dates_of_collection_maps_to_date_of_collection() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -572,8 +614,8 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT027_without_series_info_in_dcmi() throws Exception {
-        // see also DD_1292_multiple_series_informations_to_single_compound_field in MappingIntegrationMap
+    public void CIT027_no_ddm_description_with_type_serries_information_series_informations_maps_to_empty_serries() throws Exception { // TODO fix
+        // see also CIT027_multiple_series_informations_to_single_compound_field in MappingIntegrationMap
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -584,7 +626,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT027_multiple_series_informations_to_single_compound_field_DD_1292() throws Exception {
+    void CIT027_multiple_ddm_description_with_type_serries_information_series_informations_maps_to_single_series() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">"
                 + minimalDdmProfile()
@@ -607,7 +649,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT028_source() throws Exception {
+    void CIT028_dc_source_maps_to_data_sources() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">"
                 + minimalDdmProfile()
