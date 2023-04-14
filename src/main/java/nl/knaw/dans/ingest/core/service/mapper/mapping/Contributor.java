@@ -77,11 +77,8 @@ public final class Contributor extends Base {
             .map(DcxDaiAuthor::isValidContributor)
             .orElse(false);
 
-        System.out.println(node.getTextContent());
-        Optional<Node> childNode = getChildNode(node, "dcx-dai:organization");
-        Optional<Node> optionalNode = childNode
-            .filter(n -> !DcxDaiOrganization.isRightsHolderOrFunder(n));
-        var isValidOrg = optionalNode
+        var isValidOrg = getChildNode(node, "dcx-dai:organization")
+            .filter(n -> !DcxDaiOrganization.isRightsHolderOrFunder(n))
             .map(DcxDaiOrganization::isValidContributor)
             .orElse(false);
 
