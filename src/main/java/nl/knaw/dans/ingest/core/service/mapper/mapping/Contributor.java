@@ -15,12 +15,14 @@
  */
 package nl.knaw.dans.ingest.core.service.mapper.mapping;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import nl.knaw.dans.ingest.core.service.mapper.builder.CompoundFieldGenerator;
 import org.w3c.dom.Node;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
 
@@ -75,8 +77,11 @@ public final class Contributor extends Base {
             .map(DcxDaiAuthor::isValidContributor)
             .orElse(false);
 
-        var isValidOrg = getChildNode(node, "dcx-dai:organization")
-            .filter(n -> !DcxDaiOrganization.isRightsHolderOrFunder(n))
+        System.out.println(node.getTextContent());
+        Optional<Node> childNode = getChildNode(node, "dcx-dai:organization");
+        Optional<Node> optionalNode = childNode
+            .filter(n -> !DcxDaiOrganization.isRightsHolderOrFunder(n));
+        var isValidOrg = optionalNode
             .map(DcxDaiOrganization::isValidContributor)
             .orElse(false);
 

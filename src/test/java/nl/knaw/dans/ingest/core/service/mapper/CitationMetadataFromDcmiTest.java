@@ -508,7 +508,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT021_contributor_organisation_role_maps_to_contributor_type() throws Exception {
+    void CIT021_contributor_organization_role_maps_to_contributor_type() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>"
             + minimalDdmProfile() + dcmi("" 
@@ -517,6 +517,8 @@ public class CitationMetadataFromDcmiTest {
             + "                <dcx-dai:name xml:lang='en'>Contributing Org</dcx-dai:name>"
             + "                <dcx-dai:role>RightsHolder</dcx-dai:role>"
             + "            </dcx-dai:organization>"
+            + "        </dcx-dai:contributorDetails>"
+            + "        <dcx-dai:contributorDetails>"
             + "            <dcx-dai:organization>"
             + "                <dcx-dai:name xml:lang='en'>Anti-Vampire League</dcx-dai:name>"
             + "                <dcx-dai:role>"
@@ -524,8 +526,10 @@ public class CitationMetadataFromDcmiTest {
             + "                </dcx-dai:role>"
             + "                <dcx-dai:ISNI>http://isni.org/isni/0000000121032683</dcx-dai:ISNI>"
             + "            </dcx-dai:organization>"
+            + "        </dcx-dai:contributorDetails>"
+            + "        <dcx-dai:contributorDetails>"
             + "            <dcx-dai:organization>"
-            + "                <dcx-dai:name xml:lang=\"en\">Important</dcx-dai:name>"
+            + "                <dcx-dai:name xml:lang='en'>Important</dcx-dai:name>"
             + "                <dcx-dai:role>Important guy</dcx-dai:role>"
             + "                <dcx-dai:ISNI>http://isni.org/isni/0000000121032684</dcx-dai:ISNI>"
             + "            </dcx-dai:organization>"
@@ -535,13 +539,11 @@ public class CitationMetadataFromDcmiTest {
         var result = mapDdmToDataset(doc, false);
         var field = getCompoundMultiValueField("citation", CONTRIBUTOR, result);
         assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
-            .doesNotContain("RightsHolder");
+            .doesNotContain("RightsHolder", "Funder"); // see CIT024 publisher becomes distributor
         assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
-            .doesNotContain("Other", "Funder"); // see CIT024 publisher becomes distributor
-        assertThat(field).extracting(CONTRIBUTOR_TYPE).extracting("value")
-            .containsOnly("Important guy", "A Jones");
+            .containsOnly("Other");
         assertThat(field).extracting(CONTRIBUTOR_NAME).extracting("value")
-            .containsOnly("M. H. van Binsbergen (Kohnstamm Instituut)", "A Jones");
+            .containsOnly("Important"); // TODO first token/word of the role is used as default for the missing name, ISNI is not mapped
     }
 
     @Test

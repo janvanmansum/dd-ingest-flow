@@ -66,7 +66,7 @@ class RightsMetadataTest {
         + "</ddm:DDM>\n");
 
     @Test
-    void RIG000A_organisations_with_role_rightsHolder_map_to_rights_holder() {
+    void RIG000A_organizations_with_role_rightsHolder_map_to_rights_holder() {
 
         var result = mapDdmToDataset(ddmWithOrganizations, false);
         assertThat(getPrimitiveMultiValueField("dansRights", RIGHTS_HOLDER, result))
@@ -74,7 +74,7 @@ class RightsMetadataTest {
     }
 
     @Test
-    void RIG003_lang_attributes_of_organisations_map_to_language_of_metadata() {
+    void RIG003_lang_attributes_of_organizations_map_to_language_of_metadata() {
 
         var result = mapDdmToDataset(ddmWithOrganizations, false);
         assertThat(getControlledMultiValueField("dansRights", LANGUAGE_OF_METADATA, result))
@@ -105,7 +105,7 @@ class RightsMetadataTest {
         + "</ddm:DDM>\n");
 
     @Test
-    void RIG000B_authors_with_role_rightsHolder_and_organisation_map_to_rights_holders() {
+    void RIG000B_authors_with_role_rightsHolder_and_organization_map_to_rights_holders() {
 
         var result = mapDdmToDataset(ddmWithAuthors, false);
         assertThat(getPrimitiveMultiValueField("dansRights", RIGHTS_HOLDER, result))
@@ -113,7 +113,7 @@ class RightsMetadataTest {
     }
 
     @Test
-    void RIG003_lang_attributes_of_authors_with_role_rightsHolder_and_organisation_map_to_language_of_metadata() {
+    void RIG003_lang_attributes_of_authors_with_role_rightsHolder_and_organization_map_to_language_of_metadata() {
 
         var result = mapDdmToDataset(ddmWithAuthors, false);
         assertThat(getControlledMultiValueField("dansRights", LANGUAGE_OF_METADATA, result))
