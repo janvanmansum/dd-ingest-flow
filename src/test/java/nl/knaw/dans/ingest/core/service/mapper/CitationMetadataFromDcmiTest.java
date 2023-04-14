@@ -76,7 +76,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CitationMetadataFromDcmiTest {
 
     @Test
-    public void CIT002_CIT010_dct_titles_before_dct_alternative_maps_first_to_alternative_rest_to_description() throws Exception {
+    void CIT002_CIT010_dct_titles_before_dct_alternative_maps_first_to_alternative_rest_to_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -98,7 +98,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT002A_vault_metadata_other_id_maps_to_other_id() throws Exception {
+    void CIT002A_vault_metadata_other_id_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -114,7 +114,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT00X_vault_metadata_other_id_maps_to_other_id() throws Exception {
+    void CIT00X_vault_metadata_other_id_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -130,7 +130,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT002B_dct_identifier_type_easy2_maps_to_other_id() throws Exception {
+    void CIT002B_dct_identifier_type_easy2_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -147,7 +147,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT004_typeless_dct_iedntifier_maps_to_other_id() throws Exception {
+    void CIT004_typeless_dct_identifier_maps_to_other_id() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -164,7 +164,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT008_conatct_name_email_affiliation_of_amd_maps_to_contact() throws Exception {
+    void CIT008_contact_name_email_affiliation_of_amd_maps_to_contact() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("")
@@ -180,7 +180,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_date_maps_to_ds_description() throws Exception {
+    void CIT011_dct_date_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:date>2015-09-07</dct:date>")
@@ -192,7 +192,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_dateAccepted_maps_to_ds_description() throws Exception {
+    void CIT011_dct_dateAccepted_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:dateAccepted>2015-09-06</dct:dateAccepted>")
@@ -204,7 +204,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_dateCopyrighted_maps_to_ds_description() throws Exception {
+    void CIT011_dct_dateCopyrighted_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:dateCopyrighted>2015-09-05</dct:dateCopyrighted>")
@@ -216,7 +216,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_dateSubmitted_maps_to_ds_description() throws Exception {
+    void CIT011_dct_dateSubmitted_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:dateSubmitted>2015-09-05</dct:dateSubmitted>")
@@ -228,7 +228,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_modified_maps_to_ds_description() throws Exception {
+    void CIT011_dct_modified_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:modified>2015-09-08</dct:modified>")
@@ -240,7 +240,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_issued_maps_to_ds_description() throws Exception {
+    void CIT011_dct_issued_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:issued>2015-09-04</dct:issued>")
@@ -252,7 +252,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_valid_maps_to_ds_description() throws Exception {
+    void CIT011_dct_valid_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:valid>2015-09-04</dct:valid>")
@@ -264,7 +264,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT011_dct_coverage_maps_to_ds_description() throws Exception {
+    void CIT011_dct_coverage_maps_to_ds_description() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<dct:coverage>2015-09-04</dct:coverage>")
@@ -276,7 +276,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT012_dct_description_maps_to_dsDescription() throws Exception {
+    void CIT012_dct_description_maps_to_dsDescription() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -290,7 +290,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT012A_dct_accesRights_maps_to_dsDescription() throws Exception {
+    void CIT012A_dct_accessRights_maps_to_dsDescription() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + "    <ddm:profile>"
@@ -449,7 +449,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT018_not_iso_language_maps_to_nothing() throws Exception {
+    void CIT018_not_iso_language_is_ignored() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -562,7 +562,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT023_dct_identifier_nwo_project_nr_maps_to_grant_number() throws Exception {
+    void CIT023_dct_identifier_nwo_project_nr_maps_to_grant_number() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -577,7 +577,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT024_dct_publisher_maps_to_distributor() throws Exception {
+    void CIT024_dct_publisher_maps_to_distributor() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile()
@@ -590,7 +590,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT026_ddm_dates_of_collection_maps_to_date_of_collection() throws Exception {
+    void CIT026_ddm_dates_of_collection_maps_to_date_of_collection() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -614,7 +614,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    public void CIT027_no_ddm_description_with_type_serries_information_series_informations_maps_to_empty_serries() throws Exception { // TODO fix
+    void CIT027_no_ddm_description_with_type_series_information_series_informations_maps_to_empty_series() throws Exception { // TODO fix
         // see also CIT027_multiple_series_informations_to_single_compound_field in MappingIntegrationMap
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -626,7 +626,7 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT027_multiple_ddm_description_with_type_serries_information_series_informations_maps_to_single_series() throws Exception {
+    void CIT027_multiple_ddm_description_with_type_series_information_series_informations_maps_to_single_series() throws Exception {
         var doc = readDocumentFromString(
             "<ddm:DDM " + rootAttributes + ">"
                 + minimalDdmProfile()

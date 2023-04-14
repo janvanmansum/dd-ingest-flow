@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class DansArchaeologyMetadataTest {
 
     @Test
-    void AR001_archis_zaak_id() throws Exception {
+    void AR001_dct_identifier_archis_zaak_id_maps_to_archis_zaak_id() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>"
@@ -55,7 +55,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR002_archis_number() throws Exception {
+    void AR002_dct_identifier_archis_number_maps_to_archis_number() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-dai='http://easy.dans.knaw.nl/schemas/dcx/dai/'>"
@@ -72,7 +72,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR003_AR004_abr_report_type_and_number() throws Exception {
+    void AR003_AR004_ddm_reportNumber_maps_to_abr_report_type_and_number() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -97,7 +97,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR003_AR004_abr_report_number_without_type() throws Exception {
+    void AR003_AR004_ddm_report_number_without_type_maps_to_abr_number() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -121,7 +121,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR005_aquisition_method() throws Exception {
+    void AR005_ddm_acquisitionMethod_maps_to_abr_verwervingswijze() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -140,7 +140,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR006_abr_complex() throws Exception {
+    void AR006_ddm_subject_maps_to_abr_complex() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -159,7 +159,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void old_abr_complex() throws Exception {
+    void AR006_old_abr_complex_maps_to_dansAbrArtifact() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -179,7 +179,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void old_abr_complex_with_incomplete_URI() throws Exception {
+    void AR006_old_abr_complex_with_incomplete_URI_throws_an_exception() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -198,7 +198,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void old_abr_complex_with_invalid_URI() throws Exception {
+    void AR006_old_abr_complex_with_invalid_URI_is_ignored() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -216,7 +216,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR006_abr_complex_without() throws Exception {
+    void AR006_abr_complex_without_value_uri_is_ignored() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -232,7 +232,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR007_abr_artifact() throws Exception {
+    void AR007_ddm_subject_maps_to_dansAbrArtifact() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -246,13 +246,12 @@ public class DansArchaeologyMetadataTest {
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
 
-        // AR001
         assertThat(getPrimitiveMultiValueField("dansArchaeologyMetadata", ABR_ARTIFACT, result))
             .containsOnly("https://data.cultureelerfgoed.nl/term/id/abr/5bd97bc0-697c-4128-b7b2-d2324bc4a2e1");
     }
 
     @Test
-    void AR008_abr_period() throws Exception {
+    void AR008_ddm_temporal_maps_to_abr_period() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -271,7 +270,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR008_abr_period_without_value_uri() throws Exception {
+    void AR008_abr_period_without_value_uri_is_ignored() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"

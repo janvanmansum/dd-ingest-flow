@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DansRelationMetadataTest {
 
     @Test
-    void REL001_audience() throws Exception {
+    void REL001_ddm_audience_maps_to_audience() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + "  <ddm:profile>"
@@ -51,7 +51,7 @@ public class DansRelationMetadataTest {
     }
 
     @Test
-    void REL002_collection() throws Exception {
+    void REL002_ddm_inCollection_maps_to_collection() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""
@@ -67,7 +67,7 @@ public class DansRelationMetadataTest {
     }
 
     @Test
-    void REL003_text_only() throws Exception {
+    void REL003_ddm_hasFormat_text_only_maps_to_relation() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<ddm:hasFormat>barbapapa</ddm:hasFormat>")
@@ -80,7 +80,7 @@ public class DansRelationMetadataTest {
     }
 
     @Test
-    void REL003_with_href() throws Exception {
+    void REL003_ddm_relation_with_href_maps_to_relation() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<ddm:relation href='https://example.com/relation'>rabarbara</ddm:relation>")
@@ -93,7 +93,7 @@ public class DansRelationMetadataTest {
     }
 
     @Test
-    void REL003_with_scheme() throws Exception {
+    void REL003__ddm_relation_with_scheme_maps_to_relation() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi("<ddm:relation scheme='DOI'>http://doi.org/10.1111/sode.12120</ddm:relation>")
@@ -106,7 +106,7 @@ public class DansRelationMetadataTest {
     }
 
     @Test
-    void REL003() throws Exception {
+    void REL003_ddm_xxx_map_to_relation_type_xxx() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
             + minimalDdmProfile() + dcmi(""

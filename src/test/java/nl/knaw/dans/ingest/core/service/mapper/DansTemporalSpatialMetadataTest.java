@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class DansTemporalSpatialMetadataTest {
 
     @Test
-    void TS001_temporal_coverage() throws Exception {
+    void TS001_dct_temporal_maps_to_temporal_coverage() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -59,7 +59,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void TS002_spatial_point_rd() throws Exception {
+    void TS002_point_with_srs_28992_maps_to_spatial_point_scheme_rd() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -81,7 +81,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void point_with_invalid_srs_name_maps_to_degrees() throws Exception {
+    void TS002_point_with_invalid_srs_maps_to_spatial_point_scheme_degrees() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -103,7 +103,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void point_without_srs_name_maps_to_degrees() throws Exception {
+    void TS002_point_without_srs_name_maps_to_spatial_point_scheme_degrees() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -125,7 +125,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void point_single_number() throws Exception {
+    void TS002_point_with_single_number_throws_an_exception() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -141,7 +141,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void point_without_pos_is_ignored() throws Exception {
+    void TS002_point_without_pos_is_ignored() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
             + minimalDdmProfile() + dcmi(""
@@ -156,7 +156,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void spatial_without_anything_is_ignored() throws Exception {
+    void TS002_spatial_without_anything_is_ignored() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
             + minimalDdmProfile() + dcmi("<dcx-gml:spatial></dcx-gml:spatial>")
@@ -167,12 +167,12 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void TS003_spatial_point_degrees() throws Exception {
+    void TS003_spatial_point_with_srs_4326_maps_to_spatial_point_scheme_degrees() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
             + minimalDdmProfile() + dcmi(""
-            + "        <dcx-gml:spatial>"
+            + "        <dcx-gml:spatial srsName='http://www.opengis.net/def/crs/EPSG/0/4326'>"
             + "            <Point xmlns='http://www.opengis.net/gml'>"
             + "                <pos>52.078663 4.288788</pos>"
             + "            </Point>"
@@ -189,7 +189,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void TS004_spatial_box_rd() throws Exception {
+    void TS004_spatial_box_with_srs_28992_maps_to_scheme_rd() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -218,7 +218,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void TS005_spatial_box_degrees() throws Exception {
+    void TS005_spatial_box_with_srs_4326_mapsTo_spatial_box_scheme_degrees() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -247,7 +247,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void box_with_invalid_srs_name_maps_to_degrees() throws Exception {
+    void TS005_spatial_box_with_invalid_srs_name_maps_to_scheme_degrees() throws Exception {
         // TODO https://drivenbydata.atlassian.net/browse/DD-1305
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -276,7 +276,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void box_without_srs_name() throws Exception {
+    void TS005_spatial_box_without_srs_name_maps_to_scheme_degrees() throws Exception {
         // TODO not explicit in https://drivenbydata.atlassian.net/browse/DD-1305
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -305,7 +305,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void box_without_single_number_in_upper_corner_cause_an_exception() throws Exception {
+    void TS005_spatial_box_with_single_number_in_upper_corner_throws_an_exception() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
             + minimalDdmProfile() + dcmi(""
@@ -323,7 +323,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void box_without_single_number_in_lower_corner_cause_an_exception() throws Exception {
+    void TS005_spatial_box_with_single_number_in_lower_corner_throws_an_exception() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
             + minimalDdmProfile() + dcmi(""
@@ -341,7 +341,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void box_without_lower_corner_causes_an_exception() throws Exception {
+    void TS005_spatial_box_without_lower_corner_throws_an_exception() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
             + minimalDdmProfile() + dcmi(""
@@ -359,7 +359,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void box_without_upper_corner_causes_an_exception() throws Exception {
+    void TS005_spatial_box_without_upper_corner_throws_an_exception() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
             + minimalDdmProfile() + dcmi(""
@@ -377,7 +377,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void box_without_envelope_causes_an_exception() throws Exception {
+    void TS005_spatial_box_without_envelope_throws_an_exception() throws Exception {
         // TODO ignoring would be consistent with POINT without POS
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -393,7 +393,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void TS006_coverage_controlled() throws Exception {
+    void TS006_dct_spatial_maps_to_spatial_coverage_controlled() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"
@@ -407,7 +407,7 @@ public class DansTemporalSpatialMetadataTest {
     }
 
     @Test
-    void TS007_spatial_coverage_trims_text() throws Exception {
+    void TS007_dct_spatial_with_surrounding_white_space_maps_to_trimmed_spatial_coverage() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + " xmlns:dcx-gml='http://easy.dans.knaw.nl/schemas/dcx/gml/'>"

@@ -16,10 +16,7 @@
 package nl.knaw.dans.ingest.core.service.mapper;
 
 import org.junit.jupiter.api.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.util.List;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.AUTHOR;
@@ -44,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CitationMetadataFromProfileTest {
 
     @Test
-    void CIT001_should_map_title() throws ParserConfigurationException, IOException, SAXException {
+    void CIT001_title_maps_to_title() throws Exception{
         var doc = ddmWithCustomProfileContent("");
 
         var result = mapDdmToDataset(doc, false);
@@ -53,7 +50,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT005_should_map_dc_creators() throws ParserConfigurationException, IOException, SAXException {
+    void CIT005_simple_creators_map_to_dc_creators() throws Exception{
         var doc = ddmWithCustomProfileContent(""
             + "<dc:creator>J. Bond</dc:creator>\n"
             + "<dc:creator>D. O'Seven</dc:creator>\n");
@@ -65,7 +62,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT006_should_map_names_of_creatorDetails_author() throws ParserConfigurationException, IOException, SAXException {
+    void CIT006_names_of_creatorDetails_author_map_to_author_names() throws Exception{
         var doc = ddmWithCustomProfileContent(""
             + "<dcx-dai:creatorDetails>\n"
             + "    <dcx-dai:author>\n"
@@ -85,7 +82,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT007_should_map_names_of_creatorDetails_organization() throws ParserConfigurationException, IOException, SAXException {
+    void CIT007_names_of_creatorDetails_organization_map_to_author_names() throws Exception{
         var doc = ddmWithCustomProfileContent(""
             + "<dcx-dai:creatorDetails>\n"
             + "    <dcx-dai:organization>\n"
@@ -105,7 +102,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT009_should_map_descriptions() throws ParserConfigurationException, IOException, SAXException {
+    void CIT009_descriptions_map_to_descriptions() throws Exception{
         var doc = ddmWithCustomProfileContent(""
             + "<dc:description>Lorem ipsum.</dc:description>\n"
             + "<dc:description>dolor sit amet</dc:description>\n"
@@ -144,7 +141,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT013_subject_omits_other_DD_1265() throws Exception {
+    void CIT013_subject_maps_to__subject_without_other_DD_1265() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">\n"
             + "    <ddm:profile>\n"
@@ -164,7 +161,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT013_subject_is_other_DD_1265() throws Exception {
+    void CIT013_subject_maps_only_to_other_DD_1265() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">\n"
             + "    <ddm:profile>\n"
@@ -181,7 +178,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT019_should_map_creation_date() throws ParserConfigurationException, IOException, SAXException {
+    void CIT019_creation_date_maps_to_production_date() throws Exception{
         var doc = ddmWithCustomProfileContent("<ddm:created>2012-12</ddm:created>");
 
         var result = mapDdmToDataset(doc, false);
@@ -190,7 +187,7 @@ public class CitationMetadataFromProfileTest {
     }
 
     @Test
-    void CIT025_map_date_available() throws ParserConfigurationException, IOException, SAXException {
+    void CIT025_date_available_maps_to_distribution_date() throws Exception{
         var doc = ddmWithCustomProfileContent("<ddm:available>2014-12</ddm:available>");
 
         var result = mapDdmToDataset(doc, false);
