@@ -33,7 +33,7 @@ curl -X PUT -d unblock-key http://localhost:8080/api/admin/settings/:BlockedApiP
 
 ### dd-ingest-flow + dd-validate-dans-bag/application
 
-Open both project in separate terminal tabs do the following for each:
+Open both projects in separate terminal tabs do the following for each:
 
 ```commandline
 start-env.sh
