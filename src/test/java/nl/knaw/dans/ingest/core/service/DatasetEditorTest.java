@@ -21,13 +21,7 @@ import nl.knaw.dans.ingest.core.domain.Deposit;
 import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.BaseTest;
 import nl.knaw.dans.ingest.core.service.mapper.mapping.FileElement;
-import nl.knaw.dans.lib.dataverse.DatasetApi;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
-import nl.knaw.dans.lib.dataverse.DataverseException;
-import nl.knaw.dans.lib.dataverse.DataverseHttpResponse;
-import nl.knaw.dans.lib.dataverse.model.dataset.FileList;
-import nl.knaw.dans.lib.dataverse.model.file.DataFile;
-import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,18 +29,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.Matchers.nullValue;
 
 public class DatasetEditorTest extends BaseTest {
     private final Path testDir = new File("target/test/" + getClass().getSimpleName()).toPath();
@@ -320,9 +314,9 @@ public class DatasetEditorTest extends BaseTest {
             + "    </ddm:profile>"
             + "</ddm:DDM>"));
         var editor = createDatasetEditor(deposit, true, null, null);
-        String actual = editor.getDateAvailable(deposit).toString()
-            .replaceAll("T.*", ""); // ignore time
-        assertThat(actual).isEqualTo("2018-04-09"); // may fail when executed locally, supposed to succeed on github
+        Instant actual = editor.getDateAvailable(deposit);
+        LocalDate actualLocalDate = LocalDate.ofInstant(actual, ZoneId.systemDefault());
+        assertThat(actualLocalDate).isEqualTo(LocalDate.of(2018, 4, 9));
     }
 
     @Test
