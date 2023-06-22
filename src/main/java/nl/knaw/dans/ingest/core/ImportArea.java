@@ -42,12 +42,6 @@ public class ImportArea extends AbstractIngestArea {
 
     public String startImport(Path inputPath, boolean isBatch, boolean continuePrevious) {
         log.trace("startBatch({}, {})", inputPath, continuePrevious);
-        if (isBatch) {
-            validateBatchDirectory(inputPath);
-        }
-        else {
-            validateDepositDirectory(inputPath);
-        }
         Path relativeInputDir;
         if (inputPath.isAbsolute()) {
             relativeInputDir = inboxDir.relativize(inputPath);
@@ -66,12 +60,15 @@ public class ImportArea extends AbstractIngestArea {
         if (isBatch) {
             batchInDir = inboxDir.resolve(relativeInputDir);
             batchOutDir = outboxDir.resolve(relativeInputDir);
+            validateBatchDirectory(batchInDir);
         }
         else {
+            validateDepositDirectory(inboxDir.resolve(relativeInputDir));
             batchInDir = inboxDir.resolve(relativeInputDir.getParent());
             batchOutDir = outboxDir.resolve(relativeInputDir.getParent());
         }
         log.debug("relativeInputDir = {}, batchInDir = {}, batchOutDir = {}", relativeInputDir, batchInDir, batchOutDir);
+
         validateInDir(batchInDir);
         initOutbox(batchOutDir, continuePrevious || !isBatch);
         String taskName = relativeInputDir.toString();
