@@ -139,9 +139,8 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
             enqueuingService
         );
 
-        environment.healthChecks().register("DataverseAutoIngestArea", new DataverseHealthCheck(dataverseClientAutoIngestArea));
-        environment.healthChecks().register("DataverseMigrationArea", new DataverseHealthCheck(dataverseClientMigrationArea));
-        environment.healthChecks().register("DataverseImportArea", new DataverseHealthCheck(dataverseClientImportArea));
+        // Use the default configuration for the health checks. No API key is required.
+        environment.healthChecks().register("Dataverse", new DataverseHealthCheck(configuration.getDataverse().build()));
         environment.healthChecks().register("DansBagValidator", new DansBagValidatorHealthCheck(dansBagValidator));
 
         environment.lifecycle().manage(autoIngestArea);
@@ -154,7 +153,9 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
 
     private static DataverseClient getDataverseClient(DdIngestFlowConfiguration configuration, IngestAreaConfig ingestAreaConfig) {
         final var dataverseClientFactory = configuration.getDataverse();
-        dataverseClientFactory.setApiKey(ingestAreaConfig.getApiKey());
+        if (ingestAreaConfig.getApiKey() != null) {
+            dataverseClientFactory.setApiKey(ingestAreaConfig.getApiKey());
+        }
         return dataverseClientFactory.build();
     }
 }
