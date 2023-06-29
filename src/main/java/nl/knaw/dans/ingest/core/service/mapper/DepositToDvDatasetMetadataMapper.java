@@ -116,7 +116,8 @@ public class DepositToDvDatasetMetadataMapper {
         @Nullable AuthenticatedUser contactData,
         @NonNull VaultMetadata vaultMetadata,
         boolean restrictedFilesPresent,
-        String hasOrganizationalIdentifier
+        String hasOrganizationalIdentifier,
+        String hasOrganizationalIdentifierVersion
     ) throws MissingRequiredFieldException {
         var termsOfAccess = "";
 
@@ -234,8 +235,8 @@ public class DepositToDvDatasetMetadataMapper {
         if (isMigration) {
             dataVaultFieldBuilder.addNbn(vaultMetadata.getNbn()); // VLT004A
         }
-        dataVaultFieldBuilder.addDansOtherId(vaultMetadata.getOtherId()); // VLT005
-        dataVaultFieldBuilder.addDansOtherIdVersion(vaultMetadata.getOtherIdVersion()); // VLT006
+        dataVaultFieldBuilder.addDansOtherId(hasOrganizationalIdentifier); // VLT005
+        dataVaultFieldBuilder.addDansOtherIdVersion(hasOrganizationalIdentifierVersion); // VLT006
         dataVaultFieldBuilder.addSwordToken(vaultMetadata.getSwordToken()); // VLT007
 
         return assembleDataverseDataset(termsOfAccess);
