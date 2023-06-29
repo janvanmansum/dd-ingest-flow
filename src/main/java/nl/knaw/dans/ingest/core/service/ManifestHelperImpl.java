@@ -37,9 +37,10 @@ import java.util.stream.Collectors;
 
 import static gov.loc.repository.bagit.hash.StandardSupportedAlgorithms.SHA1;
 
-public class ManifestHelper {
+public class ManifestHelperImpl implements ManifestHelper {
 
-    static public void ensureSha1ManifestPresent(Bag bag) throws NoSuchAlgorithmException, IOException {
+    @Override
+    public void ensureSha1ManifestPresent(Bag bag) throws NoSuchAlgorithmException, IOException {
         var manifests = bag.getPayLoadManifests();
         var algorithms = manifests.stream().map(Manifest::getAlgorithm);
 
