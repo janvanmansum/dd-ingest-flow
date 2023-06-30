@@ -16,11 +16,15 @@ ingestFlow:
     apiKey: 'changeme' # overrides the default
     inbox: data/import/inbox
     outbox: data/import/outbox
+    dataSuppliers:
+      someUserAccount123: The Organization Name
 
   migration:
     apiKey: 'changeme' # overrides the default
     inbox: data/migration/deposits
     outbox: data/migration/out
+    dataSuppliers:
+      USER001: The Organization Name
 
   autoIngest:
     apiKey: 'changeme' # overrides the default
@@ -29,6 +33,8 @@ ingestFlow:
     authorization:
       datasetCreator: swordcreator
       datasetUpdater: swordupdater
+    dataSuppliers:
+      someUserAccount123: The Organization Name
 
   authorization:
     # Required role on the dataverse for the depositor.userId to create a dataset

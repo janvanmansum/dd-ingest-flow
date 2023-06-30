@@ -74,7 +74,7 @@ public class Deposit {
     private List<DepositFile> files;
 
     public VaultMetadata getVaultMetadata() {
-        return new VaultMetadata(getDataversePid(), getDataverseBagId(), getDataverseNbn(), getOtherId(), getDataverseSwordToken());
+        return new VaultMetadata(getDataversePid(), getDataverseBagId(), getDataverseNbn(), getOtherId(), getDataverseSwordToken(), getDepositorUserId());
     }
 
     private static boolean hasTypeDoi(Node n) {

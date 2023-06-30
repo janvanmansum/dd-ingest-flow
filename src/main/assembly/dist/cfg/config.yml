@@ -36,6 +36,8 @@ ingestFlow:
     apiKey: 'changeme' # overrides the default
     inbox: /var/opt/dans.knaw.nl/tmp/migration/deposits
     outbox: /var/opt/dans.knaw.nl/tmp/migration/out
+    dataSuppliers:
+      USER001: The Organization Name
 
   autoIngest:
     apiKey: 'changeme' # overrides the default

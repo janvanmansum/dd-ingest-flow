@@ -30,4 +30,5 @@ public class VaultMetadata {
     private String nbn;
     private String otherId;
     private String swordToken;
+    private String userId;
 }
