@@ -24,7 +24,6 @@ public class IngestAreaConfig {
     private String depositorRole;
     private DatasetAuthorizationConfig authorization;
     private String apiKey;
-    private Map<String, String> dataSuppliers = Map.of();
 
     public String getApiKey() {
         return apiKey;
@@ -66,11 +65,5 @@ public class IngestAreaConfig {
         this.authorization = authorization;
     }
 
-    public Map<String, String> getDataSuppliers() {
-        return dataSuppliers;
-    }
 
-    public void setDataSuppliers(Map<String, String> dataSuppliers) {
-        this.dataSuppliers = dataSuppliers;
-    }
 }

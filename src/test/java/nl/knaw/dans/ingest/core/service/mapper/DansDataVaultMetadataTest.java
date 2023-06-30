@@ -34,23 +34,23 @@ public class DansDataVaultMetadataTest {
         null,
         null,
         null,
-        getIngestFlowConfig().getMigration().getDataSuppliers(), // VLT008
+        getIngestFlowConfig().getDataSuppliers(), // VLT008
         true
     );
 
     @Test
     public void VLT008_userId_should_map_to_dataSupplier_from_config_yml() throws Exception {
-        var vaultMetadata = new VaultMetadata("", "", "", "", "", "USER001");
+        var vaultMetadata = new VaultMetadata("", "", "", "", "");
 
-        var result = mapper.toDataverseDataset(ddmWithCustomProfileContent(""), null, null, null, vaultMetadata, false, null, null);
+        var result = mapper.toDataverseDataset(ddmWithCustomProfileContent(""), null, null, null, vaultMetadata, "user001",false, null, null);
         assertThat(getPrimitiveSingleValueField("dansDataVaultMetadata", "dansDataSupplier", result))
             .isEqualTo("The Organization Name");
     }
 
     @Test
     public void VLT008_dataSupplier_should_ignore_not_configured_userId() throws Exception {
-        var vaultMetadata = new VaultMetadata("", "", "", "", "", "xxx");
-        var result = mapper.toDataverseDataset(ddmWithCustomProfileContent(""), null, null, null, vaultMetadata, false, null, null);
+        var vaultMetadata = new VaultMetadata("", "", "", "", "");
+        var result = mapper.toDataverseDataset(ddmWithCustomProfileContent(""), null, null, null, vaultMetadata, "xxx",false, null, null);
         assertThat(getFieldNamesOfMetadataBlocks(result).get("dansArchaeologyMetadata"))
             .doesNotContain("dansDataSupplier");
     }

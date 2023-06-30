@@ -28,19 +28,17 @@ server:
 
 ingestFlow:
   import:
-    apiKey: 'changeme' # overrides the default
+    # apiKey: # overridden key for the import area
     inbox: /var/opt/dans.knaw.nl/tmp/import/inbox
     outbox: /var/opt/dans.knaw.nl/tmp/import/outbox
 
   migration:
-    apiKey: 'changeme' # overrides the default
+    # apiKey: # overridden key for the migration area
     inbox: /var/opt/dans.knaw.nl/tmp/migration/deposits
     outbox: /var/opt/dans.knaw.nl/tmp/migration/out
-    dataSuppliers:
-      USER001: The Organization Name
 
   autoIngest:
-    apiKey: 'changeme' # overrides the default
+    # apiKey: # overridden key for the autoIngest area
     inbox: /var/opt/dans.knaw.nl/tmp/auto-ingest/inbox
     outbox: /var/opt/dans.knaw.nl/tmp/auto-ingest/outbox
     depositorRole: swordupdater
@@ -68,6 +66,14 @@ ingestFlow:
   # The role that the depositor account will be assigned on its datasets.
   #
   depositorRole: contributorplus
+
+  #
+  # Map from depositor.userId to organization name. Used to fill in the dansDataSupplier metadata field. If there is no
+  # entry for a depositor, dansDataSupplier will be left empty.
+  #
+  dataSuppliers:
+    # user001: The Organization Name
+
   deduplicate: true
   zipWrappingTempDir: /var/opt/dans.knaw.nl/tmp/zip-wrapping
   mappingDefsDir: /etc/opt/dans.knaw.nl/dd-ingest-flow

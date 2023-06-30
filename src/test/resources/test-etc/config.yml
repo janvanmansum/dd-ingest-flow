@@ -47,7 +47,7 @@ ingestFlow:
   depositorRole: contributor
 
   dataSuppliers:
-    someUserAccount123: The Organization Name
+    user001: The Organization Name
 
   deduplicate: true
   zipWrappingTempDir: data/tmp

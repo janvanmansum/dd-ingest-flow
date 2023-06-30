@@ -64,8 +64,7 @@ public class MappingTestHelper {
         "urn:uuid:ced0be49-f863-4477-9473-23010526abf3",
         "urn:nbn:nl:ui:13-c7c5a4b2-539e-4b0c-831d-fe31eb197950",
         "otherId:something",
-        "swordToken",
-        "USER001");
+        "swordToken");
     public static final String rootAttributes = "xmlns:ddm='http://schemas.dans.knaw.nl/dataset/ddm-v2/'\n"
         + "         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n"
         + "         xmlns:dc='http://purl.org/dc/elements/1.1/'\n"
@@ -76,9 +75,9 @@ public class MappingTestHelper {
         IngestFlowConfig config;
         try {
             config = new YamlConfigurationFactory<>(DdIngestFlowConfiguration.class, Validators.newValidator(), Jackson.newObjectMapper(), "dw")
-                .build(FileInputStream::new, "src/test/resources/debug-etc/config.yml")
+                .build(FileInputStream::new, "src/test/resources/test-etc/config.yml")
                 .getIngestFlow();
-            config.setMappingDefsDir(Paths.get("src/test/resources/debug-etc"));
+            config.setMappingDefsDir(Paths.get("src/test/resources/test-etc"));
             IngestFlowConfigReader.readIngestFlowConfiguration(config);
         }
         catch (IOException | ConfigurationException | URISyntaxException e) {
@@ -92,7 +91,7 @@ public class MappingTestHelper {
     }
 
     static Dataset mapDdmToDataset(Document ddm, boolean restrictedFilesPresent) {
-        return createMapper(true).toDataverseDataset(ddm, null, "2023-02-27", mockedContact, mockedVaultMetadata, restrictedFilesPresent, null, null);
+        return createMapper(true).toDataverseDataset(ddm, null, "2023-02-27", mockedContact, mockedVaultMetadata,null, restrictedFilesPresent, null, null);
     }
 
     static DepositToDvDatasetMetadataMapper createMapper(boolean isMigration) {
@@ -102,7 +101,7 @@ public class MappingTestHelper {
             config.getIso1ToDataverseLanguage(),
             config.getIso2ToDataverseLanguage(),
             config.getSpatialCoverageCountryTerms(),
-            config.getMigration().getDataSuppliers(),
+            config.getDataSuppliers(),
             isMigration);
     }
 
