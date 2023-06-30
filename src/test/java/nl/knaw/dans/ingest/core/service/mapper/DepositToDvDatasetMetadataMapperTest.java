@@ -85,9 +85,9 @@ class DepositToDvDatasetMetadataMapperTest {
         var mapper = getMigrationMapper();
         var doc = readDocument("dataset.xml");
 
-        var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "swordToken", "USER001");
+        var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "otherId:something", "swordToken");
 
-        var result = mapper.toDataverseDataset(doc, null, null, null, vaultMetadata, false, null, null);
+        var result = mapper.toDataverseDataset(doc, null, null, null, vaultMetadata, null,false, null, null);
         var str = new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()
@@ -99,9 +99,9 @@ class DepositToDvDatasetMetadataMapperTest {
         var mapper = getMigrationMapper();
         var doc = readDocument("dataset-simple-with-doi.xml");
 
-        var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "doi:a/b", "swordToken", "USER001");
+        var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "doi:a/b", "swordToken");
 
-        var result = mapper.toDataverseDataset(doc, null, null, null, vaultMetadata, false, null, null);
+        var result = mapper.toDataverseDataset(doc, null, null, null, vaultMetadata, null,false, null, null);
         var str = new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()
@@ -112,13 +112,13 @@ class DepositToDvDatasetMetadataMapperTest {
     }
 
     @Test
-    void toDataverseDataset_should_include_otherId_from_vault_metatdata() throws Exception {
+    void toDataverseDataset_should_include_otherId_from_vault_metadata() throws Exception {
         var mapper = getNonMigrationMapper();
         var doc = readDocument("dataset-simple-with-doi.xml");
 
-        var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "doi:a/b", "swordToken", "testuser");
+        var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", "doi:a/b", "swordToken");
 
-        var result = mapper.toDataverseDataset(doc, null, null, null, vaultMetadata, false, "org-id", null);
+        var result = mapper.toDataverseDataset(doc, null, null, null, vaultMetadata, null,false, "org-id", null);
         var str = new ObjectMapper()
             .writer()
             .withDefaultPrettyPrinter()
@@ -126,22 +126,6 @@ class DepositToDvDatasetMetadataMapperTest {
 
         assertThat(str).contains("org-id");
         assertThat(str).doesNotContain("10.17026/easy-dans-doi");
-    }
-
-    @Test
-    void toDataverseDataset_should_not_include_otherId_if_null_is_passed() throws Exception {
-        var mapper = getMigrationMapper();
-        var doc = readDocument("dataset-simple.xml");
-
-        var vaultMetadata = new VaultMetadata("pid", "bagId", "nbn", null, "swordToken", "USER001");
-
-        var result = mapper.toDataverseDataset(doc, null, null, null, vaultMetadata, false, null, null);
-        var str = new ObjectMapper()
-            .writer()
-            .withDefaultPrettyPrinter()
-            .writeValueAsString(result);
-
-        assertFalse(str.contains("doi:"));
     }
 
     @Test

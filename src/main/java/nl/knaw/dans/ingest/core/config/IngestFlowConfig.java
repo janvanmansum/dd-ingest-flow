@@ -70,6 +70,9 @@ public class IngestFlowConfig {
     private Map<String, String> reportIdToTerm;
     private List<String> spatialCoverageCountryTerms;
 
+    private Map<String, String> dataSuppliers = Map.of();
+
+
     public IngestAreaConfig getImportConfig() {
         return importConfig;
     }
@@ -180,5 +183,13 @@ public class IngestFlowConfig {
 
     public void setAuthorization(DatasetAuthorizationConfig authorization) {
         this.authorization = authorization;
+    }
+
+    public Map<String, String> getDataSuppliers() {
+        return dataSuppliers;
+    }
+
+    public void setDataSuppliers(Map<String, String> dataSuppliers) {
+        this.dataSuppliers = dataSuppliers;
     }
 }
