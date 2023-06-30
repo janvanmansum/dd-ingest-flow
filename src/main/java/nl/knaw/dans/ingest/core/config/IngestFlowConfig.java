@@ -70,7 +70,8 @@ public class IngestFlowConfig {
     private Map<String, String> reportIdToTerm;
     private List<String> spatialCoverageCountryTerms;
 
-    private Map<String, String> dataSuppliers = Map.of();
+    @NotNull
+    private Map<String, String> dataSuppliers;
 
 
     public IngestAreaConfig getImportConfig() {
@@ -190,6 +191,6 @@ public class IngestFlowConfig {
     }
 
     public void setDataSuppliers(Map<String, String> dataSuppliers) {
-        this.dataSuppliers = dataSuppliers;
+        this.dataSuppliers = dataSuppliers == null ? Map.of() : dataSuppliers;
     }
 }
