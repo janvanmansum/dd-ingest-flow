@@ -18,6 +18,7 @@ package nl.knaw.dans.ingest.core.service.mapper;
 import nl.knaw.dans.ingest.core.domain.VaultMetadata;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.ddmWithCustomProfileContent;
@@ -35,6 +36,7 @@ public class DansDataVaultMetadataTest {
         null,
         null,
         getIngestFlowConfig().getDataSuppliers(), // VLT008
+        Arrays.asList("".split(",")),
         true
     );
 

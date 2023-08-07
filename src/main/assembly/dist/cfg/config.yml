@@ -27,6 +27,20 @@ server:
       port: 20301
 
 ingestFlow:
+  skipHidden:
+    # see also dd-dtap/provisioning/group_vars/
+    # configure_metadata_blocks.hidden_fields in ds_dataversenl.yml
+    # shared_configure_metadata_blocks_hidden_fields in datastations.yml
+    # do not ignore data vault metadata
+    - topicClassification
+    - publication
+    - dateOfDeposit
+    - relatedMaterial
+    - relatedDatasets
+    - otherReferences
+    - originOfSources
+    - characteristicOfSources
+    - accessToSources
   import:
     # apiKey: # overridden key for the import area
     inbox: /var/opt/dans.knaw.nl/tmp/import/inbox

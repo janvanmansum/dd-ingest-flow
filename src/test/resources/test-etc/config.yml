@@ -12,6 +12,17 @@ server:
       port: 20301
 
 ingestFlow:
+  skipHidden:
+    - topicClassification
+#    - publication
+#    - dateOfDeposit
+    - relatedMaterial
+    - relatedDatasets
+    - otherReferences
+    - originOfSources
+    - characteristicOfSources
+    - accessToSources
+
   import:
     apiKey: 'changeme' # overrides the default
     inbox: data/import/inbox

@@ -44,10 +44,11 @@ import org.mockito.Mockito;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,6 +76,7 @@ public class DepositStartImportTaskWrapperTest {
 
     private final Map<String, String> iso1ToDataverseLanguage = new HashMap<>();
     private final Map<String, String> iso2ToDataverseLanguage = new HashMap<>();
+    private final List<String> skipHidden = List.of();
 
     private DepositIngestTask createTaskWrapper(String depositName, String created) {
         var mapper = getMapperFactory();
@@ -128,7 +130,7 @@ public class DepositStartImportTaskWrapperTest {
             iso1ToDataverseLanguage, iso2ToDataverseLanguage,
             List.of("Netherlands", "United Kingdom", "Belgium", "Germany"),
             Map.of(),
-            Mockito.mock(DataverseClient.class)
+            skipHidden, Mockito.mock(DataverseClient.class)
         );
     }
 
