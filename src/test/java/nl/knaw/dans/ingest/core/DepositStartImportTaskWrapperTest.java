@@ -76,7 +76,7 @@ public class DepositStartImportTaskWrapperTest {
 
     private final Map<String, String> iso1ToDataverseLanguage = new HashMap<>();
     private final Map<String, String> iso2ToDataverseLanguage = new HashMap<>();
-    private final List<String> skipHidden = List.of();
+    private final List<String> skipFields = List.of();
 
     private DepositIngestTask createTaskWrapper(String depositName, String created) {
         var mapper = getMapperFactory();
@@ -130,7 +130,7 @@ public class DepositStartImportTaskWrapperTest {
             iso1ToDataverseLanguage, iso2ToDataverseLanguage,
             List.of("Netherlands", "United Kingdom", "Belgium", "Germany"),
             Map.of(),
-            skipHidden, Mockito.mock(DataverseClient.class)
+            skipFields, Mockito.mock(DataverseClient.class)
         );
     }
 

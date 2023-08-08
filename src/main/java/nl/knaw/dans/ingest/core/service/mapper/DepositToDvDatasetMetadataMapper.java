@@ -96,19 +96,19 @@ public class DepositToDvDatasetMetadataMapper {
     private final Map<String, String> iso2ToDataverseLanguage;
     private final List<String> spatialCoverageCountryTerms;
     private final Map<String, String> dataSuppliers;
-    private final List<String> skipHidden;
+    private final List<String> skipFields;
     private final boolean isMigration;
     private final boolean deduplicate;
 
     DepositToDvDatasetMetadataMapper(boolean deduplicate, Set<String> activeMetadataBlocks, Map<String, String> iso1ToDataverseLanguage,
-                                     Map<String, String> iso2ToDataverseLanguage, List<String> spatialCoverageCountryTerms, Map<String, String> dataSuppliers, List<String> skipHidden, boolean isMigration) {
+                                     Map<String, String> iso2ToDataverseLanguage, List<String> spatialCoverageCountryTerms, Map<String, String> dataSuppliers, List<String> skipFields, boolean isMigration) {
         this.deduplicate = deduplicate;
         this.activeMetadataBlocks = activeMetadataBlocks;
         this.iso1ToDataverseLanguage = iso1ToDataverseLanguage;
         this.iso2ToDataverseLanguage = iso2ToDataverseLanguage;
         this.spatialCoverageCountryTerms = spatialCoverageCountryTerms;
         this.dataSuppliers = dataSuppliers;
-        this.skipHidden = skipHidden;
+        this.skipFields = skipFields;
         this.isMigration = isMigration;
     }
 
@@ -249,14 +249,14 @@ public class DepositToDvDatasetMetadataMapper {
             dataVaultFieldBuilder.addDataSupplier(dataSupplier);
         }
 
-        return assembleDataverseDataset(termsOfAccess, skipHidden);
+        return assembleDataverseDataset(termsOfAccess, skipFields);
     }
 
     private Stream<Node> getPersonalData(Document ddm) {
         return XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:personalData");
     }
 
-    void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder, List<String> skipHidden) {
+    void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder, List<String> skipFields) {
         // TODO figure out how to deduplicate compound fields (just on key, or also on value?)
         var compoundFields = builder.getCompoundFields().values()
                 .stream()
@@ -275,7 +275,7 @@ public class DepositToDvDatasetMetadataMapper {
         List<MetadataField> result = Stream.of(compoundFields, primitiveFields)
                 .flatMap(i -> i)
                 .filter(Objects::nonNull)
-                .filter(b -> !skipHidden.contains(b.getTypeName()))
+                .filter(b -> !skipFields.contains(b.getTypeName()))
                 .collect(Collectors.toList());
 
         var block = new MetadataBlock();
@@ -285,15 +285,15 @@ public class DepositToDvDatasetMetadataMapper {
         fields.put(title, block);
     }
 
-    private Dataset assembleDataverseDataset(String termsOfAccess, List<String> skipHidden) {
+    private Dataset assembleDataverseDataset(String termsOfAccess, List<String> skipFields) {
         var fields = new HashMap<String, MetadataBlock>();
 
-        processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields, skipHidden);
-        processMetadataBlock(deduplicate, fields, "dansRights", "Rights Metadata", rightsFields, skipHidden);
-        processMetadataBlock(deduplicate, fields, "dansRelationMetadata", "Relation Metadata", relationFields, skipHidden);
-        processMetadataBlock(deduplicate, fields, "dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologyFields, skipHidden);
-        processMetadataBlock(deduplicate, fields, "dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields, skipHidden);
-        processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder, skipHidden);
+        processMetadataBlock(deduplicate, fields, "citation", "Citation Metadata", citationFields, skipFields);
+        processMetadataBlock(deduplicate, fields, "dansRights", "Rights Metadata", rightsFields, skipFields);
+        processMetadataBlock(deduplicate, fields, "dansRelationMetadata", "Relation Metadata", relationFields, skipFields);
+        processMetadataBlock(deduplicate, fields, "dansArchaeologyMetadata", "Archaeology-Specific Metadata", archaeologyFields, skipFields);
+        processMetadataBlock(deduplicate, fields, "dansTemporalSpatial", "Temporal and Spatial Coverage", temporalSpatialFields, skipFields);
+        processMetadataBlock(deduplicate, fields, "dansDataVaultMetadata", "Dans Vault Metadata", dataVaultFieldBuilder, skipFields);
 
         checkRequiredField(fields, "citation", TITLE);
         checkRequiredField(fields, "citation", SUBJECT);

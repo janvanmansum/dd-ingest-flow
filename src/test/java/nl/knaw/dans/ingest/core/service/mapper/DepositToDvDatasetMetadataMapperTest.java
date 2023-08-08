@@ -50,7 +50,7 @@ class DepositToDvDatasetMetadataMapperTest {
     private final Map<String, String> iso2ToDataverseLanguage = new HashMap<>();
     private final List<String> spatialCoverageCountryTerms = List.of("Netherlands", "United Kingdom", "Belgium", "Germany");
     private final Map<String, String> dataSuppliers = new HashMap<>();
-    private final List<String> skipHidden = List.of();
+    private final List<String> skipFields = List.of();
 
     Document readDocument(String name) throws ParserConfigurationException, IOException, SAXException {
         return xmlReader.readXmlFile(Path.of(
@@ -60,12 +60,12 @@ class DepositToDvDatasetMetadataMapperTest {
 
     DepositToDvDatasetMetadataMapper getMigrationMapper() {
         return new DepositToDvDatasetMetadataMapper(
-            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, skipHidden, true);
+            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, skipFields, true);
     }
 
     DepositToDvDatasetMetadataMapper getNonMigrationMapper() {
         return new DepositToDvDatasetMetadataMapper(
-            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, skipHidden, false);
+            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, skipFields, false);
     }
 
     @BeforeEach
@@ -140,7 +140,7 @@ class DepositToDvDatasetMetadataMapperTest {
 
     @Test
     void processMetadataBlock_should_deduplicate_items_for_PrimitiveFieldBuilder() {
-        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, skipHidden, true);
+        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, skipFields, true);
         var fields = new HashMap<String, MetadataBlock>();
         var builder = new ArchaeologyFieldBuilder();
         builder.addArchisZaakId(Stream.of(
@@ -150,7 +150,7 @@ class DepositToDvDatasetMetadataMapperTest {
             "TEST"
         ));
 
-        mapper.processMetadataBlock(true, fields, "title", "name", builder, skipHidden);
+        mapper.processMetadataBlock(true, fields, "title", "name", builder, skipFields);
 
         // the fourth item should be removed
         assertThat(fields.get("title").getFields())
@@ -161,7 +161,7 @@ class DepositToDvDatasetMetadataMapperTest {
     @Test
     void processMetadataBlock_should_deduplicate_items_for_CompoundFieldBuilder() {
         var fields = new HashMap<String, MetadataBlock>();
-        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, skipHidden, true);
+        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, skipFields, true);
         var builder = new ArchaeologyFieldBuilder();
         builder.addArchisZaakId(Stream.of(
             "TEST",
@@ -170,7 +170,7 @@ class DepositToDvDatasetMetadataMapperTest {
             "TEST"
         ));
 
-        mapper.processMetadataBlock(true, fields, "title", "name", builder, skipHidden);
+        mapper.processMetadataBlock(true, fields, "title", "name", builder, skipFields);
 
         // the fourth item should be removed
         assertThat(fields.get("title").getFields())

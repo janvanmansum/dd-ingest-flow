@@ -477,9 +477,9 @@ public class CitationMetadataFromDcmiTest {
             + "        <dc:identifier xsi:type='ISBN'>978-3-16-148410-0</dc:identifier>")
             + "</ddm:DDM>");
 
-        var skipHidden = List.of("dateOfDeposit", "publication");
+        var skipFields = List.of("dateOfDeposit", "publication");
         var activeMetadataBlocks = Set.of("citation", "dansRights", "dansDataVaultMetadata");
-        var result = new DepositToDvDatasetMetadataMapper(true, activeMetadataBlocks, Map.of(), Map.of(), List.of(), config.getDataSuppliers(), skipHidden, true)
+        var result = new DepositToDvDatasetMetadataMapper(true, activeMetadataBlocks, Map.of(), Map.of(), List.of(), config.getDataSuppliers(), skipFields, true)
             .toDataverseDataset(doc, null, "2023-02-27", mockedContact, mockedVaultMetadata,null, false, null, null);
         var field = getCompoundMultiValueField("citation", PUBLICATION, result);
         assertThat(field).isNull();

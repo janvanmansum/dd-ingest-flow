@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class IngestFlowConfig {
 
-    private List<String> skipHidden;
+    private List<String> skipFields;
 
     @NotNull
     @Valid
@@ -197,11 +197,11 @@ public class IngestFlowConfig {
         this.dataSuppliers = dataSuppliers == null ? Map.of() : dataSuppliers;
     }
 
-    public List<String> getSkipHidden() {
-        return skipHidden;
+    public List<String> getSkipFields() {
+        return skipFields;
     }
 
-    public void setSkipHidden(List<String> skipHidden) {
-        this.skipHidden = skipHidden;
+    public void setSkipFields(List<String> skipFields) {
+        this.skipFields = skipFields;
     }
 }

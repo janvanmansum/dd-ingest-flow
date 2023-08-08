@@ -12,10 +12,10 @@ server:
       port: 20301
 
 ingestFlow:
-  skipHidden:
+  skipFields:
     - topicClassification
-#    - publication
-#    - dateOfDeposit
+#    - publication # would break existing tests
+#    - dateOfDeposit # would break existing tests
     - relatedMaterial
     - relatedDatasets
     - otherReferences

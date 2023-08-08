@@ -102,7 +102,7 @@ public class MappingTestHelper {
             config.getIso2ToDataverseLanguage(),
             config.getSpatialCoverageCountryTerms(),
             config.getDataSuppliers(),
-            config.getSkipHidden(), isMigration);
+            config.getSkipFields(), isMigration);
     }
 
     public static Document ddmWithCustomProfileContent(String content) throws ParserConfigurationException, IOException, SAXException {
