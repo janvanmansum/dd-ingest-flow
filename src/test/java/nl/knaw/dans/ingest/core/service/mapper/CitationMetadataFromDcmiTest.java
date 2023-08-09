@@ -19,6 +19,10 @@ import nl.knaw.dans.ingest.core.domain.VaultMetadata;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundSingleValueField;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ALTERNATIVE_TITLE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR_NAME;
@@ -54,6 +58,7 @@ import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICAT
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.PUBLICATION_URL;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.SERIES_INFORMATION;
+import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.config;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.createMapper;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.dcmi;
 import static nl.knaw.dans.ingest.core.service.mapper.MappingTestHelper.getCompoundMultiValueField;
@@ -458,6 +463,26 @@ public class CitationMetadataFromDcmiTest {
             .containsOnly("", "");
         assertThat(field).extracting(PUBLICATION_URL).extracting("value")
             .containsOnly("", "");
+    }
+
+    @Test
+    void mapping_skips_hidden() throws Exception {
+        var doc = readDocumentFromString(""
+            + "<ddm:DDM " + rootAttributes + ">"
+            + minimalDdmProfile()
+            + dcmi(""
+            + "        <dc:identifier xsi:type='id-type:ISSN'>0925-6229</dc:identifier>"
+            + "        <dc:identifier xsi:type='ISSN'>987-654</dc:identifier>"
+            + "        <dc:identifier xsi:type='id-type:ISBN'>0-345-24223-8</dc:identifier>"
+            + "        <dc:identifier xsi:type='ISBN'>978-3-16-148410-0</dc:identifier>")
+            + "</ddm:DDM>");
+
+        var skipFields = List.of("dateOfDeposit", "publication");
+        var activeMetadataBlocks = Set.of("citation", "dansRights", "dansDataVaultMetadata");
+        var result = new DepositToDvDatasetMetadataMapper(true, activeMetadataBlocks, Map.of(), Map.of(), List.of(), config.getDataSuppliers(), skipFields, true)
+            .toDataverseDataset(doc, null, "2023-02-27", mockedContact, mockedVaultMetadata,null, false, null, null);
+        var field = getCompoundMultiValueField("citation", PUBLICATION, result);
+        assertThat(field).isNull();
     }
 
     @Test

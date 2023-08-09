@@ -31,6 +31,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class DepositToDvDatasetMetadataMapperTest {
 
@@ -50,6 +50,7 @@ class DepositToDvDatasetMetadataMapperTest {
     private final Map<String, String> iso2ToDataverseLanguage = new HashMap<>();
     private final List<String> spatialCoverageCountryTerms = List.of("Netherlands", "United Kingdom", "Belgium", "Germany");
     private final Map<String, String> dataSuppliers = new HashMap<>();
+    private final List<String> skipFields = List.of();
 
     Document readDocument(String name) throws ParserConfigurationException, IOException, SAXException {
         return xmlReader.readXmlFile(Path.of(
@@ -57,18 +58,14 @@ class DepositToDvDatasetMetadataMapperTest {
         ));
     }
 
-    Document readDocumentFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
-        return xmlReader.readXmlString(xml);
-    }
-
     DepositToDvDatasetMetadataMapper getMigrationMapper() {
         return new DepositToDvDatasetMetadataMapper(
-            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, true);
+            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, skipFields, true);
     }
 
     DepositToDvDatasetMetadataMapper getNonMigrationMapper() {
         return new DepositToDvDatasetMetadataMapper(
-            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, false);
+            true, activeMetadataBlocks, iso1ToDataverseLanguage, iso2ToDataverseLanguage, spatialCoverageCountryTerms, dataSuppliers, skipFields, false);
     }
 
     @BeforeEach
@@ -143,7 +140,7 @@ class DepositToDvDatasetMetadataMapperTest {
 
     @Test
     void processMetadataBlock_should_deduplicate_items_for_PrimitiveFieldBuilder() {
-        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, true);
+        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, skipFields, true);
         var fields = new HashMap<String, MetadataBlock>();
         var builder = new ArchaeologyFieldBuilder();
         builder.addArchisZaakId(Stream.of(
@@ -153,7 +150,7 @@ class DepositToDvDatasetMetadataMapperTest {
             "TEST"
         ));
 
-        mapper.processMetadataBlock(true, fields, "title", "name", builder);
+        mapper.processMetadataBlock(true, fields, "title", "name", builder, skipFields);
 
         // the fourth item should be removed
         assertThat(fields.get("title").getFields())
@@ -164,7 +161,7 @@ class DepositToDvDatasetMetadataMapperTest {
     @Test
     void processMetadataBlock_should_deduplicate_items_for_CompoundFieldBuilder() {
         var fields = new HashMap<String, MetadataBlock>();
-        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, true);
+        var mapper = new DepositToDvDatasetMetadataMapper(true, Set.of("citation"), Map.of(), Map.of(), spatialCoverageCountryTerms, dataSuppliers, skipFields, true);
         var builder = new ArchaeologyFieldBuilder();
         builder.addArchisZaakId(Stream.of(
             "TEST",
@@ -173,7 +170,7 @@ class DepositToDvDatasetMetadataMapperTest {
             "TEST"
         ));
 
-        mapper.processMetadataBlock(true, fields, "title", "name", builder);
+        mapper.processMetadataBlock(true, fields, "title", "name", builder, skipFields);
 
         // the fourth item should be removed
         assertThat(fields.get("title").getFields())

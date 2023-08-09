@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 public class IngestFlowConfig {
+
+    private List<String> skipFields;
+
     @NotNull
     @Valid
     @JsonProperty("import")
@@ -192,5 +195,13 @@ public class IngestFlowConfig {
 
     public void setDataSuppliers(Map<String, String> dataSuppliers) {
         this.dataSuppliers = dataSuppliers == null ? Map.of() : dataSuppliers;
+    }
+
+    public List<String> getSkipFields() {
+        return skipFields;
+    }
+
+    public void setSkipFields(List<String> skipFields) {
+        this.skipFields = skipFields;
     }
 }

@@ -12,6 +12,8 @@ server:
       port: 20301
 
 ingestFlow:
+  skipFields: [] # see hidden_fields in dd-dtap though don't skip data vault metadata
+
   import:
     apiKey: 'changeme' # overrides the default
     inbox: data/import/inbox

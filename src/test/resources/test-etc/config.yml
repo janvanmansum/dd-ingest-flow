@@ -12,6 +12,17 @@ server:
       port: 20301
 
 ingestFlow:
+  skipFields:
+    - topicClassification
+#    - publication # would break existing tests
+#    - dateOfDeposit # would break existing tests
+    - relatedMaterial
+    - relatedDatasets
+    - otherReferences
+    - originOfSources
+    - characteristicOfSources
+    - accessToSources
+
   import:
     apiKey: 'changeme' # overrides the default
     inbox: data/import/inbox

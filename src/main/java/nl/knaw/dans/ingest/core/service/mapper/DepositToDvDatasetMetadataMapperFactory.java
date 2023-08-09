@@ -21,6 +21,7 @@ import nl.knaw.dans.lib.dataverse.DataverseException;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataBlockSummary;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,14 +34,16 @@ public class DepositToDvDatasetMetadataMapperFactory {
     private final Map<String, String> iso2ToDataverseLanguage;
     private final List<String> spatialCoverageCountryTerms;
     private final Map<String, String> dataSuppliers;
+    private final List<String> skipFields;
     private final DataverseClient dataverseClient;
 
     public DepositToDvDatasetMetadataMapperFactory(Map<String, String> iso1ToDataverseLanguage, Map<String, String> iso2ToDataverseLanguage,
-        List<String> spatialCoverageCountryTerms, Map<String, String> dataSuppliers, DataverseClient dataverseClient) {
+        List<String> spatialCoverageCountryTerms, Map<String, String> dataSuppliers, List<String> skipFields, DataverseClient dataverseClient) {
         this.iso1ToDataverseLanguage = iso1ToDataverseLanguage;
         this.iso2ToDataverseLanguage = iso2ToDataverseLanguage;
         this.spatialCoverageCountryTerms = spatialCoverageCountryTerms;
         this.dataSuppliers = dataSuppliers;
+        this.skipFields = skipFields;
         this.dataverseClient = dataverseClient;
     }
 
@@ -52,6 +55,7 @@ public class DepositToDvDatasetMetadataMapperFactory {
             iso2ToDataverseLanguage,
             spatialCoverageCountryTerms,
             dataSuppliers,
+            skipFields,
             isMigration
         );
     }

@@ -27,6 +27,8 @@ server:
       port: 20301
 
 ingestFlow:
+  skipFields: [] # see hidden-fields in dd-dtap though don't skip data vault metadata
+
   import:
     # apiKey: # overridden key for the import area
     inbox: /var/opt/dans.knaw.nl/tmp/import/inbox
