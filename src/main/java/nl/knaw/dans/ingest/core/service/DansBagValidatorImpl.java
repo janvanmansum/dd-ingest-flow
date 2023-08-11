@@ -15,8 +15,8 @@
  */
 package nl.knaw.dans.ingest.core.service;
 
-import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateCommandDto;
-import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateOkDto;
+import nl.knaw.dans.validatedansbag.client.api.ValidateCommandDto;
+import nl.knaw.dans.validatedansbag.client.api.ValidateOkDto;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

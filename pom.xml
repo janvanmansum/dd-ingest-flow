@@ -22,7 +22,7 @@
     <parent>
         <groupId>nl.knaw.dans</groupId>
         <artifactId>dd-parent</artifactId>
-        <version>0.20.0</version>
+        <version>0.21.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>dd-ingest-flow</artifactId>
@@ -217,10 +217,10 @@
                             </globalProperties>
                             <inputSpec>${project.build.directory}/openapi/dd-validate-dans-bag-api.yml</inputSpec>
                             <generatorName>java</generatorName>
+                            <apiPackage>nl.knaw.dans.validatedansbag.client.resources</apiPackage>
+                            <modelPackage>nl.knaw.dans.validatedansbag.client.api</modelPackage>
+                            <invokerPackage>nl.knaw.dans.validatedansbag.client.invoker</invokerPackage>
                             <configOptions>
-                                <apiPackage>nl.knaw.dans.ingest.client.validatedansbag</apiPackage>
-                                <modelPackage>nl.knaw.dans.ingest.client.validatedansbag.api</modelPackage>
-                                <invokerPackage>nl.knaw.dans.ingest.client.validatedansbag</invokerPackage>
                                 <!-- the client does not appear to need annotations so we can remove them -->
                                 <annotationLibrary>none</annotationLibrary>
                                 <!-- this generates jersey2 client -->

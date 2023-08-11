@@ -15,7 +15,10 @@
  */
 package nl.knaw.dans.ingest.core.service;
 
-import nl.knaw.dans.ingest.client.validatedansbag.api.*;
+
+
+import nl.knaw.dans.validatedansbag.client.api.ValidateCommandDto;
+import nl.knaw.dans.validatedansbag.client.api.ValidateOkDto;
 
 import java.nio.file.Path;
 

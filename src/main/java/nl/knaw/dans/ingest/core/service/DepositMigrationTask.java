@@ -16,7 +16,6 @@
 package nl.knaw.dans.ingest.core.service;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateCommandDto;
 import nl.knaw.dans.ingest.core.dataverse.DatasetService;
 import nl.knaw.dans.ingest.core.deposit.DepositManager;
 import nl.knaw.dans.ingest.core.domain.Deposit;
@@ -29,6 +28,7 @@ import nl.knaw.dans.ingest.core.service.mapper.mapping.Amd;
 import nl.knaw.dans.ingest.core.validation.DepositorAuthorizationValidator;
 import nl.knaw.dans.lib.dataverse.DataverseException;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
+import nl.knaw.dans.validatedansbag.client.api.ValidateCommandDto;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;

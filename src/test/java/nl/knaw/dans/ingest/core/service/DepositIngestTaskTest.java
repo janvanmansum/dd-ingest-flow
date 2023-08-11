@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.ingest.core.service;
 
-import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateOkDto;
 import nl.knaw.dans.ingest.core.TaskEvent.EventType;
 import nl.knaw.dans.ingest.core.TaskEvent.Result;
 import nl.knaw.dans.ingest.core.dataverse.DatasetService;
@@ -27,6 +26,7 @@ import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapperFactory;
 import nl.knaw.dans.ingest.core.validation.DepositorAuthorizationValidator;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.validatedansbag.client.api.ValidateOkDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
