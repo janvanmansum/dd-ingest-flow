@@ -18,7 +18,6 @@ package nl.knaw.dans.ingest.core.service.mapper.mapping;
 import org.w3c.dom.Node;
 
 import java.util.List;
-import java.util.Set;
 
 public class SpatialCoverage extends Base {
 

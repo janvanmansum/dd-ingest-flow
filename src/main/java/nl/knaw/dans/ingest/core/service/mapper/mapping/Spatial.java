@@ -19,8 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.w3c.dom.Node;
 
-import java.util.Optional;
-
 public class Spatial extends Base {
 
     /**

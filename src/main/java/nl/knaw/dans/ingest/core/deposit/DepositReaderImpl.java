@@ -22,7 +22,6 @@ import nl.knaw.dans.ingest.core.exception.InvalidDepositException;
 import nl.knaw.dans.ingest.core.io.BagDataManager;
 import nl.knaw.dans.ingest.core.io.FileService;
 import nl.knaw.dans.ingest.core.service.ManifestHelper;
-import nl.knaw.dans.ingest.core.service.ManifestHelperImpl;
 import nl.knaw.dans.ingest.core.service.XmlReader;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.lang3.StringUtils;

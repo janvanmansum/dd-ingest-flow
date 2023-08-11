@@ -20,7 +20,6 @@ import nl.knaw.dans.ingest.core.service.XPathEvaluator;
 import org.w3c.dom.Node;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class AccessRights extends Base {

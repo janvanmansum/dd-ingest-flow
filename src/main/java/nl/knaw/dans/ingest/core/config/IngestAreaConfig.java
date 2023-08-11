@@ -16,7 +16,6 @@
 package nl.knaw.dans.ingest.core.config;
 
 import java.nio.file.Path;
-import java.util.Map;
 
 public class IngestAreaConfig {
     private Path inbox;
