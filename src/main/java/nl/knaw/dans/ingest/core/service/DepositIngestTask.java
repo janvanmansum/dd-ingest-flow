@@ -16,6 +16,7 @@
 package nl.knaw.dans.ingest.core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateCommandDto;
 import nl.knaw.dans.ingest.core.TaskEvent;
 import nl.knaw.dans.ingest.core.TaskEvent.Result;
 import nl.knaw.dans.ingest.core.dataverse.DatasetService;
@@ -38,7 +39,6 @@ import nl.knaw.dans.ingest.core.validation.DepositorAuthorizationValidator;
 import nl.knaw.dans.lib.dataverse.DataverseException;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
-import nl.knaw.dans.validatedansbag.api.ValidateCommand;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -296,7 +296,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
     void validateDeposit() {
         var result = dansBagValidator.validateBag(
-                deposit.getBagDir(), ValidateCommand.PackageTypeEnum.DEPOSIT, 1);
+                deposit.getBagDir(), ValidateCommandDto.PackageTypeEnum.DEPOSIT);
 
         if (!result.getIsCompliant()) {
             var violations = result.getRuleViolations().stream()

@@ -15,9 +15,8 @@
  */
 package nl.knaw.dans.ingest.core.service;
 
-import nl.knaw.dans.validatedansbag.api.ValidateCommand;
-import nl.knaw.dans.validatedansbag.api.ValidateCommand.PackageTypeEnum;
-import nl.knaw.dans.validatedansbag.api.ValidateOk;
+import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateCommandDto;
+import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateOkDto;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +63,8 @@ public class DansBagValidatorImpl implements DansBagValidator {
     }
 
     @Override
-    public ValidateOk validateBag(Path bagDir, PackageTypeEnum informationPackageType, int profileVersion) {
-        var command = new ValidateCommand()
+    public ValidateOkDto validateBag(Path bagDir, ValidateCommandDto.PackageTypeEnum informationPackageType) {
+        var command = new ValidateCommandDto()
             .bagLocation(bagDir.toString())
             .packageType(informationPackageType);
 
@@ -82,7 +81,7 @@ public class DansBagValidatorImpl implements DansBagValidator {
                 .post(Entity.entity(multipart, multipart.getMediaType()))) {
 
                 if (response.getStatus() == 200) {
-                    return response.readEntity(ValidateOk.class);
+                    return response.readEntity(ValidateOkDto.class);
                 }
                 else {
                     throw new RuntimeException(String.format(
