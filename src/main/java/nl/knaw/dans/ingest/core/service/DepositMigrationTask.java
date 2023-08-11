@@ -16,6 +16,7 @@
 package nl.knaw.dans.ingest.core.service;
 
 import lombok.extern.slf4j.Slf4j;
+import nl.knaw.dans.ingest.client.validatedansbag.api.ValidateCommandDto;
 import nl.knaw.dans.ingest.core.dataverse.DatasetService;
 import nl.knaw.dans.ingest.core.deposit.DepositManager;
 import nl.knaw.dans.ingest.core.domain.Deposit;
@@ -28,7 +29,6 @@ import nl.knaw.dans.ingest.core.service.mapper.mapping.Amd;
 import nl.knaw.dans.ingest.core.validation.DepositorAuthorizationValidator;
 import nl.knaw.dans.lib.dataverse.DataverseException;
 import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
-import nl.knaw.dans.validatedansbag.api.ValidateCommand;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -136,7 +136,7 @@ public class DepositMigrationTask extends DepositIngestTask {
 
     void validateDeposit() {
         var result = dansBagValidator.validateBag(
-            deposit.getBagDir(), ValidateCommand.PackageTypeEnum.MIGRATION, 1);
+            deposit.getBagDir(), ValidateCommandDto.PackageTypeEnum.MIGRATION);
 
         if (!result.getIsCompliant()) {
             var violations = result.getRuleViolations().stream()

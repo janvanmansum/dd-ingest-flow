@@ -15,9 +15,7 @@
  */
 package nl.knaw.dans.ingest.core.service;
 
-import nl.knaw.dans.validatedansbag.api.ValidateCommand;
-import nl.knaw.dans.validatedansbag.api.ValidateCommand.PackageTypeEnum;
-import nl.knaw.dans.validatedansbag.api.ValidateOk;
+import nl.knaw.dans.ingest.client.validatedansbag.api.*;
 
 import java.nio.file.Path;
 
@@ -25,5 +23,5 @@ public interface DansBagValidator {
 
     void checkConnection();
 
-    ValidateOk validateBag(Path bagDir, PackageTypeEnum informationPackageType, int profileVersion);
+    ValidateOkDto validateBag(Path bagDir, ValidateCommandDto.PackageTypeEnum packageType);
 }
