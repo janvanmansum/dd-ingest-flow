@@ -66,8 +66,7 @@ dd-ingest-flow
 ├── data
 │   ├── auto-ingest
 │   │   ├── inbox
-│   │   │   └── <SOME-DIR>
-│   │   │       ├── <UUID>
+│   │   │   └── <UUID>
 │   │   │       ├── bag
 │   │   │       │   └── *
 │   │   │       └── deposit.properties
