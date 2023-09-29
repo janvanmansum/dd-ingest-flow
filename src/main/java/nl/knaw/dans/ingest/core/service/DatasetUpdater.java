@@ -66,16 +66,10 @@ public class DatasetUpdater extends DatasetEditor {
         FileInfo originalMetadata = null;
 
         try {
-            Thread.sleep(4000);
-
             var doi = deposit.getDataverseDoi();
 
             try {
                 var api = dataverseClient.dataset(doi);
-                api.awaitUnlock();
-
-                // wait for dataverse to do stuff
-                Thread.sleep(8000);
                 api.awaitUnlock();
 
                 var state = api.getLatestVersion().getData().getLatestVersion().getVersionState();
