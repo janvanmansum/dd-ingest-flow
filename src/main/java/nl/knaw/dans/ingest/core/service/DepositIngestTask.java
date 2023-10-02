@@ -238,6 +238,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
                 : newDatasetCreator(dataverseDataset, depositorRole).performEdit();
 
         publishDataset(persistentId);
+        log.debug("Dataset {} published", persistentId);
         postPublication(persistentId);
     }
 

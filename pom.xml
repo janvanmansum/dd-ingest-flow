@@ -47,10 +47,12 @@
         <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dans-java-utils</artifactId>
+            <version>0.6.0</version>
         </dependency>
         <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dans-dataverse-client-lib</artifactId>
+            <version>0.22.0</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
