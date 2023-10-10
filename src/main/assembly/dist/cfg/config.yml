@@ -77,6 +77,7 @@ ingestFlow:
     # user001: The Organization Name
 
   deduplicate: true
+  deleteDraftOnFailure: true
   zipWrappingTempDir: /var/opt/dans.knaw.nl/tmp/zip-wrapping
   mappingDefsDir: /etc/opt/dans.knaw.nl/dd-ingest-flow
   taskQueue:

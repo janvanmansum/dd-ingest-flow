@@ -21,6 +21,8 @@ import nl.knaw.dans.ingest.core.deposit.DepositManager;
 import nl.knaw.dans.ingest.core.domain.Deposit;
 import nl.knaw.dans.ingest.core.domain.DepositLocation;
 import nl.knaw.dans.ingest.core.domain.VaultMetadata;
+import nl.knaw.dans.ingest.core.exception.FailedDepositException;
+import nl.knaw.dans.ingest.core.exception.InvalidDatasetStateException;
 import nl.knaw.dans.ingest.core.exception.RejectedDepositException;
 import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapper;
 import nl.knaw.dans.ingest.core.service.mapper.DepositToDvDatasetMetadataMapperFactory;
@@ -56,12 +58,12 @@ public class DepositMigrationTask extends DepositIngestTask {
         DatasetService datasetService,
         BlockedTargetService blockedTargetService,
         DepositorAuthorizationValidator depositorAuthorizationValidator,
-        String vaultMetadataKey
+        String vaultMetadataKey,
+        boolean deleteDraftOnFailure
     ) {
         super(
-            datasetMetadataMapperFactory, depositLocation, depositorRole, fileExclusionPattern, zipFileHandler, supportedLicenses,
-            dansBagValidator,
-            outboxDir, eventWriter, depositManager, datasetService, blockedTargetService, depositorAuthorizationValidator,vaultMetadataKey);
+            datasetMetadataMapperFactory, depositLocation, depositorRole, fileExclusionPattern, zipFileHandler, supportedLicenses, dansBagValidator,
+            outboxDir, eventWriter, depositManager, datasetService, blockedTargetService, depositorAuthorizationValidator, vaultMetadataKey, deleteDraftOnFailure);
     }
 
     @Override
@@ -103,7 +105,7 @@ public class DepositMigrationTask extends DepositIngestTask {
 
     @Override
     DatasetEditor newDatasetUpdater(Dataset dataset) {
-        return newDatasetUpdater(dataset, true);
+        return newDatasetUpdater(dataset, true, deleteDraftOnFailure);
     }
 
     @Override
@@ -130,9 +132,13 @@ public class DepositMigrationTask extends DepositIngestTask {
         datasetService.releaseMigrated(persistentId, date.get());
     }
 
-    @Override
-    void postPublication(String persistentId) {
-        // do nothing
+    void postPublication(String persistentId) throws IOException, DataverseException, InterruptedException {
+        try {
+            datasetService.waitForState(persistentId, "RELEASED");
+            // Do NOT save persistent identifiers, as they were provided in the deposit
+        } catch (InvalidDatasetStateException e) {
+            throw new FailedDepositException(deposit, e.getMessage());
+        }
     }
 
     void validateDeposit() {

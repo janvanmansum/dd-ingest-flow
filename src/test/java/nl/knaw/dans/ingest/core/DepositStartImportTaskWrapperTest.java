@@ -114,7 +114,8 @@ public class DepositStartImportTaskWrapperTest {
             datasetService,
             blockedTargetService,
             depositorAuthorizationValidator,
-            vaultMetadataKey
+            vaultMetadataKey,
+            false
         );
     }
 

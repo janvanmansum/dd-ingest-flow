@@ -108,7 +108,8 @@ class FileElementTest extends BaseTest {
             + "</file>", ns));
 
         var result = FileElement.toFileMeta(doc.getDocumentElement(), defaultRestrict, isMigration);
-        assertEquals("original_filepath: \"leeg#.txt\"; description: \"Empty file\"; title: \"original/archival file name\"; time_period: \"Classical\"; hardware: \"Hardware\"", result.getDescription());
+        assertEquals("original_filepath: \"leeg#.txt\"; description: \"Empty file\"; title: \"original/archival file name\"; time_period: \"Classical\"; hardware: \"Hardware\"",
+            result.getDescription());
     }
 
     @Test
@@ -167,6 +168,36 @@ class FileElementTest extends BaseTest {
         assertTrue(result.getRestricted());
         assertEquals("othmat_codebook: \"FOTOBEST.csv; FOTOLST.csv\"; FOTONR: \"3\"", result.getDescription()); // FIL002A/B (migration only)
     }
+
+//    @Test
+//    void toFileMeta_should_only_use_keyvalue_pairs_of_current_file() throws Exception {
+//        String filePath1 = "data/this/is/the/directory/label/leeg.txt";
+//        String filePath2 = "data/this/is/the/directory/label/leeg2.txt";
+//        var doc = readDocumentFromString(String.format(""
+//            + "<files>"
+//            + "<file filepath='%s' %s>"
+//            + "    <dcterms:othmat_codebook>FOTOBEST.csv; FOTOLST.csv</dcterms:othmat_codebook>"
+//            + "    <afm:keyvaluepair>"
+//            + "        <afm:key>FOTONR</afm:key>"
+//            + "        <afm:value>3</afm:value>"
+//            + "    </afm:keyvaluepair>"
+//            + "</file>"
+//            + "  <file filepath='%s' %s>"
+//            + "    <dcterms:othmat_codebook>FOTOBEST.csv; FOTOLST.csv</dcterms:othmat_codebook>"
+//            + "    <afm:keyvaluepair>"
+//            + "        <afm:key>FOTONR</afm:key>"
+//            + "        <afm:value>3</afm:value>"
+//            + "    </afm:keyvaluepair>"
+//            + "</file>"
+//            + "</files>", filePath1, ns, filePath2, ns)
+//        );
+//
+//        var result = FileElement.toFileMeta(doc.get, defaultRestrict, isMigration);
+//        assertEquals("leeg.txt", result.getLabel());
+//        assertEquals("this/is/the/directory/label", result.getDirectoryLabel());
+//        assertTrue(result.getRestricted());
+//        assertEquals("othmat_codebook: \"FOTOBEST.csv; FOTOLST.csv\"; FOTONR: \"3\"", result.getDescription()); // FIL002A/B (migration only)
+//    }
 
     @Test
     void toFileMeta_should_include_original_filepath_if_directoryLabel_or_label_change_during_sanitation() throws Exception {

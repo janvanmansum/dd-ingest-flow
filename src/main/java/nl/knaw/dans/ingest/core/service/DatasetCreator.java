@@ -53,8 +53,8 @@ public class DatasetCreator extends DatasetEditor {
         ZipFileHandler zipFileHandler,
         String depositorRole,
         DatasetService datasetService,
-        String vaultMetadataKey
-    ) {
+        String vaultMetadataKey,
+        boolean deleteDraftOnFailure) {
         super(
             isMigration,
             dataset,
@@ -62,7 +62,8 @@ public class DatasetCreator extends DatasetEditor {
             supportedLicenses,
             fileExclusionPattern,
             zipFileHandler, objectMapper, datasetService,
-            vaultMetadataKey);
+            vaultMetadataKey,
+            deleteDraftOnFailure);
 
         this.depositorRole = depositorRole;
     }

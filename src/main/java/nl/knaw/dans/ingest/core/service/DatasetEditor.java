@@ -72,6 +72,8 @@ public abstract class DatasetEditor {
 
     protected final String vaultMetadataKey;
 
+    private boolean deleteDraftOnFailure;
+
     protected DatasetEditor(boolean isMigration,
         Dataset dataset,
         Deposit deposit,
@@ -80,7 +82,8 @@ public abstract class DatasetEditor {
         ZipFileHandler zipFileHandler,
         ObjectMapper objectMapper,
         DatasetService datasetService,
-        String vaultMetadataKey) {
+        String vaultMetadataKey,
+        boolean deleteDraftOnFailure) {
         this.dataverseClient = datasetService._getClient();
         this.isMigration = isMigration;
         this.dataset = dataset;
@@ -91,6 +94,7 @@ public abstract class DatasetEditor {
         this.objectMapper = objectMapper;
         this.datasetService = datasetService;
         this.vaultMetadataKey = vaultMetadataKey;
+        this.deleteDraftOnFailure = deleteDraftOnFailure;
     }
 
     private static Instant parseDate(String value) {
@@ -234,5 +238,16 @@ public abstract class DatasetEditor {
             .map(DatasetEditor::parseDate)
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Deposit without a ddm:available element"));
+    }
+
+    void deleteDraftIfExists(String persistentId) throws IOException, DataverseException {
+        if (deleteDraftOnFailure) {
+            var data = dataverseClient.dataset(persistentId).getLatestVersion().getData();
+
+            if (data.getLatestVersion().getVersionState().contains("DRAFT")) {
+                log.warn("Deleting draft version of dataset {} because deposit failed AND deleteDraftOnFailure = true", persistentId);
+                dataverseClient.dataset(persistentId).deleteDraft();
+            }
+        }
     }
 }

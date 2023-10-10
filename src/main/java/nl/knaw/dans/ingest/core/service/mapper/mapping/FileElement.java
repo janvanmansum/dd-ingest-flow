@@ -135,7 +135,7 @@ public class FileElement extends Base {
         if (isMigration) {
 
             // FIL002A
-            getChildNodes(node, "//afm:keyvaluepair")
+            getChildNodes(node, "afm:keyvaluepair")
                 .forEach(n -> {
                     var key = getChildNode(n, "afm:key")
                         .map(Node::getTextContent)
