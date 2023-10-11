@@ -54,10 +54,10 @@ public class DatasetUpdater extends DatasetEditor {
     protected DatasetUpdater(boolean isMigration, Dataset dataset,
         Deposit deposit, List<URI> supportedLicenses,
         Pattern fileExclusionPattern, ZipFileHandler zipFileHandler,
-        ObjectMapper objectMapper, DatasetService datasetService, String vaultMetadataKey) {
+        ObjectMapper objectMapper, DatasetService datasetService, String vaultMetadataKey, boolean deleteDraftOnFailure) {
         super(isMigration, dataset, deposit, supportedLicenses,
             fileExclusionPattern,
-            zipFileHandler, objectMapper, datasetService, vaultMetadataKey);
+            zipFileHandler, objectMapper, datasetService, vaultMetadataKey, deleteDraftOnFailure);
     }
 
     @Override
@@ -69,7 +69,11 @@ public class DatasetUpdater extends DatasetEditor {
             var doi = deposit.getDataverseDoi();
 
             try {
+                Thread.sleep(4000);
                 var api = dataverseClient.dataset(doi);
+
+                api.awaitUnlock();
+                Thread.sleep(8000);
                 api.awaitUnlock();
 
                 var state = api.getLatestVersion().getData().getLatestVersion().getVersionState();
@@ -230,18 +234,6 @@ public class DatasetUpdater extends DatasetEditor {
                 FileUtils.deleteQuietly(originalMetadata.getPath().toFile())    ;
             }
         }
-    }
-
-    void deleteDraftIfExists(String persistentId) throws IOException, DataverseException {
-        var data = dataverseClient.dataset(persistentId).getLatestVersion().getData();
-
-        if (data.getLatestVersion().getVersionState().contains("DRAFT")) {
-            deleteDraft(persistentId);
-        }
-    }
-
-    private void deleteDraft(String persistentId) throws IOException, DataverseException {
-        dataverseClient.dataset(persistentId).deleteDraft();
     }
 
     @SafeVarargs

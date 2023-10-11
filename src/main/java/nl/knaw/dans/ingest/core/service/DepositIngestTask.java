@@ -75,21 +75,24 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
     private final String vaultMetadataKey;
 
+    protected boolean deleteDraftOnFailure;
+
     public DepositIngestTask(
-            DepositToDvDatasetMetadataMapperFactory datasetMetadataMapperFactory,
-            DepositLocation depositLocation,
-            String depositorRole,
-            Pattern fileExclusionPattern,
-            ZipFileHandler zipFileHandler,
-            List<URI> supportedLicenses,
-            DansBagValidator dansBagValidator,
-            Path outboxDir,
-            EventWriter eventWriter,
-            DepositManager depositManager,
-            DatasetService datasetService,
-            BlockedTargetService blockedTargetService,
-            DepositorAuthorizationValidator depositorAuthorizationValidator,
-            String vaultMetadataKey
+        DepositToDvDatasetMetadataMapperFactory datasetMetadataMapperFactory,
+        DepositLocation depositLocation,
+        String depositorRole,
+        Pattern fileExclusionPattern,
+        ZipFileHandler zipFileHandler,
+        List<URI> supportedLicenses,
+        DansBagValidator dansBagValidator,
+        Path outboxDir,
+        EventWriter eventWriter,
+        DepositManager depositManager,
+        DatasetService datasetService,
+        BlockedTargetService blockedTargetService,
+        DepositorAuthorizationValidator depositorAuthorizationValidator,
+        String vaultMetadataKey,
+        boolean deleteDraftOnFailure
     ) {
         this.datasetMetadataMapperFactory = datasetMetadataMapperFactory;
         this.depositorRole = depositorRole;
@@ -105,6 +108,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         this.datasetService = datasetService;
         this.depositorAuthorizationValidator = depositorAuthorizationValidator;
         this.vaultMetadataKey = vaultMetadataKey;
+        this.deleteDraftOnFailure = deleteDraftOnFailure;
     }
 
     public Deposit getDeposit() {
@@ -138,16 +142,16 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             log.info("END processing (SUCCESS) deposit {}", deposit.getDepositId());
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.OK, null);
         } catch (RejectedDepositException e) {
-            log.error("Deposit was rejected", e);
+            log.error("END processing (REJECTED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.REJECTED, e.getMessage());
             blockTarget(e.getMessage(), DepositState.REJECTED);
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.REJECTED, e.getMessage());
         } catch (TargetBlockedException e) {
-            log.error("Deposit was rejected because a previous deposit with the same target failed", e);
+            log.error("END processing (REJECTED - TARGET BLOCKED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.FAILED, e.getMessage());
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.FAILED, e.getMessage());
         } catch (Throwable e) {
-            log.error("Deposit failed", e);
+            log.error("END processing (FAILED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.FAILED, e.getMessage());
             blockTarget(e.getMessage(), DepositState.FAILED);
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.FAILED, e.getMessage());
@@ -273,9 +277,10 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     void blockTarget(String message, DepositState depositState) {
         var deposit = getDeposit();
         var target = deposit.getDataverseDoi();
+        // TODO: Shouldn't target be a sword token?
 
         if (target == null) {
-            log.warn("Target for deposit {} is null, unable to block target. This probably means it is the first version of a deposit and can be ignored", deposit);
+            log.debug("Target for deposit {} is null, unable to block target. This probably means it is the first version of a deposit and can be ignored", deposit.getDepositId());
             return;
         }
 
@@ -328,7 +333,12 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         var urn = datasetService.getDatasetUrnNbn(persistentId)
                 .orElseThrow(() -> new IllegalStateException(String.format("Dataset %s did not obtain a URN:NBN", persistentId)));
 
-        deposit.setDoi(persistentId);
+        var basePersistentId = persistentId;
+        if (persistentId.startsWith("doi:")) {
+            basePersistentId = persistentId.substring("doi:".length());
+        }
+
+        deposit.setDoi(basePersistentId);
         deposit.setUrn(urn);
     }
 
@@ -341,36 +351,38 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         }
     }
 
-    DatasetEditor newDatasetUpdater(Dataset dataset, boolean isMigration) {
+    DatasetEditor newDatasetUpdater(Dataset dataset, boolean isMigration, boolean deleteDraftOnFailure) {
         return new DatasetUpdater(
-                isMigration,
-                dataset,
-                deposit,
-                supportedLicenses,
-                fileExclusionPattern,
-                zipFileHandler,
-                new ObjectMapper(),
-                datasetService,
-                vaultMetadataKey
+            isMigration,
+            dataset,
+            deposit,
+            supportedLicenses,
+            fileExclusionPattern,
+            zipFileHandler,
+            new ObjectMapper(),
+            datasetService,
+            vaultMetadataKey,
+            deleteDraftOnFailure
         );
     }
 
     DatasetEditor newDatasetUpdater(Dataset dataset) {
-        return newDatasetUpdater(dataset, false);
+        return newDatasetUpdater(dataset, false, false);
     }
 
     DatasetEditor newDatasetCreator(Dataset dataset, String depositorRole, boolean isMigration) {
         return new DatasetCreator(
-                isMigration,
-                dataset,
-                deposit,
-                new ObjectMapper(),
-                supportedLicenses,
-                fileExclusionPattern,
-                zipFileHandler,
-                depositorRole,
-                datasetService,
-                vaultMetadataKey
+            isMigration,
+            dataset,
+            deposit,
+            new ObjectMapper(),
+            supportedLicenses,
+            fileExclusionPattern,
+            zipFileHandler,
+            depositorRole,
+            datasetService,
+            vaultMetadataKey,
+            deleteDraftOnFailure
         );
     }
 

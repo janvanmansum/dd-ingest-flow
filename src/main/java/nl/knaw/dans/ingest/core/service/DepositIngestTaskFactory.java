@@ -47,6 +47,8 @@ public class DepositIngestTaskFactory {
     private final DepositorAuthorizationValidator depositorAuthorizationValidator;
     private final String vaultMetadataKey;
 
+    private final boolean deleteDraftOnFailure;
+
     public DepositIngestTaskFactory(
         boolean isMigration,
         String depositorRole,
@@ -70,6 +72,7 @@ public class DepositIngestTaskFactory {
         this.blockedTargetService = blockedTargetService;
         this.depositorAuthorizationValidator = depositorAuthorizationValidator;
         this.vaultMetadataKey = vaultMetadataKey;
+        this.deleteDraftOnFailure = ingestFlowConfig.isDeleteDraftOnFailure();
     }
 
     public DepositIngestTask createIngestTask(Path depositDir, Path outboxDir, EventWriter eventWriter) throws InvalidDepositException, IOException {
@@ -129,7 +132,8 @@ public class DepositIngestTaskFactory {
                 datasetService,
                 blockedTargetService,
                 depositorAuthorizationValidator,
-                vaultMetadataKey
+                vaultMetadataKey,
+                deleteDraftOnFailure
             );
         }
         else {
@@ -147,7 +151,8 @@ public class DepositIngestTaskFactory {
                 datasetService,
                 blockedTargetService,
                 depositorAuthorizationValidator,
-                vaultMetadataKey
+                vaultMetadataKey,
+                deleteDraftOnFailure
             );
         }
 

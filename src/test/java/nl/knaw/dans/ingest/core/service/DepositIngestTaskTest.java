@@ -92,20 +92,21 @@ public class DepositIngestTaskTest {
                 .thenReturn(deposit);
 
         return new DepositIngestTask(
-                depositToDvDatasetMetadataMapperFactory,
-                depositLocation,
-                "dummy",
-                null,
-                zipFileHandler,
-                List.of(),
-                dansBagValidator,
-                Path.of("outbox"),
-                eventWriter,
-                depositManager,
-                datasetService,
-                blockedTargetService,
-                depositorAuthorizationValidator,
-                "dummy"
+            depositToDvDatasetMetadataMapperFactory,
+            depositLocation,
+            "dummy",
+            null,
+            zipFileHandler,
+            List.of(),
+            dansBagValidator,
+            Path.of("outbox"),
+            eventWriter,
+            depositManager,
+            datasetService,
+            blockedTargetService,
+            depositorAuthorizationValidator,
+            "dummy",
+            false
         );
     }
 

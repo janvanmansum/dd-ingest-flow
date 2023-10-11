@@ -80,6 +80,8 @@ public class IngestFlowConfig {
     @Valid
     private String vaultMetadataKey;
 
+    private boolean deleteDraftOnFailure;
+
     public IngestAreaConfig getImportConfig() {
         return importConfig;
     }
@@ -214,5 +216,13 @@ public class IngestFlowConfig {
 
     public void setVaultMetadataKey(String vaultMetadataKey) {
         this.vaultMetadataKey = vaultMetadataKey;
+    }
+
+    public void setDeleteDraftOnFailure(boolean deleteDraftOnFailure) {
+        this.deleteDraftOnFailure = deleteDraftOnFailure;
+    }
+
+    public boolean isDeleteDraftOnFailure() {
+        return deleteDraftOnFailure;
     }
 }
