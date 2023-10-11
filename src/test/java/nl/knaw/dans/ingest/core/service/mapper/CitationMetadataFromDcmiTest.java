@@ -16,12 +16,14 @@
 package nl.knaw.dans.ingest.core.service.mapper;
 
 import nl.knaw.dans.ingest.core.domain.VaultMetadata;
+import nl.knaw.dans.lib.dataverse.model.dataset.CompoundMultiValueField;
 import nl.knaw.dans.lib.dataverse.model.dataset.CompoundSingleValueField;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.ALTERNATIVE_TITLE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.CONTRIBUTOR;
@@ -751,7 +753,7 @@ public class CitationMetadataFromDcmiTest {
             + minimalDdmProfile() + dcmi("")
             + "</ddm:DDM>");
         var result = mapDdmToDataset(doc, true);
-        assertThat(getCompoundSingleValueField("citation", SERIES, result))
+        assertThat(getCompoundMultiValueField("citation", SERIES, result))
             .isNull();
     }
 
@@ -769,13 +771,17 @@ public class CitationMetadataFromDcmiTest {
 
         var result = mapDdmToDataset(doc, false);
 
-        var field = (CompoundSingleValueField) result.getDatasetVersion().getMetadataBlocks()
+        var field = (CompoundMultiValueField) result.getDatasetVersion().getMetadataBlocks()
             .get("citation").getFields().stream()
             .filter(f -> f.getTypeName().equals(SERIES)).findFirst().orElseThrow();
-        assertThat(field.getValue())
+        assertThat(field.getValue().get(0))
             .extracting(SERIES_INFORMATION)
             .extracting("value")
-            .isEqualTo("<p>series<br>123</p><p>another<br>series<br>456</p>");
+            .isEqualTo("<p>series<br>123</p>");
+        assertThat(field.getValue().get(1))
+            .extracting(SERIES_INFORMATION)
+            .extracting("value")
+            .isEqualTo("<p>another<br>series<br>456</p>");
     }
 
     @Test

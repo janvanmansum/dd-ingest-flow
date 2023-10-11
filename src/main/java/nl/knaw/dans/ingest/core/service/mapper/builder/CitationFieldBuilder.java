@@ -50,13 +50,8 @@ public class CitationFieldBuilder extends FieldBuilder {
         addSingleString(TITLE, nodes);
     }
 
-    public void addSeries(Stream<Node> stream) {
-        var items = stream.collect(Collectors.toList());
-        if (!items.isEmpty()) {
-            var builder = getCompoundBuilder(SERIES, false);
-            Description.toSeries(builder, items.stream());
-            builder.build();
-        }
+    public void addSeries(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
+        addMultiple(SERIES, stream, generator);
     }
 
     public void addOtherIds(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
