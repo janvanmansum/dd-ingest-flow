@@ -142,16 +142,16 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             log.info("END processing (SUCCESS) deposit {}", deposit.getDepositId());
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.OK, null);
         } catch (RejectedDepositException e) {
-            log.error("Deposit was rejected", e);
+            log.error("END processing (REJECTED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.REJECTED, e.getMessage());
             blockTarget(e.getMessage(), DepositState.REJECTED);
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.REJECTED, e.getMessage());
         } catch (TargetBlockedException e) {
-            log.error("Deposit was rejected because a previous deposit with the same target failed", e);
+            log.error("END processing (REJECTED - TARGET BLOCKED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.FAILED, e.getMessage());
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.FAILED, e.getMessage());
         } catch (Throwable e) {
-            log.error("Deposit failed", e);
+            log.error("END processing (FAILED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.FAILED, e.getMessage());
             blockTarget(e.getMessage(), DepositState.FAILED);
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.FAILED, e.getMessage());
@@ -277,9 +277,10 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     void blockTarget(String message, DepositState depositState) {
         var deposit = getDeposit();
         var target = deposit.getDataverseDoi();
+        // TODO: Shouldn't target be a sword token?
 
         if (target == null) {
-            log.warn("Target for deposit {} is null, unable to block target. This probably means it is the first version of a deposit and can be ignored", deposit);
+            log.debug("Target for deposit {} is null, unable to block target. This probably means it is the first version of a deposit and can be ignored", deposit.getDepositId());
             return;
         }
 
