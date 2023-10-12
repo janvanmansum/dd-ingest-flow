@@ -180,7 +180,7 @@ public class DepositToDvDatasetMetadataMapper {
             }
             citationFields.addDatesOfCollection(getDatesOfCollection(ddm)
                     .filter(DatesOfCollection::isValidDatesOfCollectionPattern), DatesOfCollection.toDateOfCollectionValue); // CIT026
-            citationFields.addSeries(getDcmiDdmDescriptions(ddm).filter(Description::isSeriesInformation)); // CIT027
+            citationFields.addSeries(getDcmiDdmDescriptions(ddm).filter(Description::isSeriesInformation), Description.toSeries); // CIT027
             citationFields.addDataSources(getDataSources(ddm)); // CIT028
         } else {
             throw new IllegalStateException("Metadatablock citation should always be active");
