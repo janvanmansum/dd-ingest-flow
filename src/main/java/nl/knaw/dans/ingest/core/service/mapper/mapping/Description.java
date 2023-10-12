@@ -51,11 +51,6 @@ public class Description extends Base {
 
         builder.addSubfield(DESCRIPTION_VALUE, String.format("%s: %s", prefix, value.getTextContent()));
     };
-//    static public void toSeries (CompoundFieldBuilder builder, Stream<Node> stream) {
-//        var collected = stream.map(Node::getTextContent).collect(Collectors.joining("\n\n"));
-//        var text = newlineToHtml(collected);
-//        builder.addSubfield(SERIES_INFORMATION, text);
-//    };
 
     static public CompoundFieldGenerator<Node> toSeries = (builder, value) -> {
         var text = newlineToHtml(value.getTextContent());
