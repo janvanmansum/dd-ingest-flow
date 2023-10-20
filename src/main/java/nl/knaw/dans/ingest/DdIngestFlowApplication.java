@@ -24,6 +24,8 @@ import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import nl.knaw.dans.ingest.config.DdIngestFlowConfiguration;
+import nl.knaw.dans.ingest.config.IngestFlowConfigReader;
 import nl.knaw.dans.ingest.core.AutoIngestArea;
 import nl.knaw.dans.ingest.core.BlockedTarget;
 import nl.knaw.dans.ingest.core.CsvMessageBodyWriter;

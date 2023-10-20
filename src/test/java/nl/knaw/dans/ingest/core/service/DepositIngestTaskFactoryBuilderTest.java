@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.dropwizard.configuration.YamlConfigurationFactory;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.jersey.validation.Validators;
-import nl.knaw.dans.ingest.DdIngestFlowConfiguration;
+import nl.knaw.dans.ingest.config.DdIngestFlowConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;

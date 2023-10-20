@@ -29,12 +29,12 @@ public class DepositorAuthorizationValidatorImpl implements DepositorAuthorizati
     private static final Logger log = LoggerFactory.getLogger(DepositorAuthorizationValidatorImpl.class);
 
     private final DatasetService datasetService;
-    private final String datasetCreatorRole;
+    private final String datasetPublisherRole;
     private final String datasetUpdaterRole;
 
-    public DepositorAuthorizationValidatorImpl(DatasetService datasetService, String datasetCreatorRole, String datasetUpdaterRole) {
+    public DepositorAuthorizationValidatorImpl(DatasetService datasetService, String datasetPublisherRole, String datasetUpdaterRole) {
         this.datasetService = datasetService;
-        this.datasetCreatorRole = datasetCreatorRole;
+        this.datasetPublisherRole = datasetPublisherRole;
         this.datasetUpdaterRole = datasetUpdaterRole;
     }
 
@@ -44,18 +44,18 @@ public class DepositorAuthorizationValidatorImpl implements DepositorAuthorizati
             validateUpdaterRoles(deposit);
         }
         else {
-            validateCreatorRoles(deposit);
+            validatePublisherRoles(deposit);
         }
     }
 
-    void validateCreatorRoles(Deposit deposit) throws InvalidDepositorRoleException, DepositorValidatorException {
+    void validatePublisherRoles(Deposit deposit) throws InvalidDepositorRoleException, DepositorValidatorException {
         try {
             var roles = datasetService.getDataverseRoleAssignments(deposit.getDepositorUserId());
-            log.debug("Roles for user {}: {}; expecting role {} to be present", deposit.getDepositorUserId(), roles, datasetCreatorRole);
+            log.debug("Roles for user {}: {}; expecting role {} to be present", deposit.getDepositorUserId(), roles, datasetPublisherRole);
 
-            if (!roles.contains(datasetCreatorRole)) {
+            if (!roles.contains(datasetPublisherRole)) {
                 throw new InvalidDepositorRoleException(String.format(
-                    "Depositor %s does not have role %s on dataverse root", deposit.getDepositorUserId(), datasetCreatorRole
+                    "Depositor %s does not have role %s on dataverse root", deposit.getDepositorUserId(), datasetPublisherRole
                 ));
             }
         }

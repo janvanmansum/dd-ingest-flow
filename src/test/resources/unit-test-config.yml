@@ -10,7 +10,7 @@ ingestFlow:
     apiKey: 'changeme2' # custom value
     depositorRole: migrator # custom value
     authorization:
-      datasetCreator: migrationcreator
+      datasetPublisher: migrationcreator
       # datasetUpdater replaced by default
 
   autoIngest:
@@ -21,7 +21,7 @@ ingestFlow:
   # defaults for the areas above
   depositorRole: contributor
   authorization:
-    datasetCreator: dsContributor
+    datasetPublisher: dsContributor
     datasetUpdater: contributorplus
 
   vaultMetadataKey: 'somesecret'

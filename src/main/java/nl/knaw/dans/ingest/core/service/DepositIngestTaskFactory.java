@@ -16,7 +16,7 @@
 package nl.knaw.dans.ingest.core.service;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
+import nl.knaw.dans.ingest.config.IngestFlowConfig;
 import nl.knaw.dans.ingest.core.dataverse.DatasetService;
 import nl.knaw.dans.ingest.core.deposit.DepositManager;
 import nl.knaw.dans.ingest.core.domain.DepositLocation;

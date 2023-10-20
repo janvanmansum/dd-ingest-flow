@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nl.knaw.dans.ingest;
+package nl.knaw.dans.ingest.core.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.dropwizard.configuration.ConfigurationException;
@@ -22,6 +22,7 @@ import io.dropwizard.configuration.ResourceConfigurationSourceProvider;
 import io.dropwizard.configuration.YamlConfigurationFactory;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.jersey.validation.Validators;
+import nl.knaw.dans.ingest.config.DdIngestFlowConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static nl.knaw.dans.ingest.IngestFlowConfigReader.readIngestFlowConfiguration;
+import static nl.knaw.dans.ingest.config.IngestFlowConfigReader.readIngestFlowConfiguration;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -75,7 +76,7 @@ public class ConfigurationTest {
         assertThat(ingestFlowConfig.getAutoIngest().getApiKey()).isEqualTo("changeme3");
         assertThat(ingestFlowConfig.getMigration().getApiKey()).isEqualTo("changeme2");
 
-        assertThat(ingestFlowConfig.getMigration().getAuthorization().getDatasetCreator()).isEqualTo("migrationcreator");
+        assertThat(ingestFlowConfig.getMigration().getAuthorization().getDatasetPublisher()).isEqualTo("migrationcreator");
         assertThat(ingestFlowConfig.getImportConfig().getAuthorization().getDatasetUpdater()).isEqualTo("importupdater");
 
         assertThat(ingestFlowConfig.getVaultMetadataKey()).isEqualTo("somesecret");
@@ -94,9 +95,9 @@ public class ConfigurationTest {
         final var ingestFlowConfig = factory.build(FileInputStream::new, testFile.toString()).getIngestFlow();
 
         assertThat(ingestFlowConfig.getMigration().getAuthorization().getDatasetUpdater()).isEqualTo("contributorplus");
-        assertThat(ingestFlowConfig.getImportConfig().getAuthorization().getDatasetCreator()).isEqualTo("dsContributor");
+        assertThat(ingestFlowConfig.getImportConfig().getAuthorization().getDatasetPublisher()).isEqualTo("dsContributor");
         assertThat(ingestFlowConfig.getAutoIngest().getAuthorization().getDatasetUpdater()).isEqualTo("contributorplus");
-        assertThat(ingestFlowConfig.getAutoIngest().getAuthorization().getDatasetCreator()).isEqualTo("dsContributor");
+        assertThat(ingestFlowConfig.getAutoIngest().getAuthorization().getDatasetPublisher()).isEqualTo("dsContributor");
 
         assertThat(ingestFlowConfig.getImportConfig().getDepositorRole()).isEqualTo("contributor");
         assertThat(ingestFlowConfig.getAutoIngest().getDepositorRole()).isEqualTo("contributor");

@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.config;
+package nl.knaw.dans.ingest.config;
 
-import io.dropwizard.client.JerseyClientConfiguration;
 import lombok.Data;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.net.URI;
+import javax.validation.constraints.NotEmpty;
 
 @Data
-public class ValidateDansBagConfig {
-    @NotNull
-    @Valid
-    private URI baseUrl;
-
-    @NotNull
-    @Valid
-    private URI pingUrl;
-
-    @Valid
-    @NotNull
-    private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
+public class DatasetAuthorizationConfig {
+    @NotEmpty
+    private String datasetPublisher;
+    @NotEmpty
+    private String datasetUpdater;
 }
