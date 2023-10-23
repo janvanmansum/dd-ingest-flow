@@ -16,7 +16,7 @@
 
 package nl.knaw.dans.ingest.config;
 
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
