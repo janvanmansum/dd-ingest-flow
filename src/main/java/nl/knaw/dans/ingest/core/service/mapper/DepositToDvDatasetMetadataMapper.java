@@ -427,7 +427,7 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getOtherTitles(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-                "/ddm:DDM/ddm:dcmiMetadata/dcterms:title", "/ddm:DDM/ddm:dcmiMetadata/dcterms:alternative");
+                "/ddm:DDM/ddm:dcmiMetadata/dcterms:title", "/ddm:DDM/dcmiMetadata/dc:title", "/ddm:DDM/ddm:dcmiMetadata/dcterms:alternative");
     }
 
     Stream<Node> getCreators(Document ddm) {
@@ -445,7 +445,8 @@ public class DepositToDvDatasetMetadataMapper {
                 "/ddm:DDM/ddm:dcmiMetadata/dcterms:modified",
                 "/ddm:DDM/ddm:dcmiMetadata/dcterms:issued",
                 "/ddm:DDM/ddm:dcmiMetadata/dcterms:valid",
-                "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage");
+                "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage",
+                "/ddm:DDM/ddm:dcmiMetadata/dc:coverage");
     }
 
     Stream<Node> getDdmAccessRights(Document ddm) {
