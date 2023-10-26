@@ -45,27 +45,76 @@ public final class Contributor extends Base {
     };
 
     static {
-        contributorRoleToContributorType.put("DataCurator", "Data Curator");
-        contributorRoleToContributorType.put("DataManager", "Data Manager");
-        contributorRoleToContributorType.put("Editor", "Editor");
-        contributorRoleToContributorType.put("Funder", "Funder");
-        contributorRoleToContributorType.put("HostingInstitution", "Hosting Institution");
-        contributorRoleToContributorType.put("ProjectLeader", "Project Leader");
-        contributorRoleToContributorType.put("ProjectManager", "Project Manager");
-        contributorRoleToContributorType.put("Related Person", "Related Person");
-        contributorRoleToContributorType.put("Researcher", "Researcher");
-        contributorRoleToContributorType.put("ResearchGroup", "Research Group");
-        contributorRoleToContributorType.put("RightsHolder", "Rights Holder");
-        contributorRoleToContributorType.put("Sponsor", "Sponsor");
-        contributorRoleToContributorType.put("Supervisor", "Supervisor");
-        contributorRoleToContributorType.put("WorkPackageLeader", "Work Package Leader");
-        contributorRoleToContributorType.put("Other", "Other");
-        contributorRoleToContributorType.put("Producer", "Other");
-        contributorRoleToContributorType.put("RegistrationAuthority", "Other");
-        contributorRoleToContributorType.put("RegistrationAgency", "Other");
-        contributorRoleToContributorType.put("Distributor", "Other");
-        contributorRoleToContributorType.put("DataCollector", "Other");
+        /*
+         * The comments contain the term from the DataCite 4 contributorType vocabulary. This term is mapped to a Dataverse contributorRole,
+         * which is based on DataCite 3. If there is no DataCite 3 term, "Other" is used.
+         */
+
+        // <xs:enumeration value="ContactPerson" /> NOT MAPPABLE TO DATACITE 3
         contributorRoleToContributorType.put("ContactPerson", "Other");
+
+        // <xs:enumeration value="DataCollector" />
+        contributorRoleToContributorType.put("DataCollector", "Data Collector");
+
+        // <xs:enumeration value="DataCurator" />
+        contributorRoleToContributorType.put("DataCurator", "Data Curator");
+
+        // <xs:enumeration value="DataManager" />
+        contributorRoleToContributorType.put("DataManager", "Data Manager");
+
+        // <xs:enumeration value="Distributor" /> NOT MAPPABLE TO DATACITE 3
+        contributorRoleToContributorType.put("Distributor", "Other");
+
+        // <xs:enumeration value="Editor" />
+        contributorRoleToContributorType.put("Editor", "Editor");
+
+        // Not in DataCite 4, so should not actually be in the input
+        contributorRoleToContributorType.put("Funder", "Funder");
+
+        // <xs:enumeration value="HostingInstitution" />
+        contributorRoleToContributorType.put("HostingInstitution", "Hosting Institution");
+
+        // <xs:enumeration value="Other" />
+        contributorRoleToContributorType.put("Other", "Other");
+
+        // <xs:enumeration value="Producer" /> NOT MAPPABLE TO DATACITE 3
+        contributorRoleToContributorType.put("Producer", "Other");
+
+        // <xs:enumeration value="ProjectLeader" />
+        contributorRoleToContributorType.put("ProjectLeader", "Project Leader");
+
+        // <xs:enumeration value="ProjectManager" />
+        contributorRoleToContributorType.put("ProjectManager", "Project Manager");
+
+        // <xs:enumeration value="ProjectMember" />
+        contributorRoleToContributorType.put("ProjectMember", "Project Member");
+
+        // <xs:enumeration value="RegistrationAgency" /> NOT MAPPABLE TO DATACITE 3
+        contributorRoleToContributorType.put("RegistrationAuthority", "Other");
+
+        // <xs:enumeration value="RegistrationAuthority" /> NOT MAPPABLE TO DATACITE 3
+        contributorRoleToContributorType.put("RegistrationAgency", "Other");
+
+        // <xs:enumeration value="RelatedPerson" />
+        contributorRoleToContributorType.put("RelatedPerson", "Related Person");
+
+        // <xs:enumeration value="ResearchGroup" />
+        contributorRoleToContributorType.put("ResearchGroup", "Research Group");
+
+        // <xs:enumeration value="RightsHolder" />
+        contributorRoleToContributorType.put("RightsHolder", "Rights Holder");
+
+        // <xs:enumeration value="Researcher" />
+        contributorRoleToContributorType.put("Researcher", "Researcher");
+
+        // <xs:enumeration value="Sponsor" />
+        contributorRoleToContributorType.put("Sponsor", "Sponsor");
+
+        // <xs:enumeration value="Supervisor" />
+        contributorRoleToContributorType.put("Supervisor", "Supervisor");
+
+        // <xs:enumeration value="WorkPackageLeader" />
+        contributorRoleToContributorType.put("WorkPackageLeader", "Work Package Leader");
     }
 
     public static boolean isValidContributor(Node node) {
