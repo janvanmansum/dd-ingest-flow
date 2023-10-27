@@ -257,7 +257,6 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder, List<String> skipFields) {
-        // TODO figure out how to deduplicate compound fields (just on key, or also on value?)
         var compoundFields = builder.getCompoundFields().values()
                 .stream()
                 .map(CompoundFieldBuilder::build);
