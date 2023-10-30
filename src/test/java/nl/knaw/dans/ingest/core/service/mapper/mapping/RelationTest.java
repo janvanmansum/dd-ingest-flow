@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RELATION_TEXT;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RELATION_TYPE;
 import static nl.knaw.dans.ingest.core.service.DepositDatasetFieldNames.RELATION_URI;
+import static nl.knaw.dans.ingest.core.service.XPathConstants.DDM_DCMI_METADATA;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RelationTest extends BaseTest {
@@ -46,7 +47,7 @@ class RelationTest extends BaseTest {
                 + "</ddm:DDM>\n");
 
         var builder = new CompoundFieldBuilder("", true);
-        XPathEvaluator.nodes(doc, "/ddm:DDM/ddm:dcmiMetadata//*")
+        XPathEvaluator.nodes(doc, DDM_DCMI_METADATA + "//*")
             .filter(Relation::isRelation)
             .forEach(item -> {
                 Relation.toRelationObject.build(builder, item);
