@@ -241,10 +241,20 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
                 ? newDatasetUpdater(dataverseDataset).performEdit()
                 : newDatasetCreator(dataverseDataset, depositorRole).performEdit();
 
-        publishDataset(persistentId);
-        log.debug("Dataset {} published", persistentId);
-        postPublication(persistentId);
+        if (isDepositorDatasetPublisher()) {
+            publishDataset(persistentId);
+            log.debug("Dataset {} published", persistentId);
+            postPublication(persistentId);
+        } else {
+            submitForReview(persistentId);
+        }
     }
+
+    private boolean isDepositorDatasetPublisher() {
+
+        return true;
+    }
+
 
     void validateDepositorRoles() {
         try {
@@ -350,6 +360,11 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             throw e;
         }
     }
+
+    void submitForReview(String persitentId) throws Exception {
+        datasetService.submitForReview(persitentId);
+    }
+
 
     DatasetEditor newDatasetUpdater(Dataset dataset, boolean isMigration, boolean deleteDraftOnFailure) {
         return new DatasetUpdater(

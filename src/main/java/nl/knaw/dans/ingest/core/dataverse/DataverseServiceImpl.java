@@ -136,6 +136,16 @@ public class DataverseServiceImpl implements DatasetService {
     }
 
     @Override
+    public void submitForReview(String persitentId) {
+        try {
+            dataverseClient.dataset(persitentId).
+        }
+        catch (IOException | DataverseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public Optional<AuthenticatedUser> getUserById(String userId) {
         try {
             return Optional.of(dataverseClient.admin().listSingleUser(userId).getData());
