@@ -396,7 +396,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<String> getLanguageAttributes(Document ddm) {
-        return XPathEvaluator.strings(ddm, DDM_PROFILE + "//@xml:lang | " + DDM_DCMI_METADATA + "//@xml:lang");
+        return XPathEvaluator.strings(ddm, DDM_PROFILE + "//@xml:lang", DDM_DCMI_METADATA + "//@xml:lang");
     }
 
     Stream<Node> getContributorDetailsOrganizations(Document ddm) {
@@ -410,7 +410,7 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     Stream<Node> getContributorDetails(Document ddm) {
-        return XPathEvaluator.nodes(ddm, DDM_DCMI_METADATA + "/dcx-dai:contributorDetails[dcx-dai:author] | " + DDM_DCMI_METADATA + "/dcx-dai:contributorDetails[dcx-dai:organization]");
+        return XPathEvaluator.nodes(ddm, DDM_DCMI_METADATA + "/dcx-dai:contributorDetails[dcx-dai:author]", DDM_DCMI_METADATA + "/dcx-dai:contributorDetails[dcx-dai:organization]");
     }
 
     Stream<Node> getCreated(Document ddm) {
