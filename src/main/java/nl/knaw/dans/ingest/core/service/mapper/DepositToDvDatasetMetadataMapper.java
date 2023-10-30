@@ -257,7 +257,6 @@ public class DepositToDvDatasetMetadataMapper {
     }
 
     void processMetadataBlock(boolean deduplicate, Map<String, MetadataBlock> fields, String title, String displayName, FieldBuilder builder, List<String> skipFields) {
-        // TODO figure out how to deduplicate compound fields (just on key, or also on value?)
         var compoundFields = builder.getCompoundFields().values()
                 .stream()
                 .map(CompoundFieldBuilder::build);
@@ -427,7 +426,7 @@ public class DepositToDvDatasetMetadataMapper {
 
     Stream<Node> getOtherTitles(Document ddm) {
         return XPathEvaluator.nodes(ddm,
-                "/ddm:DDM/ddm:dcmiMetadata/dcterms:title", "/ddm:DDM/ddm:dcmiMetadata/dcterms:alternative");
+                "/ddm:DDM/ddm:dcmiMetadata/dcterms:title", "/ddm:DDM/dcmiMetadata/dc:title", "/ddm:DDM/ddm:dcmiMetadata/dcterms:alternative");
     }
 
     Stream<Node> getCreators(Document ddm) {
@@ -445,7 +444,8 @@ public class DepositToDvDatasetMetadataMapper {
                 "/ddm:DDM/ddm:dcmiMetadata/dcterms:modified",
                 "/ddm:DDM/ddm:dcmiMetadata/dcterms:issued",
                 "/ddm:DDM/ddm:dcmiMetadata/dcterms:valid",
-                "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage");
+                "/ddm:DDM/ddm:dcmiMetadata/dcterms:coverage",
+                "/ddm:DDM/ddm:dcmiMetadata/dc:coverage");
     }
 
     Stream<Node> getDdmAccessRights(Document ddm) {

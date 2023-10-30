@@ -27,7 +27,10 @@ server:
       port: 20301
 
 ingestFlow:
-  skipFields: [] # see hidden-fields in dd-dtap though don't skip data vault metadata
+  # These target fields are skipped when importing or migrating a dataset. This is useful when for metadata blocks that are active
+  # but for which some fields are hidden. Usually you do not want to fill hidden fields. (An exception is the Vault Metadata block.)
+  # Fields in metadata blocks that are not active are always skipped.
+  skipFields: [ ]
 
   import:
     # apiKey: # overridden key for the import area
@@ -82,7 +85,7 @@ ingestFlow:
   # entry for a depositor, dansDataSupplier will be left empty.
   #
   dataSuppliers:
-    # user001: The Organization Name
+  # user001: The Organization Name
 
   deduplicate: true
   deleteDraftOnFailure: true
