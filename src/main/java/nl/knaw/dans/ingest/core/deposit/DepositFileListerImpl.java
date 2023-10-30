@@ -31,6 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static nl.knaw.dans.ingest.core.service.XPathConstants.FILES_FILE;
+
 public class DepositFileListerImpl implements DepositFileLister {
     @Override
     public List<DepositFile> getDepositFiles(Deposit deposit) throws IOException {
@@ -39,7 +41,7 @@ public class DepositFileListerImpl implements DepositFileLister {
         var filePathToSha1 = ManifestHelperImpl.getFilePathToSha1(bag);
         var originalFilePathMappings = getOriginalFilePathMapping(bagDir);
 
-        return XPathEvaluator.nodes(deposit.getFilesXml(), "/files:files/files:file")
+        return XPathEvaluator.nodes(deposit.getFilesXml(), FILES_FILE)
             .map(node -> {
                 var filePath = Optional.ofNullable(node.getAttributes().getNamedItem("filepath"))
                     .map(Node::getTextContent)

@@ -52,6 +52,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static nl.knaw.dans.ingest.core.service.XPathConstants.DDM_DCMI_METADATA;
+
 @Slf4j
 public abstract class DatasetEditor {
 
@@ -165,7 +167,7 @@ public abstract class DatasetEditor {
     }
 
     protected String getLicense(Node node) {
-        return XPathEvaluator.nodes(node, "/ddm:DDM/ddm:dcmiMetadata/dcterms:license")
+        return XPathEvaluator.nodes(node, DDM_DCMI_METADATA + "/dcterms:license")
             .filter(License::isLicenseUri)
             .findFirst()
             .map(n -> License.getLicenseUri(supportedLicenses, n))
