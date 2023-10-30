@@ -30,6 +30,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static nl.knaw.dans.ingest.core.service.XPathConstants.DDM_PROFILE;
+import static nl.knaw.dans.ingest.core.service.XPathConstants.FILES_FILE;
 import static nl.knaw.dans.ingest.core.service.XmlNamespaces.NAMESPACE_XSI;
 
 @Data
@@ -108,13 +110,13 @@ public class Deposit {
      * @return whether this deposit allows access requests
      */
     public boolean allowAccessRequests() {
-        var accessRightsNode = XPathEvaluator.nodes(ddm, "/ddm:DDM/ddm:profile/ddm:accessRights")
+        var accessRightsNode = XPathEvaluator.nodes(ddm, DDM_PROFILE + "/ddm:accessRights")
             .findFirst()
             .orElseThrow();
 
         var isNoAccessDataset = "NO_ACCESS".equals(accessRightsNode.getTextContent().trim());
         var accessibleToNoneFilesPresent = XPathEvaluator
-            .strings(filesXml, "/files:files/files:file/files:accessibleToRights")
+            .strings(filesXml, FILES_FILE + "/files:accessibleToRights")
             .map(String::trim)
             .anyMatch("NONE"::equals);
 
@@ -124,7 +126,7 @@ public class Deposit {
     public boolean restrictedFilesPresent() {
         var numberOfFiles = files.size();
         var explicitAccessibleToValues = XPathEvaluator
-            .strings(filesXml, "/files:files/files:file/files:accessibleToRights")
+            .strings(filesXml, FILES_FILE + "/files:accessibleToRights")
             .map(String::trim).collect(Collectors.toList());
         var explicitlyRestrictedFilesPresent = explicitAccessibleToValues.stream()
             .anyMatch(a -> !"ANONYMOUS".equals(a));
