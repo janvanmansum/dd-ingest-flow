@@ -46,31 +46,39 @@ ingestFlow:
     # apiKey: # overridden key for the autoIngest area
     inbox: /var/opt/dans.knaw.nl/tmp/auto-ingest/inbox
     outbox: /var/opt/dans.knaw.nl/tmp/auto-ingest/outbox
+
+    #
+    # The following are overrides for the defaults directly below
+    #
     depositorRole: swordupdater
     authorization:
-      datasetCreator: swordcreator
+      # Required role on the dataverse for the depositor account to publish a SWORD2 created dataset version. Creating a new dataset
+      # via SWORD2 does not require a specific role.
+      datasetPublisher: swordpublisher
+      # Required role on the dataset for the depositor account to create a new version. If the account is datasetPublisher on the dataverse,
+      # the new version will be published. Otherwise, the new version will be submitted for review.
       datasetUpdater: swordupdater
 
-  # Default roles required for account in depositor.userId to add and update datasets via the ingest-flow. Note that these roles
+  # Default roles required for account to add and update datasets via the ingest-flow. Note that these roles
   # are not always the same as the ones required when working in the user interface! These settings can be overridden in the
   # ingest area configurations above (import, migration, autoIngest).
+  #
+  # The role that the depositor account will be assigned on its datasets.
+  #
+  depositorRole: contributorplus
   authorization:
-    # Required role on the dataverse for the depositor.userId to create a dataset
+    # Required role on the dataverse for the account to publish a dataset version. Creating a new dataset does not require a specific role.
     # If the implicit group :authenticated-users has this role, this will also suffice.
-    # Note that explicit-groups are currently not supported
-    datasetCreator: dsContributor
-    # Required role on the dataset for the depositor.userId to create a new version
-    # of dataset
+    # Note that explicit-groups are currently not supported.
+    datasetPublisher: dsContributor # Note that dsContributor cannot publish via de user interface.
+    # Required role on the dataset for the account to create a new version of dataset. If the account is datasetPublisher on the dataverse,
+    # the new version will be published. Otherwise, the new version will be submitted for review.
     datasetUpdater: contributorplus
 
   #
   # Filtering. Files with a path matching the pattern will not be added to the dataset. Renaming/moving files is not affected.
   #
   fileExclusionPattern: ^$
-  #
-  # The role that the depositor account will be assigned on its datasets.
-  #
-  depositorRole: contributorplus
 
   #
   # Map from depositor.userId to organization name. Used to fill in the dansDataSupplier metadata field. If there is no

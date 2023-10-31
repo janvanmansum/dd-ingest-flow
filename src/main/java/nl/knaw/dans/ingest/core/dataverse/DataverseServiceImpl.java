@@ -136,6 +136,16 @@ public class DataverseServiceImpl implements DatasetService {
     }
 
     @Override
+    public void submitForReview(String persitentId) throws IOException, DataverseException {
+        var dataset = dataverseClient.dataset(persitentId);
+        var result = dataset.submitForReview();
+        if (log.isDebugEnabled()) {
+            log.debug("Response message: {}", result.getEnvelopeAsJson().toPrettyString());
+        }
+        // DO NOT wait for unlock, because submit for review IS a lock state
+    }
+
+    @Override
     public Optional<AuthenticatedUser> getUserById(String userId) {
         try {
             return Optional.of(dataverseClient.admin().listSingleUser(userId).getData());

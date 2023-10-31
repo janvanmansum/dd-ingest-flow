@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.ingest.core.config;
+package nl.knaw.dans.ingest.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import nl.knaw.dans.lib.util.ExecutorServiceFactory;

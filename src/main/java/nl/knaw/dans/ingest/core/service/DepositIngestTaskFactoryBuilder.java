@@ -16,8 +16,8 @@
 package nl.knaw.dans.ingest.core.service;
 
 import gov.loc.repository.bagit.reader.BagReader;
-import nl.knaw.dans.ingest.DdIngestFlowConfiguration;
-import nl.knaw.dans.ingest.core.config.IngestAreaConfig;
+import nl.knaw.dans.ingest.config.DdIngestFlowConfiguration;
+import nl.knaw.dans.ingest.config.IngestAreaConfig;
 import nl.knaw.dans.ingest.core.dataverse.DataverseServiceImpl;
 import nl.knaw.dans.ingest.core.deposit.BagDirResolverImpl;
 import nl.knaw.dans.ingest.core.deposit.DepositFileListerImpl;
@@ -83,8 +83,8 @@ public class DepositIngestTaskFactoryBuilder {
             configuration.getDataverseExtra().getPublishAwaitUnlockMaxRetries()
         );
         final var authorization = ingestAreaConfig.getAuthorization();
-        final var creator = authorization.getDatasetCreator();
-        final var updater = authorization.getDatasetUpdater();
+        final var datasetPublisher = authorization.getDatasetPublisher();
+        final var datasetUpdater = authorization.getDatasetUpdater();
         return new DepositIngestTaskFactory(
             isMigration,
             ingestAreaConfig.getDepositorRole(),
@@ -95,7 +95,7 @@ public class DepositIngestTaskFactoryBuilder {
             zipFileHandler,
             datasetService,
             blockedTargetService,
-            new DepositorAuthorizationValidatorImpl(datasetService, creator, updater),
+            new DepositorAuthorizationValidatorImpl(datasetService, datasetPublisher, datasetUpdater),
             configuration.getIngestFlow().getVaultMetadataKey()
         );
     }

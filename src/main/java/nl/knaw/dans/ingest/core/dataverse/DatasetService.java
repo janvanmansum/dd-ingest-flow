@@ -53,4 +53,6 @@ public interface DatasetService {
     List<DatasetResultItem> searchDatasets(String key, String value) throws IOException, DataverseException;
 
     List<URI> getLicenses() throws IOException, DataverseException;
+
+    void submitForReview(String persitentId) throws IOException, DataverseException;
 }

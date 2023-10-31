@@ -38,12 +38,12 @@ ingestFlow:
     inbox: data/auto-ingest/inbox
     outbox: data/auto-ingest/outbox
     authorization:
-      datasetCreator: swordcreator
+      datasetPublisher: swordcreator
       datasetUpdater: swordupdater
 
   authorization:
     # Required role on the dataverse for the depositor.userId to create a dataset
-    datasetCreator: datasetcreator
+    datasetPublisher: datasetcreator
     # Required role on the dataset for the depositor.userId to create a new version
     # of dataset
     datasetUpdater: curator

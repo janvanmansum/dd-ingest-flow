@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package nl.knaw.dans.ingest;
+package nl.knaw.dans.ingest.config;
 
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import nl.knaw.dans.ingest.core.config.DataverseExtra;
-import nl.knaw.dans.ingest.core.config.IngestAreaConfig;
-import nl.knaw.dans.ingest.core.config.IngestFlowConfig;
-import nl.knaw.dans.ingest.core.config.ValidateDansBagConfig;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import nl.knaw.dans.ingest.config.DataverseExtra;
+import nl.knaw.dans.ingest.config.IngestAreaConfig;
+import nl.knaw.dans.ingest.config.IngestFlowConfig;
+import nl.knaw.dans.ingest.config.ValidateDansBagConfig;
 import nl.knaw.dans.lib.util.DataverseClientFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotNull;
 
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class DdIngestFlowConfiguration extends Configuration {
 
     @NotNull
@@ -60,8 +64,8 @@ public class DdIngestFlowConfiguration extends Configuration {
             ingestAreaConfig.setAuthorization(defaultAuthorization);
         } else {
             var authorization = ingestAreaConfig.getAuthorization();
-            if (StringUtils.isBlank(authorization.getDatasetCreator())) {
-                authorization.setDatasetCreator(defaultAuthorization.getDatasetCreator());
+            if (StringUtils.isBlank(authorization.getDatasetPublisher())) {
+                authorization.setDatasetPublisher(defaultAuthorization.getDatasetPublisher());
             }
             if (StringUtils.isBlank(authorization.getDatasetUpdater())) {
                 authorization.setDatasetUpdater(defaultAuthorization.getDatasetUpdater());
@@ -71,41 +75,4 @@ public class DdIngestFlowConfiguration extends Configuration {
             ingestAreaConfig.setApiKey(dataverse.getApiKey());
         }
     }
-
-    public void setIngestFlow(IngestFlowConfig ingestFlow) {
-        this.ingestFlow = ingestFlow;
-    }
-
-    public DataverseClientFactory getDataverse() {
-        return dataverse;
-    }
-
-    public void setDataverse(DataverseClientFactory dataverse) {
-        this.dataverse = dataverse;
-    }
-
-    public DataverseExtra getDataverseExtra() {
-        return dataverseExtra;
-    }
-
-    public void setDataverseExtra(DataverseExtra dataverseExtra) {
-        this.dataverseExtra = dataverseExtra;
-    }
-
-    public ValidateDansBagConfig getValidateDansBag() {
-        return validateDansBag;
-    }
-
-    public void setValidateDansBag(ValidateDansBagConfig validateDansBag) {
-        this.validateDansBag = validateDansBag;
-    }
-
-    public DataSourceFactory getTaskEventDatabase() {
-        return taskEventDatabase;
-    }
-
-    public void setTaskEventDatabase(DataSourceFactory dataSourceFactory) {
-        this.taskEventDatabase = dataSourceFactory;
-    }
-
 }

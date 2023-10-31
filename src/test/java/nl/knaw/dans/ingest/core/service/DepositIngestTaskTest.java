@@ -121,15 +121,15 @@ public class DepositIngestTaskTest {
 
         var spiedTask = Mockito.spy(task);
 
-        Mockito.doNothing()
+        Mockito.doReturn(true)
                 .when(spiedTask)
                 .createOrUpdateDataset(Mockito.anyBoolean());
 
-        Mockito.doNothing()
-                .when(spiedTask)
-                .validateDepositorRoles();
         Mockito.doReturn("doi:id")
                 .when(spiedTask).resolveDoi(Mockito.any());
+
+        Mockito.doReturn(true)
+                .when(depositorAuthorizationValidator).isDatasetUpdateAllowed(Mockito.any());
 
         spiedTask.run();
 
@@ -150,16 +150,16 @@ public class DepositIngestTaskTest {
         var task = getDepositIngestTask("doi:id", depositId.toString(), "version1");
 
         var spiedTask = Mockito.spy(task);
+        Mockito.doReturn(true)
+                .when(depositorAuthorizationValidator)
+                .isDatasetUpdateAllowed(Mockito.any());
+
         Mockito.doThrow(RejectedDepositException.class)
                 .when(spiedTask).validateDeposit();
 
-        Mockito.doNothing()
+        Mockito.doReturn(true)
                 .when(spiedTask)
                 .createOrUpdateDataset(Mockito.anyBoolean());
-
-        Mockito.doNothing()
-                .when(spiedTask)
-                .validateDepositorRoles();
 
         Mockito.doReturn("doi:id")
                 .when(spiedTask).resolveDoi(Mockito.any());
@@ -181,11 +181,7 @@ public class DepositIngestTaskTest {
         Mockito.doThrow(RejectedDepositException.class)
                 .when(spiedTask).validateDeposit();
 
-        Mockito.doNothing()
-                .when(spiedTask)
-                .validateDepositorRoles();
-
-        Mockito.doNothing()
+        Mockito.doReturn(true)
                 .when(spiedTask)
                 .createOrUpdateDataset(Mockito.anyBoolean());
 
@@ -210,13 +206,9 @@ public class DepositIngestTaskTest {
 
         var spiedTask = Mockito.spy(task);
 
-        Mockito.doNothing()
+        Mockito.doReturn(true)
                 .when(spiedTask)
                 .createOrUpdateDataset(Mockito.anyBoolean());
-
-        Mockito.doNothing()
-                .when(spiedTask)
-                .validateDepositorRoles();
 
         Mockito.doNothing()
                 .when(spiedTask)

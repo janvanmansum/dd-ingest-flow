@@ -67,7 +67,7 @@ public class DepositMigrationTask extends DepositIngestTask {
     }
 
     @Override
-    void checkDepositType() {
+    void checkDoiRequirements() {
         if (StringUtils.isEmpty(deposit.getDoi())) {
             throw new IllegalArgumentException("Deposit for migrated dataset MUST have deposit property identifier.doi set");
         }
