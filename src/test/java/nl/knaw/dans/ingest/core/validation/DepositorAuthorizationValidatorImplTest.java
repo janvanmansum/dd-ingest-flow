@@ -25,89 +25,149 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DepositorAuthorizationValidatorImplTest {
 
     @Test
-    void validateDepositorAuthorization_should_not_throw_when_creator_role_matches() throws Exception {
+    void isDatasetPublicationAllowed_should_return_true_when_publisher_role_matches_for_new_dataset() throws Exception {
         var datasetService = Mockito.mock(DatasetService.class);
         Mockito.when(datasetService.getDataverseRoleAssignments(Mockito.eq("user001")))
-            .thenReturn(List.of("admin", "creator"));
+            .thenReturn(List.of("admin", "publisher"));
 
-        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "creator", "updater");
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
 
         var deposit = new Deposit();
         deposit.setDepositorUserId("user001");
         deposit.setUpdate(false);
 
-        assertDoesNotThrow(() -> validator.validateDepositorAuthorization(deposit));
+        assertThat(validator.isDatasetPublicationAllowed(deposit)).isTrue();
     }
 
-    @Test
-    void validateDepositorAuthorization_should_not_throw_when_updater_role_matches() throws Exception {
-        var datasetService = Mockito.mock(DatasetService.class);
-        Mockito.when(datasetService.getDatasetRoleAssignments(Mockito.eq("user001"), Mockito.eq("dataset_id")))
-            .thenReturn(List.of("updater"));
 
-        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "creator", "updater");
+    @Test
+    void isDatasetPublicationAllowed_should_return_true_when_publisher_role_matches_for_dataset_update() throws Exception {
+        var datasetService = Mockito.mock(DatasetService.class);
+        Mockito.when(datasetService.getDataverseRoleAssignments(Mockito.eq("user001")))
+            .thenReturn(List.of("admin", "publisher"));
+
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
 
         var deposit = new Deposit();
         deposit.setDepositorUserId("user001");
         deposit.setUpdate(true);
-        deposit.setDataverseDoi("dataset_id");
 
-        assertDoesNotThrow(() -> validator.validateDepositorAuthorization(deposit));
+        assertThat(validator.isDatasetPublicationAllowed(deposit)).isTrue();
     }
 
     @Test
-    void validateDepositorAuthorization_should_throw_when_creator_role_is_missing() throws Exception {
+    void isDatasetPublicationAllowed_should_return_false_when_publisher_role_does_not_match_for_new_dataset() throws Exception {
         var datasetService = Mockito.mock(DatasetService.class);
         Mockito.when(datasetService.getDataverseRoleAssignments(Mockito.eq("user001")))
-            .thenReturn(List.of("curator"));
+            .thenReturn(List.of("admin", "NOT_publisher"));
 
-        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "creator", "updater");
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
 
         var deposit = new Deposit();
         deposit.setDepositorUserId("user001");
         deposit.setUpdate(false);
 
-        assertThrows(InvalidDepositorRoleException.class,
-            () -> validator.validateDepositorAuthorization(deposit));
+        assertThat(validator.isDatasetPublicationAllowed(deposit)).isFalse();
     }
 
     @Test
-    void validateDepositorAuthorization_should_throw_when_updater_role_is_missing() throws Exception {
+    void isDatasetPublicationAllowed_should_return_false_when_publisher_role_does_not_match_for_dataset_update() throws Exception {
         var datasetService = Mockito.mock(DatasetService.class);
-        Mockito.when(datasetService.getDatasetRoleAssignments(Mockito.eq("user001"), Mockito.eq("dataset_id")))
-            .thenReturn(List.of("curator"));
+        Mockito.when(datasetService.getDataverseRoleAssignments(Mockito.eq("user001")))
+            .thenReturn(List.of("admin", "NOT_publisher"));
 
-        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "creator", "updater");
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
 
         var deposit = new Deposit();
         deposit.setDepositorUserId("user001");
         deposit.setUpdate(true);
-        deposit.setDataverseDoi("dataset_id");
 
-        assertThrows(InvalidDepositorRoleException.class,
-            () -> validator.validateDepositorAuthorization(deposit));
+        assertThat(validator.isDatasetPublicationAllowed(deposit)).isFalse();
     }
 
     @Test
-    void validateDepositorAuthorization_should_throw_DepositorValidatorException_when_IOException_occurs() throws Exception {
+    void isDatasetPublicationAllowed_should_throw_when_not_able_to_retrieve_roles() throws Exception {
         var datasetService = Mockito.mock(DatasetService.class);
-        Mockito.doThrow(IOException.class)
-            .when(datasetService)
-            .getDataverseRoleAssignments(Mockito.any());
+        Mockito.when(datasetService.getDataverseRoleAssignments(Mockito.eq("user001")))
+            .thenThrow(new IOException("test"));
 
-        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "creator", "updater");
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
+
+        var deposit = new Deposit();
+        deposit.setDepositorUserId("user001");
+        deposit.setUpdate(true);
+
+        assertThrows(DepositorValidatorException.class, () -> validator.isDatasetPublicationAllowed(deposit));
+    }
+
+    @Test
+    void isDatasetUpdateAllowed_should_return_true_when_updater_role_matches_for_dataset_update() throws Exception {
+        var datasetService = Mockito.mock(DatasetService.class);
+        Mockito.when(datasetService.getDatasetRoleAssignments(Mockito.eq("user001"), Mockito.eq("doi:123")))
+            .thenReturn(List.of("admin", "updater"));
+
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
+
+        var deposit = new Deposit();
+        deposit.setDepositorUserId("user001");
+        deposit.setUpdate(true);
+        deposit.setDataverseDoi("doi:123");
+
+        assertThat(validator.isDatasetUpdateAllowed(deposit)).isTrue();
+    }
+
+    @Test
+    void isDatasetUpdateAllowed_should_return_false_when_updater_role_does_not_match_for_dataset_update() throws Exception {
+        var datasetService = Mockito.mock(DatasetService.class);
+        Mockito.when(datasetService.getDatasetRoleAssignments(Mockito.eq("user001"), Mockito.eq("doi:123")))
+            .thenReturn(List.of("admin", "NOT_updater"));
+
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
+
+        var deposit = new Deposit();
+        deposit.setDepositorUserId("user001");
+        deposit.setUpdate(true);
+        deposit.setDataverseDoi("doi:123");
+
+        assertThat(validator.isDatasetUpdateAllowed(deposit)).isFalse();
+    }
+
+    @Test
+    void isDatasetUpdateAllowed_should_throw_when_not_able_to_retrieve_roles() throws Exception {
+        var datasetService = Mockito.mock(DatasetService.class);
+        Mockito.when(datasetService.getDatasetRoleAssignments(Mockito.eq("user001"), Mockito.eq("doi:123")))
+            .thenThrow(new IOException("test"));
+
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
+
+        var deposit = new Deposit();
+        deposit.setDepositorUserId("user001");
+        deposit.setUpdate(true);
+        deposit.setDataverseDoi("doi:123");
+
+        assertThrows(DepositorValidatorException.class, () -> validator.isDatasetUpdateAllowed(deposit));
+    }
+
+    @Test
+    void isDatasetUpdateAllowed_should_throw_when_deposit_is_not_an_update() throws Exception {
+        var datasetService = Mockito.mock(DatasetService.class);
+
+        var validator = new DepositorAuthorizationValidatorImpl(datasetService, "publisher", "updater");
 
         var deposit = new Deposit();
         deposit.setDepositorUserId("user001");
         deposit.setUpdate(false);
+        deposit.setDataverseDoi("doi:123");
 
-        assertThrows(DepositorValidatorException.class,
-            () -> validator.validateDepositorAuthorization(deposit));
+        assertThrows(DepositorValidatorException.class, () -> validator.isDatasetUpdateAllowed(deposit));
     }
+
+
 }

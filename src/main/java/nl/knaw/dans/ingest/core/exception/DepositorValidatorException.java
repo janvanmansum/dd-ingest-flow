@@ -19,4 +19,8 @@ public class DepositorValidatorException extends Exception {
     public DepositorValidatorException(Throwable e) {
         super(e);
     }
+
+    public DepositorValidatorException(String message) {
+        super(message);
+    }
 }

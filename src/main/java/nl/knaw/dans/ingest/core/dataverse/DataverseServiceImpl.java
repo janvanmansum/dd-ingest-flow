@@ -136,13 +136,10 @@ public class DataverseServiceImpl implements DatasetService {
     }
 
     @Override
-    public void submitForReview(String persitentId) {
-        try {
-            dataverseClient.dataset(persitentId).
-        }
-        catch (IOException | DataverseException e) {
-            throw new RuntimeException(e);
-        }
+    public void submitForReview(String persitentId) throws IOException, DataverseException {
+        var dataset = dataverseClient.dataset(persitentId);
+        dataset.submitForReview();
+        // DO NOT wait for unlock, because submit for review IS a lock state
     }
 
     @Override

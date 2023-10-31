@@ -39,45 +39,33 @@ public class DepositorAuthorizationValidatorImpl implements DepositorAuthorizati
     }
 
     @Override
-    public void validateDepositorAuthorization(Deposit deposit) throws InvalidDepositorRoleException, DepositorValidatorException {
+    public boolean isDatasetUpdateAllowed(Deposit deposit) throws DepositorValidatorException {
         if (deposit.isUpdate()) {
-            validateUpdaterRoles(deposit);
+            try {
+                var doi = deposit.getDataverseDoi();
+                var roles = datasetService.getDatasetRoleAssignments(deposit.getDepositorUserId(), doi);
+                log.debug("Roles for user {} on deposit with doi {}: {}; expecting role {} to be present", deposit.getDepositorUserId(), doi, roles, datasetUpdaterRole);
+                return roles.contains(datasetUpdaterRole);
+            }
+            catch (DataverseException | IOException e) {
+                throw new DepositorValidatorException(e);
+            }
         }
-        else {
-            validatePublisherRoles(deposit);
-        }
+        throw new DepositorValidatorException("Deposit is not an update");
     }
 
-    void validatePublisherRoles(Deposit deposit) throws InvalidDepositorRoleException, DepositorValidatorException {
+    public boolean isDatasetPublicationAllowed(Deposit deposit) throws DepositorValidatorException {
         try {
             var roles = datasetService.getDataverseRoleAssignments(deposit.getDepositorUserId());
-            log.debug("Roles for user {}: {}; expecting role {} to be present", deposit.getDepositorUserId(), roles, datasetPublisherRole);
-
             if (!roles.contains(datasetPublisherRole)) {
-                throw new InvalidDepositorRoleException(String.format(
-                    "Depositor %s does not have role %s on dataverse root", deposit.getDepositorUserId(), datasetPublisherRole
-                ));
+                log.debug("Roles for user {}: {}; role {} is not present; publication not allowed", deposit.getDepositorUserId(), roles, datasetPublisherRole);
+                return false;
             }
         }
         catch (DataverseException | IOException e) {
             throw new DepositorValidatorException(e);
         }
-    }
-
-    void validateUpdaterRoles(Deposit deposit) throws InvalidDepositorRoleException, DepositorValidatorException {
-        try {
-            var doi = deposit.getDataverseDoi();
-            var roles = datasetService.getDatasetRoleAssignments(deposit.getDepositorUserId(), doi);
-            log.debug("Roles for user {} on deposit with doi {}: {}; expecting role {} to be present", deposit.getDepositorUserId(), doi, roles, datasetUpdaterRole);
-
-            if (!roles.contains(datasetUpdaterRole)) {
-                throw new InvalidDepositorRoleException(String.format(
-                    "Depositor %s does not have role %s on dataset doi:%s", deposit.getDepositorUserId(), datasetUpdaterRole, doi
-                ));
-            }
-        }
-        catch (DataverseException | IOException e) {
-            throw new DepositorValidatorException(e);
-        }
+        log.debug("Roles for user {}: role {} is present; publication allowed", deposit.getDepositorUserId(), datasetPublisherRole);
+        return true;
     }
 }
