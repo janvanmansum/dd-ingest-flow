@@ -218,4 +218,10 @@ public class DataverseServiceImpl implements DatasetService {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean isDatasetInReview(String persistentId) throws IOException, DataverseException {
+        var r = dataverseClient.dataset(persistentId).getLocks();
+        return r.getData().stream().anyMatch(l -> l.getLockType().equals("InReview"));
+    }
 }
