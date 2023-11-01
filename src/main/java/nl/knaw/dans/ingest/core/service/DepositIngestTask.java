@@ -240,6 +240,12 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
                     "Dataset %s is not allowed to be updated by user %s", deposit.getDataverseDoi(), deposit.getDepositorUserId()
                 ));
             }
+            log.debug("Checking if dataset {} is in review ...", dataverseDoi);
+            if (isDatasetInReview()) {
+                throw new RejectedDepositException(deposit, String.format(
+                    "Dataset %s is in review and cannot be updated", deposit.getDataverseDoi()
+                ));
+            }
             log.debug("Checking if dataset {} is blocked ...", dataverseDoi);
             checkBlockedTarget();
         }
@@ -284,6 +290,12 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             throw new FailedDepositException(deposit, e.getMessage());
         }
     }
+
+   boolean isDatasetInReview() throws IOException, DataverseException {
+        var deposit = getDeposit();
+        var target = deposit.getDataverseDoi();
+        return datasetService.isDatasetInReview(target);
+   }
 
     void checkBlockedTarget() throws TargetBlockedException {
         var deposit = getDeposit();
