@@ -77,21 +77,21 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     protected boolean deleteDraftOnFailure;
 
     public DepositIngestTask(
-            DepositToDvDatasetMetadataMapperFactory datasetMetadataMapperFactory,
-            DepositLocation depositLocation,
-            String depositorRole,
-            Pattern fileExclusionPattern,
-            ZipFileHandler zipFileHandler,
-            List<URI> supportedLicenses,
-            DansBagValidator dansBagValidator,
-            Path outboxDir,
-            EventWriter eventWriter,
-            DepositManager depositManager,
-            DatasetService datasetService,
-            BlockedTargetService blockedTargetService,
-            DepositorAuthorizationValidator depositorAuthorizationValidator,
-            String vaultMetadataKey,
-            boolean deleteDraftOnFailure
+        DepositToDvDatasetMetadataMapperFactory datasetMetadataMapperFactory,
+        DepositLocation depositLocation,
+        String depositorRole,
+        Pattern fileExclusionPattern,
+        ZipFileHandler zipFileHandler,
+        List<URI> supportedLicenses,
+        DansBagValidator dansBagValidator,
+        Path outboxDir,
+        EventWriter eventWriter,
+        DepositManager depositManager,
+        DatasetService datasetService,
+        BlockedTargetService blockedTargetService,
+        DepositorAuthorizationValidator depositorAuthorizationValidator,
+        String vaultMetadataKey,
+        boolean deleteDraftOnFailure
     ) {
         this.datasetMetadataMapperFactory = datasetMetadataMapperFactory;
         this.depositorRole = depositorRole;
@@ -123,11 +123,13 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         try {
             this.deposit = depositManager.readDeposit(depositLocation);
             log.info("Deposit {} is update: {}", deposit.getDepositId(), deposit.isUpdate());
-        } catch (InvalidDepositException e) {
+        }
+        catch (InvalidDepositException e) {
             try {
                 updateDepositFromResult(DepositState.FAILED, e.getMessage());
                 moveDepositToOutbox(depositLocation.getDir(), OutboxSubDir.FAILED);
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 log.error("Unable to move deposit directory to 'failed' outbox", ex);
             }
 
@@ -139,22 +141,26 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             boolean published = doRun();
             if (published) {
                 updateDepositFromResult(DepositState.PUBLISHED, "The deposit was successfully ingested in the Data Station and will be automatically archived.");
-            } else {
+            }
+            else {
                 updateDepositFromResult(DepositState.ACCEPTED,
-                        "The deposit was successfully submitted for review in the Data Station and will be reviewed by a data manager before it is published and archived.");
+                    "The deposit was successfully submitted for review in the Data Station and will be reviewed by a data manager before it is published and archived.");
             }
             log.info("END processing (SUCCESS) deposit {}", deposit.getDepositId());
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.OK, null);
-        } catch (RejectedDepositException e) {
+        }
+        catch (RejectedDepositException e) {
             log.error("END processing (REJECTED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.REJECTED, e.getMessage());
             blockTarget(e.getMessage(), DepositState.REJECTED);
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.REJECTED, e.getMessage());
-        } catch (TargetBlockedException e) {
+        }
+        catch (TargetBlockedException e) {
             log.error("END processing (REJECTED - TARGET BLOCKED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.FAILED, e.getMessage());
             writeEvent(TaskEvent.EventType.END_PROCESSING, TaskEvent.Result.FAILED, e.getMessage());
-        } catch (Throwable e) {
+        }
+        catch (Throwable e) {
             log.error("END processing (FAILED) deposit {}", deposit.getDepositId(), e);
             updateDepositFromResult(DepositState.FAILED, e.getMessage());
             blockTarget(e.getMessage(), DepositState.FAILED);
@@ -173,9 +179,11 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
         try {
             depositManager.updateAndMoveDeposit(deposit, getTargetPath(depositState));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             log.error("Unable to move directory for deposit {}", deposit.getDir(), e);
-        } catch (InvalidDepositException e) {
+        }
+        catch (InvalidDepositException e) {
             log.error("Unable to save deposit for deposit {}", deposit.getDir(), e);
         }
     }
@@ -191,8 +199,8 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
                 return this.outboxDir.resolve(OutboxSubDir.FAILED.getValue());
             default:
                 throw new IllegalArgumentException(String.format(
-                        "Unexpected deposit state '%s' found; not sure where to move it",
-                        depositState
+                    "Unexpected deposit state '%s' found; not sure where to move it",
+                    depositState
                 ));
 
         }
@@ -229,13 +237,13 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             log.debug("Checking if dataset {} is allowed to be updated by user {} ...", dataverseDoi, deposit.getDepositorUserId());
             if (!isDatasetUpdateAllowed()) {
                 throw new RejectedDepositException(deposit, String.format(
-                        "Dataset %s is not allowed to be updated by user %s", deposit.getDataverseDoi(), deposit.getDepositorUserId()
+                    "Dataset %s is not allowed to be updated by user %s", deposit.getDataverseDoi(), deposit.getDepositorUserId()
                 ));
             }
             log.debug("Checking if dataset {} is in review ...", dataverseDoi);
             if (isDatasetInReview()) {
                 throw new RejectedDepositException(deposit, String.format(
-                        "Dataset %s is in review and cannot be updated", deposit.getDataverseDoi()
+                    "Dataset %s is in review and cannot be updated", deposit.getDataverseDoi()
                 ));
             }
             log.debug("Checking if dataset {} is blocked ...", dataverseDoi);
@@ -250,15 +258,16 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     boolean createOrUpdateDataset(boolean isUpdate) throws Exception {
         var dataverseDataset = getMetadata();
         var persistentId = isUpdate
-                ? newDatasetUpdater(dataverseDataset).performEdit()
-                : newDatasetCreator(dataverseDataset, depositorRole).performEdit();
+            ? newDatasetUpdater(dataverseDataset).performEdit()
+            : newDatasetCreator(dataverseDataset, depositorRole).performEdit();
 
         if (isDatasetPublicationAllowed()) {
             publishDataset(persistentId);
             log.debug("Dataset {} published", persistentId);
             postPublication(persistentId);
             return true;
-        } else {
+        }
+        else {
             submitForReview(persistentId);
             log.debug("Dataset {} submitted for review", persistentId);
             postSubmitForReview(persistentId);
@@ -269,7 +278,8 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     private boolean isDatasetPublicationAllowed() {
         try {
             return depositorAuthorizationValidator.isDatasetPublicationAllowed(deposit);
-        } catch (DepositorValidatorException e) {
+        }
+        catch (DepositorValidatorException e) {
             throw new FailedDepositException(deposit, e.getMessage());
         }
     }
@@ -277,7 +287,8 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     private boolean isDatasetUpdateAllowed() {
         try {
             return depositorAuthorizationValidator.isDatasetUpdateAllowed(deposit);
-        } catch (DepositorValidatorException e) {
+        }
+        catch (DepositorValidatorException e) {
             throw new FailedDepositException(deposit, e.getMessage());
         }
     }
@@ -294,7 +305,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         var depositId = deposit.getDepositId();
         if (blockedTargetService.isBlocked(target)) {
             throw new TargetBlockedException(String.format(
-                    "Deposit with id %s and target %s is blocked by a previous deposit", depositId, target
+                "Deposit with id %s and target %s is blocked by a previous deposit", depositId, target
             ));
         }
     }
@@ -311,12 +322,13 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
         try {
             blockedTargetService.blockTarget(
-                    deposit.getDepositId(),
-                    target,
-                    depositState.toString(),
-                    message
+                deposit.getDepositId(),
+                target,
+                depositState.toString(),
+                message
             );
-        } catch (TargetBlockedException e) {
+        }
+        catch (TargetBlockedException e) {
             log.warn("Target {} is already blocked", target);
         }
     }
@@ -331,16 +343,16 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
     void validateDeposit() {
         var result = dansBagValidator.validateBag(
-                deposit.getBagDir(), ValidateCommandDto.PackageTypeEnum.DEPOSIT);
+            deposit.getBagDir(), ValidateCommandDto.PackageTypeEnum.DEPOSIT);
 
         if (!result.getIsCompliant()) {
             var violations = result.getRuleViolations().stream()
-                    .map(r -> String.format("- [%s] %s", r.getRule(), r.getViolation()))
-                    .collect(Collectors.joining("\n"));
+                .map(r -> String.format("- [%s] %s", r.getRule(), r.getViolation()))
+                .collect(Collectors.joining("\n"));
 
             throw new RejectedDepositException(deposit, String.format(
-                    "Bag was not valid according to Profile Version %s. Violations: %s",
-                    result.getProfileVersion(), violations)
+                "Bag was not valid according to Profile Version %s. Violations: %s",
+                result.getProfileVersion(), violations)
             );
         }
     }
@@ -354,7 +366,8 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
             datasetService.waitForState(persistentId, "RELEASED");
             saveDoiInDepositProperties(persistentId);
             saveUrnInDepositProperties(persistentId);
-        } catch (InvalidDatasetStateException e) {
+        }
+        catch (InvalidDatasetStateException e) {
             throw new FailedDepositException(deposit, e.getMessage());
         }
     }
@@ -372,16 +385,16 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     // Does not actually save the URN, but only sets it on the deposit object
     void saveUrnInDepositProperties(String persistentId) throws IOException, DataverseException {
         var urn = datasetService.getDatasetUrnNbn(persistentId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Dataset %s did not obtain a URN:NBN", persistentId)));
+            .orElseThrow(() -> new IllegalStateException(String.format("Dataset %s did not obtain a URN:NBN", persistentId)));
 
         deposit.setUrn(urn);
     }
 
-
     void publishDataset(String persistentId) throws Exception {
         try {
             datasetService.publishDataset(persistentId);
-        } catch (IOException | DataverseException e) {
+        }
+        catch (IOException | DataverseException e) {
             log.error("Unable to publish dataset", e);
             throw e;
         }
@@ -393,16 +406,16 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
     DatasetEditor newDatasetUpdater(Dataset dataset, boolean isMigration, boolean deleteDraftOnFailure) {
         return new DatasetUpdater(
-                isMigration,
-                dataset,
-                deposit,
-                supportedLicenses,
-                fileExclusionPattern,
-                zipFileHandler,
-                new ObjectMapper(),
-                datasetService,
-                vaultMetadataKey,
-                deleteDraftOnFailure
+            isMigration,
+            dataset,
+            deposit,
+            supportedLicenses,
+            fileExclusionPattern,
+            zipFileHandler,
+            new ObjectMapper(),
+            datasetService,
+            vaultMetadataKey,
+            deleteDraftOnFailure
         );
     }
 
@@ -412,17 +425,17 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
     DatasetEditor newDatasetCreator(Dataset dataset, String depositorRole, boolean isMigration) {
         return new DatasetCreator(
-                isMigration,
-                dataset,
-                deposit,
-                new ObjectMapper(),
-                supportedLicenses,
-                fileExclusionPattern,
-                zipFileHandler,
-                depositorRole,
-                datasetService,
-                vaultMetadataKey,
-                deleteDraftOnFailure
+            isMigration,
+            dataset,
+            deposit,
+            new ObjectMapper(),
+            supportedLicenses,
+            fileExclusionPattern,
+            zipFileHandler,
+            depositorRole,
+            datasetService,
+            vaultMetadataKey,
+            deleteDraftOnFailure
         );
     }
 
@@ -439,15 +452,15 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
         var contact = getDatasetContact();
         var mapper = newMapper();
         return mapper.toDataverseDataset(
-                deposit.getDdm(),
-                deposit.getOtherDoiId(),
-                date.orElse(null),
-                contact.orElse(null),
-                deposit.getVaultMetadata(),
-                deposit.getDepositorUserId(),
-                deposit.restrictedFilesPresent(),
-                deposit.getHasOrganizationalIdentifier(),
-                deposit.getHasOrganizationalIdentifierVersion()
+            deposit.getDdm(),
+            deposit.getOtherDoiId(),
+            date.orElse(null),
+            contact.orElse(null),
+            deposit.getVaultMetadata(),
+            deposit.getDepositorUserId(),
+            deposit.restrictedFilesPresent(),
+            deposit.getHasOrganizationalIdentifier(),
+            deposit.getHasOrganizationalIdentifierVersion()
         );
     }
 
@@ -457,9 +470,9 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
     Optional<AuthenticatedUser> getDatasetContact() {
         return Optional.ofNullable(deposit.getDepositorUserId())
-                .filter(StringUtils::isNotBlank)
-                .map(userId -> datasetService.getUserById(userId)
-                        .orElseThrow(() -> new RuntimeException("Unable to fetch user with id " + userId)));
+            .filter(StringUtils::isNotBlank)
+            .map(userId -> datasetService.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("Unable to fetch user with id " + userId)));
     }
 
     @Override
@@ -480,7 +493,7 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
 
         if (items.size() != 1) {
             throw new FailedDepositException(deposit, String.format(
-                    "Deposit is update of %s datasets; should always be 1!", items.size()
+                "Deposit is update of %s datasets; should always be 1!", items.size()
             ), null);
         }
 
