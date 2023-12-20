@@ -113,7 +113,7 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
         final ImportArea importArea = new ImportArea(
             importAreaConfig.getInbox(),
             importAreaConfig.getOutbox(),
-            taskFactoryBuilder.createTaskFactory(importAreaConfig, environment, false),
+            taskFactoryBuilder.createTaskFactory(environment, "dd-ingest-flow/import", importAreaConfig,  false),
             taskEventService,
             enqueuingService);
 
@@ -121,20 +121,20 @@ public class DdIngestFlowApplication extends Application<DdIngestFlowConfigurati
         final ImportArea migrationArea = new ImportArea(
             migrationAreaConfig.getInbox(),
             migrationAreaConfig.getOutbox(),
-            taskFactoryBuilder.createTaskFactory(migrationAreaConfig, environment,true),
+            taskFactoryBuilder.createTaskFactory(environment, "dd-ingest-flow/migration", migrationAreaConfig,true),
             taskEventService,
             enqueuingService);
 
         final AutoIngestArea autoIngestArea = new AutoIngestArea(
             autoIngestAreaConfig.getInbox(),
             autoIngestAreaConfig.getOutbox(),
-            taskFactoryBuilder.createTaskFactory(autoIngestAreaConfig, environment, false),
+            taskFactoryBuilder.createTaskFactory(environment, "dd-ingest-flow/auto-ingest", autoIngestAreaConfig,  false),
             taskEventService,
             enqueuingService
         );
 
         // Use the default configuration for the health checks. No API key is required.
-        environment.healthChecks().register("Dataverse", new DataverseHealthCheck(configuration.getDataverse().build(environment)));
+        environment.healthChecks().register("Dataverse", new DataverseHealthCheck(configuration.getDataverse().build()));
         environment.healthChecks().register("DansBagValidator", new DansBagValidatorHealthCheck(dansBagValidator));
 
         environment.lifecycle().manage(autoIngestArea);

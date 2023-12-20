@@ -64,12 +64,12 @@ public class DepositIngestTaskFactoryBuilder {
         this.blockedTargetService = blockedTargetService;
     }
 
-    public DepositIngestTaskFactory createTaskFactory(IngestAreaConfig ingestAreaConfig, Environment environment, boolean isMigration) throws IOException, URISyntaxException {
+    public DepositIngestTaskFactory createTaskFactory(Environment environment, String name, IngestAreaConfig ingestAreaConfig, boolean isMigration) throws IOException, URISyntaxException {
         final var dataverseClientFactory = configuration.getDataverse();
         if (ingestAreaConfig.getApiKey() != null) {
             dataverseClientFactory.setApiKey(ingestAreaConfig.getApiKey());
         }
-        final var dataverseClient = dataverseClientFactory.build(environment);
+        final var dataverseClient = dataverseClientFactory.build(environment, name);
         final var ingestFlowConfig = configuration.getIngestFlow();
         final var mapperFactory = new DepositToDvDatasetMetadataMapperFactory(
             ingestFlowConfig.getIso1ToDataverseLanguage(),
