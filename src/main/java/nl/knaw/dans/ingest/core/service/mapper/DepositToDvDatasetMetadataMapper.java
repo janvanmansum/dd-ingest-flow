@@ -178,7 +178,9 @@ public class DepositToDvDatasetMetadataMapper {
             if (isMigration) {
                 citationFields.addNotesText(getProvenance(ddm)); // CIT017A
                 citationFields.addContributors(getDcmiDdmDescriptions(ddm).filter(Description::hasDescriptionTypeOther), Contributor.toContributorValueObject); // CIT021A
-                citationFields.addDateOfDeposit(dateOfDeposit); // CIT025A
+            }
+            if (dateOfDeposit != null) {
+                citationFields.addDateOfDeposit(dateOfDeposit); // CIT025A and CIT025B (first dataset versions)
             }
             citationFields.addDatesOfCollection(getDatesOfCollection(ddm)
                 .filter(DatesOfCollection::isValidDatesOfCollectionPattern), DatesOfCollection.toDateOfCollectionValue); // CIT026

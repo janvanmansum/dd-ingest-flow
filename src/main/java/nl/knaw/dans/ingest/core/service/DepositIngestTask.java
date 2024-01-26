@@ -39,6 +39,9 @@ import nl.knaw.dans.lib.dataverse.model.dataset.Dataset;
 import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
 import nl.knaw.dans.validatedansbag.client.api.ValidateCommandDto;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +56,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DepositIngestTask implements TargetedTask, Comparable<DepositIngestTask> {
-
+    private static final DateTimeFormatter yyyymmddPattern = DateTimeFormat.forPattern("YYYY-MM-dd");
     private static final Logger log = LoggerFactory.getLogger(DepositIngestTask.class);
     protected final String depositorRole;
     protected final Pattern fileExclusionPattern;
@@ -465,7 +468,12 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     Optional<String> getDateOfDeposit() {
-        return Optional.empty();
+        if (deposit.isUpdate()) {
+            return Optional.empty(); // See for implementation CIT025B in DatasetUpdater
+        }
+        else {
+            return Optional.of(yyyymmddPattern.print(DateTime.now())); // CIT025B
+        }
     }
 
     Optional<AuthenticatedUser> getDatasetContact() {
