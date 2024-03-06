@@ -93,13 +93,13 @@ public class Deposit {
             return null;
         }
 
-        var result = getDataversePid();
-
-        if (StringUtils.equals(String.format("doi:%s", doi), result)) {
+        var otherDoi = String.format("doi:%s", doi);
+        if (StringUtils.equals(otherDoi, getDataversePid())) {
+            // The same, so no "other DOI"
             return null;
         }
         else {
-            return result;
+            return otherDoi;
         }
     }
 

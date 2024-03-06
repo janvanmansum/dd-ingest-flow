@@ -55,10 +55,17 @@ class DepositTest {
     @Test
     void getOtherDoiId_should_return_doi_if_doi_is_different() {
         var deposit = new Deposit();
+        /*
+         * The DOI under which the dataset is to be published in Dataverse. This is the DOI of the first version.
+         */
         deposit.setDataverseIdProtocol("doi");
         deposit.setDataverseIdAuthority("a");
-        deposit.setDataverseId("c");
-        deposit.setDoi("a/b");
+        deposit.setDataverseId("b");
+
+        /*
+         * The DOI in the EASY dataset. This may be different from the first version, as in this test case.
+         */
+        deposit.setDoi("a/c");
 
         assertEquals("doi:a/c", deposit.getOtherDoiId());
     }
