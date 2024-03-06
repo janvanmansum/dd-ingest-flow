@@ -46,7 +46,6 @@ public class Deposit {
     private String urn;
     private String dataverseDoi;
     private String depositorUserId;
-    private String otherId;
     private OffsetDateTime created;
     private DepositState state;
     private String stateDescription;
@@ -75,7 +74,7 @@ public class Deposit {
     private List<DepositFile> files;
 
     public VaultMetadata getVaultMetadata() {
-        return new VaultMetadata(getDataversePid(), getDataverseBagId(), getDataverseNbn(), getOtherId(), getDataverseSwordToken());
+        return new VaultMetadata(getDataversePid(), getDataverseBagId(), getDataverseNbn(), getDataverseOtherId(), getDataverseSwordToken());
     }
 
     private static boolean hasTypeDoi(Node n) {

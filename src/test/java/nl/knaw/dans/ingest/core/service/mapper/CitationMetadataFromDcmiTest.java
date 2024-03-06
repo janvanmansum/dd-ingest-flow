@@ -103,22 +103,6 @@ public class CitationMetadataFromDcmiTest {
     }
 
     @Test
-    void CIT002A_vault_metadata_other_id_maps_to_other_id() throws Exception {
-        var doc = readDocumentFromString(""
-            + "<ddm:DDM " + rootAttributes + ">"
-            + minimalDdmProfile() + dcmi("")
-            + "</ddm:DDM>");
-        var result = createMapper(true).toDataverseDataset(doc, null, null, null, mockedVaultMetadata, null,true, null, null);
-        var field = getCompoundMultiValueField("citation", OTHER_ID, result);
-
-        assertThat(field).hasSize(1);
-        assertThat(field).extracting(OTHER_ID_AGENCY).extracting("value")
-            .contains("otherId");
-        assertThat(field).extracting(OTHER_ID_VALUE).extracting("value")
-            .contains("something");
-    }
-
-    @Test
     void CIT002A_vault_metadata_other_id_is_ignored_when_not_migration() throws Exception {
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"

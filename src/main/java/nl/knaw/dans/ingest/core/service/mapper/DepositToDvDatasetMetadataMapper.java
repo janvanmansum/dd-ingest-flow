@@ -132,8 +132,6 @@ public class DepositToDvDatasetMetadataMapper {
             citationFields.addAlternativeTitle(otherTitlesAndAlternativeTitles.stream().map(Node::getTextContent)); // CIT002
 
             if (isMigration) {
-                    citationFields.addOtherIdsStrings(Stream.ofNullable(vaultMetadata.getOtherId()) // CIT002A
-                    .filter(DepositPropertiesVaultMetadata::isValidOtherIdValue), DepositPropertiesVaultMetadata.toOtherIdValue);
                 citationFields.addOtherIds(getIdentifiers(ddm).filter(Identifier::hasXsiTypeEasy2), Identifier.toOtherIdValue); // CIT002B
                 citationFields.addOtherIdsStrings(Stream.ofNullable(otherDoiId), DepositPropertiesOtherDoi.toOtherIdValue); // PAN second version DOIs (migration)
             }
