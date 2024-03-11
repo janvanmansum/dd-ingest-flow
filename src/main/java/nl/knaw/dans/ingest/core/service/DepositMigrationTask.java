@@ -156,10 +156,5 @@ public class DepositMigrationTask extends DepositIngestTask {
             );
         }
     }
-
-    @Override
-    String resolveDoi(Deposit deposit) throws IOException, DataverseException {
-        return getDoi("dansBagId", deposit.getIsVersionOf());
-    }
 }
 
