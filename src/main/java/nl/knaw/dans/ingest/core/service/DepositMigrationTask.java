@@ -159,7 +159,7 @@ public class DepositMigrationTask extends DepositIngestTask {
 
     @Override
     String resolveDoi(Deposit deposit) throws IOException, DataverseException {
-        if (deposit.getVaultMetadata().getSwordToken() != null) {
+        if (StringUtils.isNotBlank(deposit.getVaultMetadata().getSwordToken())) {
             // Migration of SWORD datasets
             return getDoi("dansSwordToken", deposit.getVaultMetadata().getSwordToken());
         } else {
