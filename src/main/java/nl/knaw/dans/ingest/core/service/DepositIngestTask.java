@@ -493,7 +493,11 @@ public class DepositIngestTask implements TargetedTask, Comparable<DepositIngest
     }
 
     String resolveDoi(Deposit deposit) throws IOException, DataverseException {
-        var items = datasetService.searchDatasets("dansSwordToken", deposit.getVaultMetadata().getSwordToken());
+        return getDoi("dansSwordToken", deposit.getVaultMetadata().getSwordToken());
+    }
+
+    String getDoi(String key, String value) throws IOException, DataverseException {
+        var items = datasetService.searchDatasets(key, value);
 
         if (items.size() != 1) {
             throw new FailedDepositException(deposit, String.format(

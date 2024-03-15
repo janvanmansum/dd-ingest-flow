@@ -156,5 +156,17 @@ public class DepositMigrationTask extends DepositIngestTask {
             );
         }
     }
+
+    @Override
+    String resolveDoi(Deposit deposit) throws IOException, DataverseException {
+        if (deposit.getVaultMetadata().getSwordToken() != null) {
+            // Migration of SWORD datasets
+            return getDoi("dansSwordToken", deposit.getVaultMetadata().getSwordToken());
+        } else {
+            // Migration of other datasets. This will only work if there are two versions, because search only works for the latest version of a dataset,
+            // so dansBagId in earlier versions will not be found.
+            return getDoi("dansBagId", deposit.getIsVersionOf());
+        }
+    }
 }
 
