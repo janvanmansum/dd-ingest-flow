@@ -73,14 +73,23 @@ public class DatasetCreator extends DatasetEditor {
         var api = dataverseClient.dataverse("root");
 
         log.debug("Creating new dataset");
+        String persistentId = null;
 
         try {
-            var persistentId = importDataset(api);
+            persistentId = importDataset(api);
             log.debug("New persistent ID: {}", persistentId);
             modifyDataset(persistentId);
             return persistentId;
         }
         catch (Exception e) {
+            try {
+                if (persistentId != null) {
+                    deleteDraftIfExists(persistentId);
+                }
+            }
+            catch (IOException | DataverseException ex) {
+                log.error("Error deleting draft dataset", ex);
+            }
             throw new FailedDepositException(deposit, "Error creating dataset, deleting draft", e);
         }
     }
