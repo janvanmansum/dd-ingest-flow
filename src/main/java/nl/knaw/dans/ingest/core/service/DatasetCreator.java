@@ -90,7 +90,7 @@ public class DatasetCreator extends DatasetEditor {
             catch (IOException | DataverseException ex) {
                 log.error("Error deleting draft dataset", ex);
             }
-            throw new FailedDepositException(deposit, "Error creating dataset, deleting draft", e);
+            throw new FailedDepositException(deposit, "Error creating dataset" + (this.deleteDraftOnFailure ? ". Deleting draft" : "."), e);
         }
     }
 
