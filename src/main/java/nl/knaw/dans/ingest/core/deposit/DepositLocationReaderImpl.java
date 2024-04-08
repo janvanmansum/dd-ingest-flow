@@ -18,6 +18,7 @@ package nl.knaw.dans.ingest.core.deposit;
 import gov.loc.repository.bagit.domain.Metadata;
 import gov.loc.repository.bagit.exceptions.InvalidBagitFileFormatException;
 import gov.loc.repository.bagit.exceptions.UnparsableVersionException;
+import lombok.AllArgsConstructor;
 import nl.knaw.dans.ingest.core.domain.DepositLocation;
 import nl.knaw.dans.ingest.core.exception.InvalidDepositException;
 import nl.knaw.dans.ingest.core.exception.MissingTargetException;
@@ -32,23 +33,14 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.UUID;
 
+@AllArgsConstructor
 public class DepositLocationReaderImpl implements DepositLocationReader {
-    private final BagDirResolver bagDirResolver;
-
     private final BagDataManager bagDataManager;
-
-    public DepositLocationReaderImpl(BagDirResolver bagDirResolver, BagDataManager bagDataManager) {
-        this.bagDirResolver = bagDirResolver;
-        this.bagDataManager = bagDataManager;
-    }
 
     @Override
     public DepositLocation readDepositLocation(Path depositDir) throws InvalidDepositException, IOException {
-        var bagDir = bagDirResolver.getBagDir(depositDir);
-
         try {
             var properties = bagDataManager.readDepositProperties(depositDir);
-            var bagInfo = bagDataManager.readBagMetadata(bagDir);
             var depositId = getDepositId(depositDir);
             var target = getTarget(properties);
             var created = getCreated(properties);
@@ -60,9 +52,6 @@ public class DepositLocationReaderImpl implements DepositLocationReader {
         }
         catch (MissingTargetException e) {
             throw new InvalidDepositException(e.getMessage(), e);
-        }
-        catch (UnparsableVersionException | InvalidBagitFileFormatException | IOException e) {
-            throw new InvalidDepositException("BagIt file(s) could not be read", e);
         }
     }
 

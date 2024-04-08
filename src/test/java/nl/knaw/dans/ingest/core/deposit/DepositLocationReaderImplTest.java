@@ -16,6 +16,7 @@
 package nl.knaw.dans.ingest.core.deposit;
 
 import gov.loc.repository.bagit.domain.Metadata;
+import nl.knaw.dans.ingest.core.exception.InvalidDepositException;
 import nl.knaw.dans.ingest.core.exception.MissingTargetException;
 import nl.knaw.dans.ingest.core.io.BagDataManager;
 import org.apache.commons.configuration2.BaseConfiguration;
@@ -32,10 +33,6 @@ class DepositLocationReaderImplTest {
     @Test
     void readDepositLocation_should_call_with_correct_paths() throws Throwable {
         var basePath = Path.of("/some/path/to/4e97185d-b38c-4ed9-bdf6-64339acfb6e8");
-        var bagDirResolver = Mockito.mock(BagDirResolver.class);
-        Mockito.doReturn(basePath.resolve("bagdir"))
-            .when(bagDirResolver).getBagDir(Mockito.any());
-
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
         config.setProperty("dataverse.sword-token", "token");
@@ -50,27 +47,41 @@ class DepositLocationReaderImplTest {
 
         Mockito.doReturn(metadata).when(bagDataManager).readBagMetadata(Mockito.any());
 
-        var reader = new DepositLocationReaderImpl(bagDirResolver, bagDataManager);
+        var reader = new DepositLocationReaderImpl(bagDataManager);
         var result = reader.readDepositLocation(basePath);
 
-        Mockito.verify(bagDataManager).readBagMetadata(Mockito.eq(basePath.resolve("bagdir")));
         Mockito.verify(bagDataManager).readDepositProperties(Mockito.eq(basePath));
 
         assertEquals("4e97185d-b38c-4ed9-bdf6-64339acfb6e8", result.getDepositId());
     }
-
+    
     @Test
-    void getTarget_should_return_sword_token() throws Throwable {
-        var bagDirResolver = Mockito.mock(BagDirResolver.class);
-        Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getBagDir(Mockito.any());
-
+    void readDepositLocation_should_throw_if_no_creation_timestamp_present() throws Exception {
+        var basePath = Path.of("/some/path/to/4e97185d-b38c-4ed9-bdf6-64339acfb6e8");
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
         config.setProperty("dataverse.sword-token", "token");
         config.setProperty("identifier.doi", "doi");
 
-        var reader = new DepositLocationReaderImpl(bagDirResolver, bagDataManager);
+        Mockito.doReturn(config)
+            .when(bagDataManager).readDepositProperties(Mockito.any());
+
+        var metadata = new Metadata();
+        metadata.add("Created", "2022-10-01T00:03:04+03:00");
+
+        var reader = new DepositLocationReaderImpl(bagDataManager);
+
+        assertThrows(InvalidDepositException.class, () -> reader.readDepositLocation(basePath));
+    }
+
+    @Test
+    void getTarget_should_return_sword_token() throws Throwable {
+        var bagDataManager = Mockito.mock(BagDataManager.class);
+        var config = new BaseConfiguration();
+        config.setProperty("dataverse.sword-token", "token");
+        config.setProperty("identifier.doi", "doi");
+
+        var reader = new DepositLocationReaderImpl(bagDataManager);
         var result = reader.getTarget(config);
 
         assertEquals("token", result);
@@ -78,16 +89,12 @@ class DepositLocationReaderImplTest {
 
     @Test
     void getTarget_should_return_doi_if_sword_token_is_null() throws Throwable {
-        var bagDirResolver = Mockito.mock(BagDirResolver.class);
-        Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getBagDir(Mockito.any());
-
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
         config.setProperty("dataverse.sword-token", null);
         config.setProperty("identifier.doi", "doi");
 
-        var reader = new DepositLocationReaderImpl(bagDirResolver, bagDataManager);
+        var reader = new DepositLocationReaderImpl(bagDataManager);
         var result = reader.getTarget(config);
 
         assertEquals("doi", result);
@@ -95,16 +102,12 @@ class DepositLocationReaderImplTest {
 
     @Test
     void getTarget_should_return_doi_if_sword_token_is_blank() throws Throwable {
-        var bagDirResolver = Mockito.mock(BagDirResolver.class);
-        Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getBagDir(Mockito.any());
-
         var bagDataManager = Mockito.mock(BagDataManager.class);
         var config = new BaseConfiguration();
         config.setProperty("dataverse.sword-token", " ");
         config.setProperty("identifier.doi", "doi");
 
-        var reader = new DepositLocationReaderImpl(bagDirResolver, bagDataManager);
+        var reader = new DepositLocationReaderImpl(bagDataManager);
         var result = reader.getTarget(config);
 
         assertEquals("doi", result);
@@ -112,17 +115,13 @@ class DepositLocationReaderImplTest {
 
     @Test
     void getTarget_should_throw_MissingTargetException_when_targets_are_missing() throws Throwable {
-        var bagDirResolver = Mockito.mock(BagDirResolver.class);
-        Mockito.doReturn(Path.of("bagdir"))
-            .when(bagDirResolver).getBagDir(Mockito.any());
-
         var config = new BaseConfiguration();
         config.setProperty("dataverse.sword-token", " ");
         config.setProperty("identifier.doi", " ");
 
         var bagDataManager = Mockito.mock(BagDataManager.class);
 
-        var reader = new DepositLocationReaderImpl(bagDirResolver, bagDataManager);
+        var reader = new DepositLocationReaderImpl(bagDataManager);
 
         assertThrows(MissingTargetException.class, () -> reader.getTarget(config));
     }
