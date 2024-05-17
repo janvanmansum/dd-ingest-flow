@@ -113,18 +113,6 @@ validateDansBag:
 #
 logging:
   level: INFO
-  loggers:
-    "nl.knaw.dans.ingest":
-      level: TRACE
-    "nl.knaw.dans.ingest.core.sequencing.DepositSequenceManager":
-      level: TRACE
-      additive: true
-    "nl.knaw.dans.ingest.core.service.UnboundedDepositsImportTaskIterator":
-      level: INFO
-    "nl.knaw.dans.easy.dd2d":
-      level: TRACE
-    "nl.knaw.dans.dataverse.DatasetApi":
-      level: TRACE
   appenders:
     - type: console
       logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
@@ -132,3 +120,6 @@ logging:
     - type: file
       archive: false
       currentLogFilename: data/dd-ingest-flow.log
+  loggers:
+    'nl.knaw.dans': DEBUG
+    'org.hibernate.engine.internal.StatisticalLoggingSessionEventListener': 'OFF'
