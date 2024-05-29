@@ -67,7 +67,9 @@ public class CitationFieldBuilder extends FieldBuilder {
     }
 
     public void addAlternativeTitle(Stream<String> stream) {
-        addSingleString(ALTERNATIVE_TITLE, stream);
+        // Use only the first value (like it is a single value), but then process as a multiple
+        Stream<String> firstElementStream = Stream.of(stream.findFirst().orElse(null));
+        addMultiplePrimitiveString(ALTERNATIVE_TITLE, firstElementStream);
     }
 
     public void addDescription(Stream<Node> stream, CompoundFieldGenerator<Node> generator) {
