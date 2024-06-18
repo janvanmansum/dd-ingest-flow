@@ -44,11 +44,11 @@ import nl.knaw.dans.ingest.core.service.TaskEventServiceImpl;
 import nl.knaw.dans.ingest.db.BlockedTargetDAO;
 import nl.knaw.dans.ingest.db.TaskEventDAO;
 import nl.knaw.dans.ingest.health.DansBagValidatorHealthCheck;
-import nl.knaw.dans.ingest.health.DataverseHealthCheck;
 import nl.knaw.dans.ingest.resources.BlockedTargetsResource;
 import nl.knaw.dans.ingest.resources.EventsResource;
 import nl.knaw.dans.ingest.resources.ImportsResource;
 import nl.knaw.dans.ingest.resources.MigrationsResource;
+import nl.knaw.dans.lib.util.DataverseHealthCheck;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import java.io.IOException;
