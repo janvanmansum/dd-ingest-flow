@@ -22,7 +22,7 @@
     <parent>
         <groupId>nl.knaw.dans</groupId>
         <artifactId>dd-parent</artifactId>
-        <version>1.5.1</version>
+        <version>1.9.0</version>
     </parent>
 
     <artifactId>dd-ingest-flow</artifactId>
@@ -40,7 +40,7 @@
 
     <scm>
         <developerConnection>scm:git:ssh://github.com/DANS-KNAW/${project.artifactId}</developerConnection>
-        <tag>v1.0.8</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
@@ -51,6 +51,7 @@
         <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dans-dataverse-client-lib</artifactId>
+
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
