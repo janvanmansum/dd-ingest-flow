@@ -35,6 +35,7 @@ public class DansDataVaultMetadataTest {
         null,
         null,
         null,
+        null,
         getIngestFlowConfig().getDataSuppliers(), // VLT008
         Arrays.asList("".split(",")),
         true

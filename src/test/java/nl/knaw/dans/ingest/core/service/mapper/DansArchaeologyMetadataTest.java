@@ -216,7 +216,7 @@ public class DansArchaeologyMetadataTest {
     }
 
     @Test
-    void AR006_abr_complex_without_value_uri_is_ignored() throws Exception {
+    void AR006_abr_complex_without_value_uri_throws_IllegalArgumentExcepiton() throws Exception {
 
         var doc = readDocumentFromString(""
             + "<ddm:DDM " + rootAttributes + ">"
@@ -227,8 +227,7 @@ public class DansArchaeologyMetadataTest {
             + "            houtwinning"
             + "        </ddm:subject>")
             + "</ddm:DDM>");
-        var result = mapDdmToDataset(doc, true).getDatasetVersion().getMetadataBlocks();
-        assertThat(result.get("dansArchaeologyMetadata").getFields()).isEmpty();
+        assertThrows(IllegalArgumentException.class, () -> mapDdmToDataset(doc, true));
     }
 
     @Test

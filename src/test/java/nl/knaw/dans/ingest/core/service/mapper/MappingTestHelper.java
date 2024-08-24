@@ -100,6 +100,7 @@ public class MappingTestHelper {
             Set.of("citation", "dansRights", "dansRelationMetadata", "dansArchaeologyMetadata", "dansTemporalSpatial", "dansDataVaultMetadata"),
             config.getIso1ToDataverseLanguage(),
             config.getIso2ToDataverseLanguage(),
+            config.getAbrArtifactCodeToTerm(),
             config.getSpatialCoverageCountryTerms(),
             config.getDataSuppliers(),
             config.getSkipFields(), isMigration);

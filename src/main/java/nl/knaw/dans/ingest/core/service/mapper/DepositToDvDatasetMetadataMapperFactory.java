@@ -31,15 +31,18 @@ public class DepositToDvDatasetMetadataMapperFactory {
 
     private final Map<String, String> iso1ToDataverseLanguage;
     private final Map<String, String> iso2ToDataverseLanguage;
+    private final Map<String, String> abrArtifactCodeToTerm;
     private final List<String> spatialCoverageCountryTerms;
     private final Map<String, String> dataSuppliers;
     private final List<String> skipFields;
     private final DataverseClient dataverseClient;
 
     public DepositToDvDatasetMetadataMapperFactory(Map<String, String> iso1ToDataverseLanguage, Map<String, String> iso2ToDataverseLanguage,
+        Map<String, String> abrArtifactCodeToTerm,
         List<String> spatialCoverageCountryTerms, Map<String, String> dataSuppliers, List<String> skipFields, DataverseClient dataverseClient) {
         this.iso1ToDataverseLanguage = iso1ToDataverseLanguage;
         this.iso2ToDataverseLanguage = iso2ToDataverseLanguage;
+        this.abrArtifactCodeToTerm = abrArtifactCodeToTerm;
         this.spatialCoverageCountryTerms = spatialCoverageCountryTerms;
         this.dataSuppliers = dataSuppliers;
         this.skipFields = skipFields;
@@ -52,6 +55,7 @@ public class DepositToDvDatasetMetadataMapperFactory {
             getActiveMetadataBlocks(),
             iso1ToDataverseLanguage,
             iso2ToDataverseLanguage,
+            abrArtifactCodeToTerm,
             spatialCoverageCountryTerms,
             dataSuppliers,
             skipFields,

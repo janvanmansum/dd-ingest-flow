@@ -466,7 +466,7 @@ public class CitationMetadataFromDcmiTest {
 
         var skipFields = List.of("dateOfDeposit", "publication");
         var activeMetadataBlocks = Set.of("citation", "dansRights", "dansDataVaultMetadata");
-        var result = new DepositToDvDatasetMetadataMapper(true, activeMetadataBlocks, Map.of(), Map.of(), List.of(), config.getDataSuppliers(), skipFields, true)
+        var result = new DepositToDvDatasetMetadataMapper(true, activeMetadataBlocks, Map.of(), Map.of(), Map.of(), List.of(), config.getDataSuppliers(), skipFields, true)
             .toDataverseDataset(doc, null, "2023-02-27", mockedContact, mockedVaultMetadata,null, false, null, null);
         var field = getCompoundMultiValueField("citation", PUBLICATION, result);
         assertThat(field).isNull();

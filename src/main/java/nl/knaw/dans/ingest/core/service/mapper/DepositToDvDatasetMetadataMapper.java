@@ -95,6 +95,7 @@ public class DepositToDvDatasetMetadataMapper {
 
     private final Map<String, String> iso1ToDataverseLanguage;
     private final Map<String, String> iso2ToDataverseLanguage;
+    private final Map<String, String> abrArtifactCodeToTerm;
     private final List<String> spatialCoverageCountryTerms;
     private final Map<String, String> dataSuppliers;
     private final List<String> skipFields;
@@ -102,11 +103,12 @@ public class DepositToDvDatasetMetadataMapper {
     private final boolean deduplicate;
 
     DepositToDvDatasetMetadataMapper(boolean deduplicate, Set<String> activeMetadataBlocks, Map<String, String> iso1ToDataverseLanguage,
-        Map<String, String> iso2ToDataverseLanguage, List<String> spatialCoverageCountryTerms, Map<String, String> dataSuppliers, List<String> skipFields, boolean isMigration) {
+        Map<String, String> iso2ToDataverseLanguage, Map<String, String> abrArtifactCodeToTerm, List<String> spatialCoverageCountryTerms, Map<String, String> dataSuppliers, List<String> skipFields, boolean isMigration) {
         this.deduplicate = deduplicate;
         this.activeMetadataBlocks = activeMetadataBlocks;
         this.iso1ToDataverseLanguage = iso1ToDataverseLanguage;
         this.iso2ToDataverseLanguage = iso2ToDataverseLanguage;
+        this.abrArtifactCodeToTerm = abrArtifactCodeToTerm;
         this.spatialCoverageCountryTerms = spatialCoverageCountryTerms;
         this.dataSuppliers = dataSuppliers;
         this.skipFields = skipFields;
@@ -215,8 +217,8 @@ public class DepositToDvDatasetMetadataMapper {
             archaeologyFields.addVerwervingswijze(getAcquisitionMethods(ddm).filter(AbrAcquisitionMethod::isVerwervingswijze).map(AbrAcquisitionMethod::toVerwervingswijze)); // AR005
             archaeologyFields.addComplex(getDdmSubjects(ddm).filter(SubjectAbr::isAbrComplex).map(SubjectAbr::toAbrComplex)); // AR006
             // Keep support for old URIs for PAN. No rule for this in the mapping file.
-            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isOldAbr).map(SubjectAbr::toAbrArtifact)); // AR007
-            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isAbrArtifact).map(SubjectAbr::toAbrArtifact)); // AR007
+            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isOldAbr).map(node -> SubjectAbr.toAbrArtifact(node, abrArtifactCodeToTerm))); // AR007
+            archaeologyFields.addArtifact(getDdmSubjects(ddm).filter(SubjectAbr::isAbrArtifact).map(node -> SubjectAbr.toAbrArtifact(node, abrArtifactCodeToTerm))); // AR007
             archaeologyFields.addPeriod(getDdmTemporal(ddm).filter(TemporalAbr::isAbrPeriod).map(TemporalAbr::toAbrPeriod)); // AR008
         }
 

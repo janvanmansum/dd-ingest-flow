@@ -31,8 +31,8 @@ public class IngestFlowConfigReader {
     public static void readIngestFlowConfiguration(IngestFlowConfig config) throws IOException, URISyntaxException {
         config.setIso1ToDataverseLanguage(getMap(config, "iso639-1-to-dv.csv", "ISO639-1", "Dataverse-language"));
         config.setIso2ToDataverseLanguage(getMap(config, "iso639-2-to-dv.csv", "ISO639-2", "Dataverse-language"));
-        config.setReportIdToTerm(getMap(config, "ABR-reports.csv", "URI-suffix", "Term"));
         config.setSpatialCoverageCountryTerms(FileUtils.readLines(config.getMappingDefsDir().resolve("spatial-coverage-country-terms.txt").toFile(), StandardCharsets.UTF_8));
+        config.setAbrArtifactCodeToTerm(getMap(config, "abr-artifact-code-to-term.csv", "code", "subject"));
     }
 
     private static Map<String, String> loadCsvToMap(Path path, String keyColumn, String valueColumn) throws IOException {
