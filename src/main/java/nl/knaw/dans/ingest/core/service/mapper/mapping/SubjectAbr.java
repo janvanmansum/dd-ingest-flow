@@ -55,26 +55,8 @@ public class SubjectAbr extends Base {
         );
     }
 
-    private static String getValueUri(Node node, Map<String, String> codeToTerm) {
-        return getAttribute(node, "valueURI")
-            .map(Node::getTextContent)
-            .orElseGet(() -> {
-                var valueCode = getAttribute(node, "valueCode")
-                    .map(Node::getTextContent)
-                    .orElse(null);
-                if (valueCode == null) {
-                    throw new IllegalArgumentException("No valueURI or valueCode found for for ddm:subject element");
-                }
-                var term = codeToTerm.get(valueCode.trim());
-                if (term == null) {
-                    throw new IllegalArgumentException("No term URI found for code " + valueCode);
-                }
-                return term;
-            });
-    }
-
-    public static String toAbrComplex(Node node) {
-        return normalizeToNewAbrTerm(getValueUri(node, null));
+    public static String toAbrComplex(Node node, Map<String, String> abrComplexCodeToTerm) {
+        return normalizeToNewAbrTerm(getValueUri(node, abrComplexCodeToTerm));
     }
 
     public static String toAbrArtifact(Node node, Map<String, String> abrArtifactCodeToTerm) {

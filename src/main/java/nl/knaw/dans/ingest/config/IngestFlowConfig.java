@@ -75,17 +75,17 @@ public class IngestFlowConfig {
     @NotNull
     private Map<String, String> abrReportCodeToTerm;
 
-//    @NotNull
-//    private Map<String, String> abrAcquistionMethodCodeToTerm;
-//
-//    @NotNull
-//    private Map<String, String> abrComplexTypeCodeToTerm;
-//
-//    @NotNull
-//    private Map<String, String> abrPeriodCodeToTerm;
+    @NotNull
+    private Map<String, String> abrAcquisitionMethodCodeToTerm;
+
+    @NotNull
+    private Map<String, String> abrComplexTypeCodeToTerm;
 
     @NotNull
     private Map<String, String> abrArtifactCodeToTerm;
+
+    @NotNull
+    private Map<String, String> abrPeriodCodeToTerm;
 
     @NotNull
     private List<String> spatialCoverageCountryTerms;
