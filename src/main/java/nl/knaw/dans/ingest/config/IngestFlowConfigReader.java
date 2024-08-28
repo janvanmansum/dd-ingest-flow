@@ -32,11 +32,11 @@ public class IngestFlowConfigReader {
         config.setIso1ToDataverseLanguage(getMap(config, "iso639-1-to-dv.csv", "ISO639-1", "Dataverse-language"));
         config.setIso2ToDataverseLanguage(getMap(config, "iso639-2-to-dv.csv", "ISO639-2", "Dataverse-language"));
         config.setSpatialCoverageCountryTerms(FileUtils.readLines(config.getMappingDefsDir().resolve("spatial-coverage-country-terms.txt").toFile(), StandardCharsets.UTF_8));
-        config.setAbrReportCodeToTerm(getMap(config, "abr-report-code-to-term.csv", "code", "subject"));
-        config.setAbrAcquisitionMethodCodeToTerm(getMap(config, "abr-acquisition-method-code-to-term.csv", "code", "subject"));
-        config.setAbrComplexTypeCodeToTerm(getMap(config, "abr-complextype-code-to-term.csv", "code", "subject"));
-        config.setAbrArtifactCodeToTerm(getMap(config, "abr-artifact-code-to-term.csv", "code", "subject"));
-        config.setAbrPeriodCodeToTerm(getMap(config, "abr-period-code-to-term.csv", "code", "subject"));
+        config.setAbrReportCodeToTerm(getMap(config, "rapporten-code-to-term.csv", "code", "subject"));
+        config.setAbrAcquisitionMethodCodeToTerm(getMap(config, "verwervingswijzen-code-to-term.csv", "code", "subject"));
+        config.setAbrComplexTypeCodeToTerm(getMap(config, "complextypen-code-to-term.csv", "code", "subject"));
+        config.setAbrArtifactCodeToTerm(getMap(config, "artefacten-code-to-term.csv", "code", "subject"));
+        config.setAbrPeriodCodeToTerm(getMap(config, "periodes-code-to-term.csv", "code", "subject"));
     }
 
     private static Map<String, String> loadCsvToMap(Path path, String keyColumn, String valueColumn) throws IOException {
